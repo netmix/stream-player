@@ -6,7 +6,7 @@ Plugin Name: Stream Player
 Plugin URI: https://radiostation.pro/stream-player/
 Description: Adds a Streaming Player shortcodes and widgets to your site.
 Author: Tony Hayes, Tony Zeoli
-Version: 2.5.1
+Version: 2.5.3
 Requires at least: 4.0.0
 Text Domain: stream-player
 Domain Path: /languages
