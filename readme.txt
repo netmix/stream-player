@@ -12,8 +12,9 @@ Stream Player gives you the ultimate power: to stream a broadcast on your websit
 
 == Description ==
 
-#### STREAM PLAYER by netmix®† 
+#### STREAM PLAYER by netmix®† - the best streaming audio plugin for WordPress
 
+Stream Player by netmi® is a powerful streaming audio player solution that gives your listeners the same persistent streaming audio playback experience employed by sites like Spotify, MixCloud, Soundcloud, Mixlr, Beatport, Traxsource, and many others. With Stream Player by netmix®, your listeners can enjoy an uninterrupted audio playback experience while navigating your WordPress website.
 
 
 == Installation ==
