@@ -1,7 +1,6 @@
 
 /* === Stream Player Block Editor Scripts === */
 
-const el = window.wp.element.createElement;
 const { Icon } = wp.components;
 
 /* --- Subscribe to Block State --- */
