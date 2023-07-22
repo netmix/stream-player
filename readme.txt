@@ -4,7 +4,7 @@ Donate link: https://netmix.co/donate
 Tags: player, stream, audio, radio, broadcast
 Requires at least: 4.0
 Tested up to: 6.2.2
-Stable tag: 2.5.4
+Stable tag: 2.5.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,7 +14,7 @@ Stream Player gives you the ultimate power: to stream a broadcast on your websit
 
 #### STREAM PLAYER by netmix®† - the best streaming audio plugin for WordPress
 
-Stream Player by netmi® is a powerful streaming audio player solution that gives your listeners the same persistent streaming audio playback experience employed by sites like Spotify, MixCloud, Soundcloud, Mixlr, Beatport, Traxsource, and many others. With Stream Player by netmix®, your listeners can enjoy an uninterrupted audio playback experience while navigating your WordPress website.
+Stream Player by netmix® is a powerful streaming audio player solution that gives your listeners the same persistent streaming audio playback experience employed by sites like Spotify, MixCloud, Soundcloud, Mixlr, Beatport, Traxsource, and many others. With Stream Player by netmix®, your listeners can enjoy an uninterrupted audio playback experience while navigating your WordPress website.
 
 
 == Installation ==
@@ -29,6 +29,10 @@ Stream Player by netmi® is a powerful streaming audio player solution that give
 == Screenshots ==
 
 == Changelog ==
+
+= 2.5.5 =
+* Updated: Freemius SDK (2.5.10)
+* Fixed: Prefix Block element JS constant to prevent conflicts
 
 = 2.5.4 =
 * Updated: Freemius SDK (2.5.9)
