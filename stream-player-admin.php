@@ -49,7 +49,7 @@ function stream_player_enqueue_admin_scripts() {
 	wp_enqueue_script( 'stream-player-admin', $script_url, $deps, $version, true );
 
 	// 2.5.0: maybe enqueue pricing page styles
-	if ( isset( $_REQUEST['page'] ) && ( 'stream-player-pricing' == $_REQUEST['page'] ) ) {
+	if ( isset( $_REQUEST['page'] ) && ( 'stream-player-pricing' == sanitize_text_field( $_REQUEST['page'] ) ) ) {
 		$style_url = plugins_url( 'freemius-pricing/freemius-pricing.css', STREAM_PLAYER_FILE );
 		$style_path = STREAM_PLAYER_DIR . '/freemius-pricing/freemius-pricing.css';
 		$version = filemtime( $style_path );
@@ -72,7 +72,8 @@ function stream_player_admin_styles() {
 	$css = apply_filters( 'stream_player_admin_styles', $css );
 
 	// --- output admin styles ---
-	echo '<style>' . wp_strip_all_tags( $css ) . '</style>' . "\n";
+	// 2.5.6: use wp_kses_post instead of wp_strip_all_tags
+	echo '<style>' . wp_kses_post( $css ) . '</style>' . "\n";
 
 }
 
@@ -111,7 +112,7 @@ function stream_player_plugin_page_links( $links, $file ) {
 // (recheck permissions for main menu item click)
 add_action( 'admin_init', 'stream_player_settings_cap_check' );
 function stream_player_settings_cap_check() {
-	if ( isset( $_REQUEST['page'] ) && ( STREAM_PLAYER_SLUG == $_REQUEST['page'] ) ) {
+	if ( isset( $_REQUEST['page'] ) && ( STREAM_PLAYER_SLUG == sanitize_text_field( $_REQUEST['page'] ) ) ) {
 		$settingscap = apply_filters( 'stream_player_settings_capability', 'manage_options' );
 		if ( !current_user_can( $settingscap ) ) {
 			wp_die( esc_html( __( 'You do not have permissions to access that page.', 'stream-player' ) ) );
@@ -161,6 +162,7 @@ function stream_player_settings_page_redirect() {
 
 		// --- redirect to plugin settings page (admin.php) ---
 		$url = add_query_arg( 'page', STREAM_PLAYER_SLUG, admin_url( 'admin.php' ) );
+		// TODO: maybe use wp_safe_redirect here ?
 		wp_redirect( $url );
 		exit;
 	}
@@ -179,7 +181,7 @@ function stream_player_plugin_docs_page() {
 	include_once STREAM_PLAYER_DIR . '/reader.php';
 
 	$docs = scandir( STREAM_PLAYER_DIR . '/docs/' );
-	$docs[] = 'CHANGELOG.md';
+	// $docs[] = 'CHANGELOG.md'; // temporarily removed
 	foreach ( $docs as $doc ) {
 		if ( !in_array( $doc, array( '.', '..' ) ) ) {
 			$id = str_replace( '.md', '', $doc );
@@ -188,14 +190,16 @@ function stream_player_plugin_docs_page() {
 				echo ' style="display:none;"';
 			}
 			echo '>';
-				// TODO: use wp_kses with allowed HTML (needs onclick on a tag fix)
-				// phpcs:ignore WordPress.Security.OutputNotEscaped
-				echo stream_player_parse_doc( $id );
+				// 2.5.6: use wp_kses with allowed HTML
+				$allowed = stream_player_allowed_html( 'content', 'docs' );
+				echo wp_kses( stream_player_parse_doc( $id ), $allowed );
 			echo '</div>' . "\n";
 		}
 	}
 
-	echo "<script>function stream_load_doc(id) {
+	// 2.5.6: added jquery onclick functions to replace onclick attributes
+	echo "<script>jQuery('.doc-link').on('click',function(){ref = jQuery(this).attr('id').replace('-doc-link',''); stream_load_doc(ref);});
+	function stream_load_doc(id) {
 		pages = document.getElementsByClassName('doc-page');
 		for (i = 0; i < pages.length; i++) {pages[i].style.display = 'none';}
 		hash = '';
@@ -246,7 +250,9 @@ function stream_player_parse_doc( $id ) {
 	$sep = '***';
 	$backlink = '';
 	if ( 'index' != $id ) {
-		$backlink = '<alink href="javascript:void(0);" onclick="stream_load_doc(\'index\');">&larr; ';
+		// 2.5.6: remove onclick attribute to survive sanitization
+		// $backlink = '<a class="doc-index-link" href="javascript:void(0);" onclick="stream_load_doc(\'index\');">&larr; ';
+		$backlink = '<a class="doc-link" id="index-doc-link">&larr; ';
 		$backlink .= esc_html( __( 'Back to Documentation Index', 'stream-player' ) );
 		$backlink .= '</a><br>';
 	}
@@ -282,7 +288,7 @@ function stream_player_parse_doc( $id ) {
 	// --- replace links with javascript ---
 	$tag_start = '<a href="./';
 	$tag_end = '"';
-	$placeholder = '<alink href="javascript:void(0);"';
+	$placeholder = '<alink ';
 	if ( stristr( $formatted, $tag_start ) ) {
 		while ( stristr( $formatted, $tag_start ) ) {
 			$pos = strpos( $formatted, $tag_start );
@@ -292,11 +298,14 @@ function stream_player_parse_doc( $id ) {
 			$pos2 = strpos( $after, $tag_end );
 			$url = substr( $after, 0, $pos2 );
 			$url = strtolower( $url );
-			$onclick = ' onclick="stream_load_doc(\'' . esc_js( $url ) . '\');';
-			$after = substr( $after, $pos2, strlen( $after ) );
-			$formatted = $before . $placeholder . $onclick . $after;
+			// 2.5.6: replace onclick with class and id
+			// $onclick = ' onclick="stream_load_doc(\'' . esc_js( $url ) . '\');';
+			$class = ' class="doc-link" id="' . esc_attr( $url ) . '-doc-link"';
+			$after = substr( $after, ( $pos2 + 1), strlen( $after ) );
+			$formatted = $before . $placeholder . $class . $after;
 		}
 	}
+
 	$formatted = str_replace( '<a href="', '<a target="_blank" href="', $formatted );
 	if ( 'index' != $id ) {
 		$formatted .= $backlink . '<br>';
@@ -436,7 +445,8 @@ function stream_player_plugin_update_message( $plugin_data, $response ) {
 	foreach ( $notice['lines'] as $i => $line ) {
 		// 2.5.0: maybe output link to notice URL
 		if ( ( '' != $notice['url'] ) && ( 0 == $i ) ) {
-			echo '&bull; <a href="' . esc_url( $notice_url ) . '" target="_blank" title="' . esc_attr( __( 'Read full update details.', 'stream-player' ) ) . '">' . esc_html( $line ) . '</a><br>';
+			// 2.5.6: fix to incorrect variable notice_url
+			echo '&bull; <a href="' . esc_url( $notice['url'] ) . '" target="_blank" title="' . esc_attr( __( 'Read full update details.', 'stream-player' ) ) . '">' . esc_html( $line ) . '</a><br>';
 		} else {
 			echo '&bull; ' . esc_html( $line ) . '<br>';
 		}
@@ -747,10 +757,9 @@ function stream_player_admin_notice_iframe() {
 add_action( 'stream_player_admin_page_top', 'stream_player_settings_page_top' );
 function stream_player_settings_page_top() {
 
-	$now = time();
-
 	// --- pro launch discount notice ---
-	/* $offer_start = strtotime( '2021-07-20 00:01' );
+	/* $now = time();
+	$offer_start = strtotime( '2021-07-20 00:01' );
 	$offer_end = strtotime( '2021-07-26 00:01' );
 	if ( $now < $offer_end ) {
 		$user_id = get_current_user_id();
@@ -869,13 +878,13 @@ function stream_player_launch_offer_content( $dismissable = true, $prelaunch = f
 		echo '<center>' . "\n";
 		echo '<div id="launch-offer-accept-button" style="display:inline-block; margin-right:10px;">' . "\n";
 		if ( $prelaunch ) {
-			echo '<a href="' . STREAM_PLAYER_PRO_URL . 'plugin-launch-discount/" style="font-size: 16px;" target="_blank" class="button-primary"';
+			echo '<a href="' . esc_url( STREAM_PLAYER_PRO_URL ) . 'plugin-launch-discount/" style="font-size: 16px;" target="_blank" class="button-primary"';
 			if ( $dismissable ) {
 				echo ' onclick="stream_display_dismiss_link();"';
 			}
 			echo '>' . esc_html( __( "Yes, I'm in!", 'stream-player' ) ) . '</a>' . "\n";
 		} else {
-			echo '<a href="' . STREAM_PLAYER_PRO_URL . 'pricing/" style="font-size: 16px;" target="_blank" class="button-primary"';
+			echo '<a href="' . esc_url( STREAM_PLAYER_PRO_URL ) . 'pricing/" style="font-size: 16px;" target="_blank" class="button-primary"';
 			if ( $dismissable ) {
 				echo ' onclick="stream_display_dismiss_link();"';
 			}
