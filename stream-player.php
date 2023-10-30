@@ -4,9 +4,9 @@
 
 Plugin Name: Stream Player
 Plugin URI: https://radiostation.pro/stream-player/
-Description: Adds a Streaming Player shortcodes and widgets to your site.
+Description: Adds an advanced Streaming Audio Player your site.
 Author: Tony Hayes, Tony Zeoli
-Version: 2.5.5
+Version: 2.5.5.2
 Requires at least: 4.0.0
 Text Domain: stream-player
 Domain Path: /languages
@@ -34,6 +34,8 @@ GitHub Plugin URI: netmix/stream-player
 // - Check Plan Options
 // - Get Stream Formats
 // - Get Streaming URL
+// - Get Allowed HTML
+// - Filter Anchor Tag Allowed HTML
 
 
 // -------------
@@ -43,7 +45,7 @@ GitHub Plugin URI: netmix/stream-player
 // -----------------------
 // Define Plugin Constants
 // -----------------------
-// TODO: set accurate documentation URL constant
+// TODO: set accurate documentation URL constants
 define( 'STREAM_PLAYER_SLUG', 'stream-player' );
 define( 'STREAM_PLAYER_FILE', __FILE__ );
 define( 'STREAM_PLAYER_DIR', dirname( __FILE__ ) );
@@ -56,7 +58,7 @@ define( 'STREAM_PLAYER_PRO_URL', 'https://radiostation.pro/stream-player-pro/' )
 // Set Debug Mode Constant
 // -----------------------
 if ( !defined( 'STREAM_PLAYER_DEBUG' ) ) {
-	$sp_debug = ( isset( $_REQUEST['sp-debug'] ) && ( '1' == $_REQUEST['sp-debug'] ) ) ? true : false;
+	$sp_debug = ( isset( $_REQUEST['sp-debug'] ) && ( '1' == sanitize_text_field( $_REQUEST['sp-debug'] ) ) ) ? true : false;
 	define( 'STREAM_PLAYER_DEBUG', $sp_debug );
 }
 
@@ -70,13 +72,13 @@ if ( is_admin() ) {
 }
 
 // --- Player ---
-include STREAM_PLAYER_DIR . '/player/radio-player.php';
+require STREAM_PLAYER_DIR . '/player/radio-player.php';
 
 // --- Widgets ---
-include STREAM_PLAYER_DIR . '/widgets/class-stream-player-widget.php';
+require STREAM_PLAYER_DIR . '/widgets/class-stream-player-widget.php';
 
 // --- Blocks ---
-if ( function_exists( 'register_block_type' ) )  {
+if ( function_exists( 'register_block_type' ) ) {
 	include STREAM_PLAYER_DIR . '/includes/blocks.php';
 }
 
@@ -136,10 +138,7 @@ $settings = array(
 	/* --- for Stream Player standalone version --- */
 	'freemius_id'  => '11590',
 	'freemius_key' => 'pk_290b70e902c7f036c0254c1c8d920',
-	/* --- for Radio Station addon version --- */
-	// 'freemius_id'  => '9672', 
-	// 'freemius_key' => 'pk_3dcd25e27b10eea05c66cbbc4ea74',
-	
+
 );
 
 // -----------------------------
@@ -159,48 +158,6 @@ function stream_player_freemius_config( $settings ) {
 	$settings['bundle_public_key'] = 'pk_ce082d29a1904c4f31f6631648f32';
 	$settings['bundle_license_auto_activation'] = true;
 
-	// $settings['bundle_id'] = '9521';
-	// $settings['bundle_public_key'] = 'pk_a2650f223ef877e87fe0fdfc4442b';			
-
-	// --- set parent plugin ---
-	/* $settings['parent'] = array(
-		'id'              => '4526',
-		'slug'            => 'radio-station',
-		'public_key'      => 'pk_aaf375c4fb42e0b5b3831e0b8476b',
-		'name'            => 'Radio Station',				
-	); */
-
-	// --- initialize "parent" plugin ---
-	/* global $radio_station_freemius;
-	if ( !isset( $radio_station_freemius ) ) {
-
-		// --- radio station settings ---
-		$first_path = add_query_arg( 'page', 'radio-station', 'admin.php' );
-		$first_path = add_query_arg( 'welcome', 'true', $first_path );
-		$rs_settings = array(
-			'type'             => 'plugin',
-			'slug'             => 'radio-station',
-			'id'               => '4526',
-			'public_key'       => 'pk_aaf375c4fb42e0b5b3831e0b8476b',
-			'has_addons'       => false,
-			'has_paid_plans'   => true,
-			'is_org_compliant' => true,
-			'is_premium'       => false,
-			'menu'             => array(
-				'slug'       => 'radio-station',
-				'first-path' => $first_path,
-				'account'    => true,
-			),
-			'bundle_id'         => '11589',
-			'bundle_public_key' => 'pk_ce082d29a1904c4f31f6631648f32',
-			'bundle_license_auto_activation' => true,
-		);
-		
-		// --- initialize freemius ---
-		$radio_station_freemius = fs_dynamic_init( $rs_settings );
-
-	} */
-	
 	return $settings;
 }
 
@@ -260,7 +217,7 @@ function stream_player_add_pricing_path_filter() {
 // ------------------------
 // Pricing Page Path Filter
 // ------------------------
-// 2.6.0: added for Freemius Pricing Page v2
+// 2.5.0: added for Freemius Pricing Page v2
 function stream_player_pricing_page_path( $default_pricing_js_path ) {
 	return STREAM_PLAYER_DIR . '/freemius-pricing/freemius-pricing.js';
 }
@@ -331,13 +288,13 @@ function stream_player_get_stream_formats() {
 	// [Media Elements] Audio: mp3, wma, wav +Video: mp4, ogg, webm, wmv
 
 	$formats = array(
-		'aac'	=> 'AAC/M4A',		// A/H/J
-		'mp3'	=> 'MP3',			// A/H/J
-		'ogg'	=> 'OGG',			// H
-		'oga'	=> 'OGA',			// H/J
-		'webm'	=> 'WebM',			// H/J
-		'rtmpa' => 'RTMPA',			// J
-		'opus'  => 'OPUS',			// H
+		'aac'	=> 'AAC/M4A',   // A/H/J
+		'mp3'	=> 'MP3',       // A/H/J
+		'ogg'	=> 'OGG',		// H
+		'oga'	=> 'OGA',		// H/J
+		'webm'	=> 'WebM',		// H/J
+		'rtmpa' => 'RTMPA',		// J
+		'opus'  => 'OPUS',		// H
 	);
 
 	// --- filter and return ---
@@ -352,7 +309,7 @@ function stream_player_get_stream_url() {
 	$streaming_url = '';
 	$stream = stream_player_get_setting( 'streaming_url' );
 	if ( STREAM_PLAYER_DEBUG ) {
-		echo '<span style="display:none;">Stream URL Setting: ' . print_r( $stream, true ) . '</span>';
+		echo '<span style="display:none;">Stream URL Setting: ' . esc_html( print_r( $stream, true ) ) . '</span>';
 	}
 	if ( $stream && ( '' != $stream ) ) {
 		$streaming_url = $stream;
@@ -362,3 +319,30 @@ function stream_player_get_stream_url() {
 	return $streaming_url;
 }
 
+// -----------------
+// KSES Allowed HTML
+// -----------------
+// 2.5.0: added for allowing custom wp_kses output
+function stream_player_allowed_html( $type, $context = false ) {
+	$allowed = wp_kses_allowed_html( 'post' );
+	$allowed = apply_filters( 'stream_player_allowed_html', $allowed, $type, $context );
+	return $allowed;
+}
+
+// -----------------------
+// Anchor Tag Allowed HTML
+// -----------------------
+// 2.5.6: added for allowing extended anchor tag output for wp_kses
+add_filter( 'stream_player_allowed_html', 'stream_player_anchor_tag_allowed_html', 10, 3 );
+function stream_player_anchor_tag_allowed_html( $allowed, $type, $context ) {
+
+	// 2.5.6: added docs context for documentation links
+	if ( 'docs' != $context ) {
+		return $allowed;
+	}
+
+	// 2.5.6: added data-href attribute for docs
+	$allowed['a']['id'] = true;
+
+	return $allowed;
+}

@@ -72,11 +72,11 @@ function stream_player_get_block_attributes() {
 // ---------------
 add_action( 'init', 'stream_player_register_blocks' );
 function stream_player_register_blocks() {
-	
+
 	// --- get block callbacks and attributes ---
 	$callbacks = stream_player_get_block_callbacks();
-	$attributes = stream_player_get_block_callbacks();
-	
+	$attributes = stream_player_get_block_attributes();
+
 	// --- loop block names to register blocks ---
 	foreach ( $callbacks as $block_slug => $callback ) {
 		$block_key = 'stream-player/' . $block_slug;
@@ -84,7 +84,7 @@ function stream_player_register_blocks() {
 			'render_callback' => $callback,
 			'attributes'      => $attributes[$block_slug],
 			'category'        => 'media',
-		);	
+		);
 		$args = apply_filters( 'stream_player_block_args', $args, $block_slug, $callback );
 		register_block_type( $block_key, $args );
 	}
@@ -95,11 +95,11 @@ function stream_player_register_blocks() {
 // ---------------------------
 add_action( 'enqueue_block_editor_assets', 'stream_player_block_editor_assets' );
 function stream_player_block_editor_assets() {
-	
+
 	// --- get block callabacks ---
 	$callbacks = stream_player_get_block_callbacks();
 
-    // --- set block dependencies ---
+	// --- set block dependencies ---
 	$deps = array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-components', 'wp-editor' );
 
 	// --- set base block URL and path ---
@@ -122,7 +122,7 @@ function stream_player_block_editor_assets() {
 			);
 
 		}
-    }
+	}
 
 	// --- filter scripts and loop to enqueue ---
 	$block_scripts = apply_filters( 'stream_player_block_scripts', $block_scripts );
@@ -135,7 +135,7 @@ function stream_player_block_editor_assets() {
 	$script_path = STREAM_PLAYER_DIR . 'blocks/editor.js';
 	$version = filemtime( $script_path );
 	wp_enqueue_script( 'stream-blockedit-js', $script_url, $deps, $version, true );
-	
+
 	// 2.5.0: added for script loading
 	// $js = "var stream_ajax_url = " . admin_url( 'admin-ajax.php' ) . "'; ";
 	$js = "var stream_player_script = " . plugins_url( '/player/js/radio-player.js', STREAM_PLAYER_FILE ) . "';";
@@ -173,7 +173,7 @@ function stream_player_block_editor_assets() {
 // add_action( 'wp_ajax_stream_player_block_script', 'stream_player_block_script' );
 /*
 function stream_player_block_script() {
-	
+
 	if ( !isset( $_REQUEST['handle'] ) ) {
 		exit;
 	}
@@ -195,4 +195,3 @@ function stream_player_block_script() {
 	exit;
 }
 */
-

@@ -56,7 +56,7 @@ $options = array(
 		'section' => 'source',
 	),
 
-	// === Info ===
+	// === Channel ===
 
 	// --- [Player] Station Title ---
 	'station_title' => array(
@@ -65,7 +65,7 @@ $options = array(
 		'default' => '',
 		'helper'  => __( 'The name of your Stream.', 'stream-player' ),
 		'tab'     => 'stream',
-		'section' => 'info',
+		'section' => 'channel',
 	),
 
 	// --- [Player] Player Title ---
@@ -76,7 +76,7 @@ $options = array(
 		'value'   => 'yes',
 		'helper'  => __( 'Display your Stream Title in Player by default.', 'stream-player' ),
 		'tab'     => 'stream',
-		'section' => 'info',
+		'section' => 'channel',
 	),
 
 	// --- [Player] Stream Image ---
@@ -86,7 +86,7 @@ $options = array(
 		'default' => '',
 		'helper'  => __( 'Add a logo image for your Stream. Please ensure image is square before uploading. Recommended size 256 x 256', 'stream-player' ),
 		'tab'     => 'stream',
-		'section' => 'info',
+		'section' => 'channel',
 	),
 
 	// --- [Player] Display Stream Image ---
@@ -97,7 +97,7 @@ $options = array(
 		'value'   => 'yes',
 		'helper'  => __( 'Display your Stream Image in Player by default.', 'stream-player' ),
 		'tab'     => 'stream',
-		'section' => 'info',
+		'section' => 'channel',
 	),
 
 	// --------------
@@ -108,7 +108,7 @@ $options = array(
 
 	// --- Defaults Note ---
 	// 2.5.0: added note about defaults being overrideable in widgets
-	'player_bar_note' => array(
+	'player_defaults_note' => array(
 		'type'    => 'note',
 		'label'   => __( 'Player Defaults Note', 'stream-player' ),
 		'helper'  => __( 'Note that you can override these defaults in specific Player Widgets.', 'stream-player' ),
@@ -152,8 +152,8 @@ $options = array(
 		'label'   => __( 'Default Player Theme', 'stream-player' ),
 		'default' => 'light',
 		'options' => array(
-			'light'	=> __( 'Light', 'stream-player' ),
-			'dark'	=> __( 'Dark', 'stream-player' ),
+			'light' => __( 'Light', 'stream-player' ),
+			'dark'  => __( 'Dark', 'stream-player' ),
 		),
 		'helper'  => __( 'Default Player Controls theme style.', 'stream-player' ),
 		'tab'     => 'player',
@@ -323,9 +323,9 @@ $options = array(
 		'label'   => __( 'Sitewide Player Bar', 'stream-player' ),
 		'default' => 'off',
 		'options' => array(
-			'off'		=> __( 'No Player Bar', 'stream-player' ),
-			'top'   	=> __( 'Top Player Bar', 'stream-player' ),
-			'bottom'	=> __( 'Bottom Player Bar', 'stream-player' ),
+			'off'    => __( 'No Player Bar', 'stream-player' ),
+			'top'    => __( 'Top Player Bar', 'stream-player' ),
+			'bottom' => __( 'Bottom Player Bar', 'stream-player' ),
 		),
 		'tab'     => 'bar',
 		'section' => 'display',
@@ -465,7 +465,7 @@ $options = array(
 		'tab'     => 'player',
 		'section' => 'bar',
 		'helper'  => __( 'How to animate the currently playing track display.', 'stream-player' ),
-		'pro'     => true,	
+		'pro'     => true,
 	),
 
 	// === Tabs and Sections ===
@@ -480,7 +480,7 @@ $options = array(
 	// --- Section Labels ---
 	'sections' => array(
 		'source'      => __( 'Source', 'stream-player' ),
-		'info'        => __( 'Information', 'stream-player' ),
+		'channel'     => __( 'Channel', 'stream-player' ),
 		'basic'       => __( 'Basic Defaults', 'stream-player' ),
 		'colors'      => __( 'Player Colors', 'stream-player' ),
 		'advanced'    => __( 'Advanced Defaults', 'stream-player' ),
@@ -489,4 +489,3 @@ $options = array(
 		'metadata'    => __( 'Metadata Display', 'stream-player' ),
 	),
 );
-
