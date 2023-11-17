@@ -1597,11 +1597,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 				// --- Freemius Object Debug ---
 				if ( $this->debug && current_user_can( 'manage_options' ) ) {
 					// phpcs:ignore WordPress.PHP.DevelopmentFunctions
-<<<<<<< HEAD
-					echo '<span style="display:none;">Freemius Object: ' . esc_html( print_r( $freemius, true ) ) . '</span>' . PHP_EOL;
-=======
 					echo '<span style="display:none;">Freemius Object: ' . esc_html( print_r( $freemius, true ) ) . '</span>' . "\n";
->>>>>>> release/2.5.6
 				}
 				
 				// --- fire Freemius loaded action ---
@@ -2114,11 +2110,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 			$namespace = $this->namespace;
 
 			// --- open page wrapper ---
-<<<<<<< HEAD
-			echo '<div id="pagewrap" class="wrap" style="width:100%;margin-right:0 !important;">' . PHP_EOL;
-=======
 			echo '<div id="pagewrap" class="wrap" style="width:100%;margin-right:0 !important;">' . "\n";
->>>>>>> release/2.5.6
 
 			do_action( $namespace . '_admin_page_top' );
 
@@ -3519,13 +3511,9 @@ if ( !function_exists( 'stream_player_load_prefixed_functions' ) ) {
 // - fix for possible page/post options conflict
 // - added explicit email option field type
 // - added fallback to text option firld type
-<<<<<<< HEAD
-// - add check if pro slug data is a string
-=======
 // - added check if pro slug data is a string
 // - added Freemius has_affiliation key
 // - added hash link anchor for Pro feature options
->>>>>>> release/2.5.6
 
 // == 1.2.9 ==
 // - fix empty number field converting to NaN value

@@ -2657,7 +2657,7 @@ function radio_player_enqueue_styles( $script = false, $skin = false ) {
 	}
 
 	// --- enqueue base player styles ---
-	// $suffix = ''; // DEV TEMP
+	$suffix = ''; // DEV TEMP
 
 	if ( defined( 'RADIO_STATION_DIR' ) ) {
 		$path = RADIO_STATION_DIR . '/player/css/radio-player' . $suffix . '.css';
@@ -2700,11 +2700,6 @@ function radio_player_enqueue_styles( $script = false, $skin = false ) {
 			$control_styles = radio_player_control_styles( false );
 			if ( '' != $control_styles ) {
 				// 2.5.6: use wp_kses_post on control styles
-<<<<<<< HEAD
-				// TODO: use wp_add_inline_style - with fallback ?
-				// wp_add_inline_style( 'radio-player', $control_styles );
-=======
->>>>>>> release/2.5.6
 				echo '<style>' . wp_kses_post( $control_styles ) . '</style>';
 			}
 			

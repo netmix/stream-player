@@ -6,11 +6,7 @@ Plugin Name: Stream Player
 Plugin URI: https://radiostation.pro/stream-player/
 Description: Adds an advanced Streaming Audio Player your site.
 Author: Tony Hayes, Tony Zeoli
-<<<<<<< HEAD
-Version: 2.5.5.2
-=======
 Version: 2.5.6
->>>>>>> release/2.5.6
 Requires at least: 4.0.0
 Text Domain: stream-player
 Domain Path: /languages
@@ -46,10 +42,6 @@ GitHub Plugin URI: netmix/stream-player
 // - Get Pricing Page URL
 // - Get Stream Formats
 // - Get Streaming URL
-<<<<<<< HEAD
-// - Get Allowed HTML
-// - Filter Anchor Tag Allowed HTML
-=======
 // - Get Fallback URL
 // - Get Station Image URL
 // - Filter for Streaming Data
@@ -57,7 +49,6 @@ GitHub Plugin URI: netmix/stream-player
 // - Get Allowed HTML
 // - Filter Anchor Tag Allowed HTML
 // - Settings Inputs Allowed HTML
->>>>>>> release/2.5.6
 
 
 // -------------
@@ -465,8 +456,6 @@ function stream_player_get_stream_url() {
 	return $streaming_url;
 }
 
-<<<<<<< HEAD
-=======
 // ----------------
 // Get Fallback URL
 // ----------------
@@ -533,7 +522,6 @@ function stream_player_get_broadcast_data() {
 	return $broadcast;
 }
 
->>>>>>> release/2.5.6
 // -----------------
 // KSES Allowed HTML
 // -----------------
@@ -561,8 +549,6 @@ function stream_player_anchor_tag_allowed_html( $allowed, $type, $context ) {
 
 	return $allowed;
 }
-<<<<<<< HEAD
-=======
 
 // ----------------------------
 // Settings Inputs Allowed HTML
@@ -630,4 +616,3 @@ function stream_player_settings_allowed_html( $allowed, $type, $context ) {
 	return $allowed;
 }
 
->>>>>>> release/2.5.6

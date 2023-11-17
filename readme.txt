@@ -3,8 +3,8 @@ Contributors: tonyzeoli, majick
 Donate link: https://netmix.co/donate
 Tags: player, stream, audio, radio, broadcast
 Requires at least: 4.0
-Tested up to: 6.3.2
-Stable tag: 2.5.6
+Tested up to: 6.4.1
+Stable tag: 2.5.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,6 +37,7 @@ Stream Player PRO by netmix® is a powerful streaming audio player solution that
 * Updated: Freemius SDK (2.5.11)
 * Updated: Plugin Panel (1.3.0)
 * Improved: more consistent sanitization and escaping
+* Fixed: automatic use of default Stream settings
 
 = 2.5.5 =
 * Updated: Freemius SDK (2.5.10)

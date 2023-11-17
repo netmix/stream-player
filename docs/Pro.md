@@ -10,21 +10,6 @@ Note that additional Pro Documentation will be added in the relevant section as 
 
 If you are interested in testing cutting edge features in development for this next release, read about [Installing the Development Version](./FAQ.md#how-do-i-install-the-latest-development-version-for-testing) and [Pro Beta Version Testing](./#pro-beta-version-testing).
 
-<<<<<<< HEAD
-### Pro Player Options
-
-TODO
-
-#### Widgets
-
-[Sitewide Bar Player](./Player.md#pro-sitewide-bar-player)
-
-[Extra Block Options](./Widgets.md#pro-extra-block-options)
-
-[Elementor Widgets](./Widgets.md#pro-elementor-widgets)
-
-[Beaver Builder Modules]('./Widgets.md#pro-beaver-builder-modules)
-=======
 ### Pro Player Features
 
 [Sitewide Bar Player](./Player.md#pro-sitewide-bar-player)
@@ -73,5 +58,4 @@ Only one tab/window on your site plays at a time, preventing annoying, overlappi
 Wide Audio Format Support
 MP3, M4A, OGG, FLAC, WAV, and more…the widest browser audio support by leveraging multiple player scripts.
 
->>>>>>> release/2.5.6
 
