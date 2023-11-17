@@ -6,7 +6,11 @@ Plugin Name: Stream Player
 Plugin URI: https://radiostation.pro/stream-player/
 Description: Adds an advanced Streaming Audio Player your site.
 Author: Tony Hayes, Tony Zeoli
+<<<<<<< HEAD
 Version: 2.5.5.2
+=======
+Version: 2.5.6
+>>>>>>> release/2.5.6
 Requires at least: 4.0.0
 Text Domain: stream-player
 Domain Path: /languages
@@ -30,12 +34,30 @@ GitHub Plugin URI: netmix/stream-player
 // - Add Pricing Page Path Filter
 // - Pricing Page Path Filter
 // === Helper Functions ===
+// - Get Now Timestamp
+// - Add Inline Script
+// - Print Footer Scripts
+// - Add inline Style
+// - Print Footer Styles
+// - Enqueue Widget Color Picker
 // - Stream Player Shortcode
 // - Check Plan Options
+// - Get Upgrade URL
+// - Get Pricing Page URL
 // - Get Stream Formats
 // - Get Streaming URL
+<<<<<<< HEAD
 // - Get Allowed HTML
 // - Filter Anchor Tag Allowed HTML
+=======
+// - Get Fallback URL
+// - Get Station Image URL
+// - Filter for Streaming Data
+// - Get Broadcast Data
+// - Get Allowed HTML
+// - Filter Anchor Tag Allowed HTML
+// - Settings Inputs Allowed HTML
+>>>>>>> release/2.5.6
 
 
 // -------------
@@ -128,12 +150,14 @@ $settings = array(
 	'textdomain'   => 'stream-player',
 
 	// --- Freemius ---
+	// 2.5.6: added affiliation key
 	'hasplans'     => $plan_options['has_plans'],
 	'upgrade_link' => add_query_arg( 'page', STREAM_PLAYER_SLUG . '-pricing', admin_url( 'admin.php' ) ),
 	'pro_link'     => STREAM_PLAYER_PRO_URL . 'pricing/',
 	'hasaddons'    => $plan_options['has_addons'],
 	'addons_link'  => add_query_arg( 'page', STREAM_PLAYER_SLUG . '-addons', admin_url( 'admin.php' ) ),
 	'plan'         => $plan_options['plan_type'],
+	'affiliation'  => 'selected',
 
 	/* --- for Stream Player standalone version --- */
 	'freemius_id'  => '11590',
@@ -227,6 +251,110 @@ function stream_player_pricing_page_path( $default_pricing_js_path ) {
 // === Helper Functions ===
 // ------------------------
 
+// -----------------
+// Get Now Timestamp
+// -----------------
+function stream_player_get_now() {
+
+	$datetime = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
+	$now = $datetime->format( 'U' );
+
+	// 2.5.6: allow explicit override of now time
+	if ( isset( $_REQUEST['for_time'] ) ) {
+		$now = absint( $_REQUEST['for_time'] );
+	}
+	$now = apply_filters( 'stream_player_now_time', $now );
+
+	return $now;
+}
+
+// -----------------
+// Add Inline Script
+// -----------------
+// 2.5.0: added for missed inline scripts (via shortcodes)
+function stream_player_add_inline_script( $handle, $js, $position = 'after' ) {
+
+	// --- add check if script is already done ---
+	if ( !wp_script_is( $handle, 'done' ) ) {
+		// --- handle javascript normally ---
+		wp_add_inline_script( $handle, $js, $position );
+	} else {
+		// --- store extra javascript for later output ---
+		global $stream_player_scripts;
+		add_action( 'wp_print_footer_scripts', 'stream_player_print_footer_scripts', 20 );
+		if ( !isset( $stream_player_scripts[$handle] ) ) {
+			$stream_player_scripts[$handle] = '';
+		}
+		$radio_station_scripts[$handle] .= $js;
+	}
+}
+
+// --------------------
+// Print Footer Scripts
+// --------------------
+// 2.5.0: added for missed inline scripts
+function stream_player_print_footer_scripts() {
+	global $stream_player_scripts;
+	if ( is_array( $stream_player_scripts ) && ( count( $stream_player_scripts ) > 0 ) ) {
+		foreach ( $stream_player_scripts as $handle => $js ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo '<script id="' . esc_attr( $handle ) . '-js-after">' . $js . '</script>';
+		}
+	}
+}
+
+// -----------------
+// Add Inline Styles
+// -----------------
+// 2.5.0: added for missed inline styles (via shortcodes)
+function stream_player_add_inline_style( $handle, $css ) {
+
+	// --- add check if style is already done ---
+	if ( !wp_style_is( $handle, 'done' ) ) {
+		// --- handle style normally ---
+		wp_add_inline_style( $handle, $css );
+	} else {
+		// --- store extra styles for later output ---
+		global $stream_player_styles;
+		add_action( 'wp_print_footer_scripts', 'stream_player_print_footer_styles', 20 );
+		if ( !isset( $stream_player_styles[$handle] ) ) {
+			$stream_player_styles[$handle] = '';
+		}
+		$stream_player_styles[$handle] .= $css;
+	}
+}
+
+// -------------------
+// Print Footer Styles
+// -------------------
+// 2.5.0: added for missed inline styles
+function stream_player_print_footer_styles() {
+	global $stream_player_styles;
+	if ( is_array( $stream_player_styles ) && ( count( $stream_player_styles ) > 0 ) ) {
+		foreach ( $stream_player_styles as $handle => $css ) {
+			echo '<style>' . wp_kses_post( $css ) . '</style>';
+		}
+	}
+}
+
+// ---------------------------
+// Enqueue Widget Color Picker
+// ---------------------------
+// 2.5.0: added for widget color options
+function stream_player_enqueue_color_picker() {
+
+	// --- enqueue color picker ---
+	$suffix = SCRIPT_DEBUG ? '' : '.min';
+	$url = plugins_url( '/js/wp-color-picker-alpha' . $suffix . '.js', STREAM_PLAYER_FILE );
+	wp_enqueue_script( 'wp-color-picker-a', $url, array( 'wp-color-picker' ), '3.0.0', true );
+
+	// --- init color picker fields ---
+	$js = "jQuery(document).ready(function() {";
+	$js .= "if (jQuery('.color-picker').length) {jQuery('.color-picker').wpColorPicker();}";
+	$js .= "});" . "\n";
+	stream_player_add_inline_script( 'wp-color-picker-a', $js );
+}
+
 // -----------------------
 // Stream Player Shortcode
 // -----------------------
@@ -271,6 +399,24 @@ function stream_player_check_plan_options() {
 		'plan_type'  => $plan,
 	);
 	return $plan_options;
+}
+
+// ---------------
+// Get Upgrade URL
+// ---------------
+// 2.3.0: added to get Upgrade to Pro link
+function stream_player_get_upgrade_url() {
+	$upgrade_url = add_query_arg( 'page', 'stream-player-pricing', admin_url( 'admin.php' ) );
+	return $upgrade_url;
+}
+
+// ---------------
+// Get Pricing URL
+// ---------------
+// 2.5.0: added to get link to Pricing page
+function stream_player_get_pricing_url() {
+	$pricing_url = STREAM_PLAYER_PRO_URL . 'pricing/';
+	return $pricing_url;
 }
 
 // ------------------
@@ -319,6 +465,75 @@ function stream_player_get_stream_url() {
 	return $streaming_url;
 }
 
+<<<<<<< HEAD
+=======
+// ----------------
+// Get Fallback URL
+// ----------------
+// 2.3.3.9: added get fallback URL helper
+function stream_player_get_fallback_url() {
+	$fallback_url = '';
+	$fallback = stream_player_get_setting( 'fallback_url' );
+	if ( $fallback && ( '' != $fallback ) ) {
+		$fallback_url = $fallback;
+	}
+	if ( STREAM_PLAYER_DEBUG ) {
+		echo '<span style="display:none;">Fallback URL Setting: ' . esc_html( $fallback_url ) . '</span>';
+	}
+	$fallback_url = apply_filters( 'stream_player_fallback_url', $fallback_url );
+
+	return $fallback_url;
+}
+
+// ---------------------
+// Get Station Image URL
+// ---------------------
+// 2.3.3.8: added get station logo image URL
+function stream_player_get_station_image_url() {
+	$station_image = '';
+	$attachment_id = stream_player_get_setting( 'station_image' );
+	$image = wp_get_attachment_image_src( $attachment_id, 'full' );
+	if ( is_array( $image ) ) {
+		$station_image = $image[0];
+	}
+	$station_image = apply_filters( 'stream_player_station_image_url', $station_image );
+
+	return $station_image;
+}
+
+// -------------------------
+// Filter for Streaming Data
+// -------------------------
+// 2.3.3.7: added streaming data filter for player integration
+add_filter( 'radio_player_data', 'stream_player_streaming_data', 10, 2 );
+function stream_player_streaming_data( $data, $channel = false ) {
+	$data = array(
+		'script'   => stream_player_get_setting( 'player_script' ),
+		'instance' => 0,
+		'url'      => stream_player_get_stream_url(),
+		'format'   => stream_player_get_setting( 'streaming_format' ),
+		'fallback' => stream_player_get_fallback_url(),
+		'fformat'  => stream_player_get_setting( 'fallback_format' ),
+	);
+	if ( STREAM_PLAYER_DEBUG ) {
+		echo '<span style="display:none;">Player Stream Data: ' . esc_html( print_r( $data, true ) ) . '</span>' . "\n";
+	}
+	$data = apply_filters( 'stream_player_streaming_data', $data, $channel );
+	return $data;
+}
+
+// ------------------
+// Get Broadcast Data
+// ------------------
+// 2.5.6: added for now playing metadata endpoint 
+function stream_player_get_broadcast_data() {
+
+	// --- filter and return ---
+	$broadcast = apply_filters( 'stream_player_broadcast_data', array() );
+	return $broadcast;
+}
+
+>>>>>>> release/2.5.6
 // -----------------
 // KSES Allowed HTML
 // -----------------
@@ -346,3 +561,73 @@ function stream_player_anchor_tag_allowed_html( $allowed, $type, $context ) {
 
 	return $allowed;
 }
+<<<<<<< HEAD
+=======
+
+// ----------------------------
+// Settings Inputs Allowed HTML
+// ----------------------------
+// 2.5.0: added for admin settings inputs
+add_filter( 'stream_player_allowed_html', 'stream_player_settings_allowed_html', 10, 3 );
+function stream_player_settings_allowed_html( $allowed, $type, $context ) {
+
+	if ( ( 'content' != $type ) || ( 'settings' != $context ) ) {
+		return $allowed;
+	}
+
+	// --- input ---
+	$allowed['input'] = array(
+		'id'          => array(),
+		'class'       => array(),
+		'name'        => array(),
+		'value'       => array(),
+		'type'        => array(),
+		'data'        => array(),
+		'placeholder' => array(),
+		'style'       => array(),
+		'checked'     => array(),
+		'onclick'     => array(),
+	);
+
+	// --- textarea ---
+	$allowed['textarea'] = array(
+		'id'          => array(),
+		'class'       => array(),
+		'name'        => array(),
+		'value'       => array(),
+		'type'        => array(),
+		'placeholder' => array(),
+		'style'       => array(),
+	);
+
+	// --- select ---
+	$allowed['select'] = array(
+		'id'          => array(),
+		'class'       => array(),
+		'name'        => array(),
+		'value'       => array(),
+		'type'        => array(),
+		'multiselect' => array(),
+		'style'       => array(),
+		'onchange'    => array(),
+	);
+
+	// --- select option ---
+	$allowed['option'] = array(
+		'selected' => array(),
+		'value'    => array(),
+	);
+
+	// --- option group ---
+	$allowed['optgroup'] = array(
+		'label' => array(),
+	);
+
+	// --- allow onclick on spans and divs ---
+	$allowed['span']['onclick'] = array();
+	$allowed['div']['onclick'] = array();
+
+	return $allowed;
+}
+
+>>>>>>> release/2.5.6

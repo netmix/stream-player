@@ -52,8 +52,8 @@ class Radio_Player_Widget extends WP_Widget {
 		// $producers = isset( $instance['show_producers'] ) ? $instance['show_producers'] : false;
 
 		// --- get upgrade URLs ---
-		$upgrade_url = radio_station_get_upgrade_url();
-		$pricing_url = radio_station_get_pricing_url();
+		$upgrade_url = stream_player_get_upgrade_url();
+		$pricing_url = stream_player_get_pricing_url();
 
 		// 2.5.0: set fields array
 		$fields = array();
@@ -141,11 +141,11 @@ class Radio_Player_Widget extends WP_Widget {
 		// 2.5.0: added for consistency with main plugin settings
 		$fields['volumes'] = '<p>
 			<label>
-			' . esc_html( __( 'Volume Controls', 'stream-player' ) ) . '
-				<input name="' . esc_attr( $this->get_field_name( 'volume_slider' ) ) . '" type="checkbox" ' . checked( $volume_slider, true, false ) . '>
-				<input name="' . esc_attr( $this->get_field_name( 'volume_updown' ) ) . '" type="checkbox" ' . checked( $volume_updown, true, false ) . '>
-				<input name="' . esc_attr( $this->get_field_name( 'volume_mute' ) ) . '" type="checkbox" ' . checked( $volume_mute, true, false ) . '>
-				<input name="' . esc_attr( $this->get_field_name( 'volume_max' ) ) . '" type="checkbox" ' . checked( $volume_max, true, false ) . '>
+			' . esc_html( __( 'Volume Controls', 'stream-player' ) ) . '<br>
+				<input name="' . esc_attr( $this->get_field_name( 'volume_slider' ) ) . '" type="checkbox" ' . checked( $volume_slider, true, false ) . '> ' . esc_html( __( 'Slider', 'stream-player' ) ) . ' ' . '
+				<input name="' . esc_attr( $this->get_field_name( 'volume_updown' ) ) . '" type="checkbox" ' . checked( $volume_updown, true, false ) . '> ' . esc_html( __( 'Up/Down', 'stream-player' ) ) . ' ' . '
+				<input name="' . esc_attr( $this->get_field_name( 'volume_mute' ) ) . '" type="checkbox" ' . checked( $volume_mute, true, false ) . '> ' . esc_html( __( 'Mute', 'stream-player' ) ) . ' ' . '
+				<input name="' . esc_attr( $this->get_field_name( 'volume_max' ) ) . '" type="checkbox" ' . checked( $volume_max, true, false ) . '> ' . esc_html( __( 'Max', 'stream-player' ) ) . ' ' . '
 			</label>
 		</p>';
 
@@ -193,7 +193,7 @@ class Radio_Player_Widget extends WP_Widget {
 				'light'   => __( 'Light', 'stream-player' ),
 				'dark'    => __( 'Dark', 'stream-player' ),
 			);
-			$options = apply_filters( 'radio_station_player_theme_options', $options );
+			$options = apply_filters( 'stream_player_player_theme_options', $options );
 			$options = apply_filters( 'radio_player_theme_options', $options );
 			foreach ( $options as $option => $label ) {
 				$field .= '<option value="' . esc_attr( $option ) . '" ' . selected( $theme, $option, false ) . '>' . esc_html( $label ) . '</option>';
@@ -214,7 +214,7 @@ class Radio_Player_Widget extends WP_Widget {
 				'rounded'  => __( 'Rounded', 'stream-player' ),
 				'square'   => __( 'Square', 'stream-player' ),
 			);
-			$options = apply_filters( 'radio_station_player_button_options', $options );
+			$options = apply_filters( 'stream_player_player_button_options', $options );
 			$options = apply_filters( 'radio_player_button_options', $options );
 			foreach ( $options as $option => $label ) {
 				$field .= '<option value="' . esc_attr( $option ) . '" ' . selected( $buttons, $option, false ) . '>' . esc_html( $label ) . '</option>';
@@ -225,8 +225,9 @@ class Radio_Player_Widget extends WP_Widget {
 
 		// --- [Pro] Color Options ---
 		// 2.5.0: added Pro color options message
-		$fields['color_options'] .= '<h4>' . esc_html( __( '[Pro] Color Options', 'stream-player' ) ) . '</h4>' . "\n";
-		$fields['color_options'] = '<p>
+		// 2.5.6: fix to color options title / undefined index warning
+		$fields['color_options'] = '<h4>' . esc_html( __( '[Pro] Color Options', 'stream-player' ) ) . '</h4>' . "\n";
+		$fields['color_options'] .= '<p>
 			<label for="dynamic">' . esc_html( __( 'Color options available in Pro.', 'stream-player' ) ) . '</label><br>
 			<a href="' . esc_url( $pricing_url ) . '">' . esc_html( __( 'Upgrade to Pro', 'stream-player' ) ) . '</a> |
 			<a href="' . esc_url( $upgrade_url ) . '" target="_blank">' . esc_html( __( 'More Details', 'stream-player' ) ) . '</a>
@@ -244,11 +245,11 @@ class Radio_Player_Widget extends WP_Widget {
 
 		// --- filter and output ---
 		// 2.5.0: added filter for array fields for ease of adding fields
-		$fields = apply_filters( 'radio_station_player_widget_fields_list', $fields, $this, $instance );
+		$fields = apply_filters( 'stream_player_player_widget_fields_list', $fields, $this, $instance );
 		$fields_html = implode( "\n", $fields );
-		$fields_html = apply_filters( 'radio_station_player_widget_fields', $fields_html, $this, $instance );
+		$fields_html = apply_filters( 'stream_player_player_widget_fields', $fields_html, $this, $instance );
 		// 2.5.0: use wp_kses on field settings output
-		$allowed = radio_station_allowed_html( 'content', 'settings' );
+		$allowed = stream_player_allowed_html( 'content', 'settings' );
 		echo wp_kses( $fields_html, $allowed );
 	}
 
@@ -299,22 +300,22 @@ class Radio_Player_Widget extends WP_Widget {
 		// $instance['show_producers'] = isset( $new_instance['show_producers'] ) ? 1 : 0;
 
 		// --- filter and return ---
-		$instance = apply_filters( 'radio_station_player_widget_update', $instance, $new_instance, $old_instance );
+		$instance = apply_filters( 'stream_player_player_widget_update', $instance, $new_instance, $old_instance );
 		return $instance;
 	}
 
 	// --- widget output ---
 	public function widget( $args, $instance ) {
 
-		global $radio_station_data;
+		global $stream_player_data;
 
 		// --- set widget id ---
 		// 2.5.0: simplify widget id setting
-		if ( !isset( $radio_station_data['widgets']['player'] ) ) {
-			$radio_station_data['widgets']['player'] = 0;
+		if ( !isset( $stream_player_data['widgets']['player'] ) ) {
+			$stream_player_data['widgets']['player'] = 0;
 		}
-		$radio_station_data['widgets']['player']++;
-		$id = $radio_station_data['widgets']['player'];
+		$stream_player_data['widgets']['player']++;
+		$id = $stream_player_data['widgets']['player'];
 
 		// --- get widget options ---
 		$media = isset( $instance['media'] ) ? $instance['media'] : 'stream';
@@ -374,7 +375,7 @@ class Radio_Player_Widget extends WP_Widget {
 		);
 
 		// 2.5.0: add filter for default widget attributes
-		$atts = apply_filters( 'radio_station_player_widget_atts', $atts, $instance );
+		$atts = apply_filters( 'stream_player_player_widget_atts', $atts, $instance );
 
 		// --- maybe debug widget attributes --
 		// 2.5.0: added for debugging widget attributes
@@ -385,7 +386,7 @@ class Radio_Player_Widget extends WP_Widget {
 		}
 
 		// 2.5.0: get context filtered allowed HTML
-		$allowed = radio_station_allowed_html( 'widget', 'radio-player' );
+		$allowed = stream_player_allowed_html( 'widget', 'radio-player' );
 
 		// --- before widget ---
 		// 2.5.0: use wp_kses on output
@@ -408,7 +409,7 @@ class Radio_Player_Widget extends WP_Widget {
 			$output = radio_player_shortcode( $atts );
 
 			// --- check for widget output override ---
-			$output = apply_filters( 'radio_station_player_widget_override', $output, $args, $atts );
+			$output = apply_filters( 'stream_player_player_widget_override', $output, $args, $atts );
 
 			// --- output widget display ---
 			// TODO: test wp_kses on widget output ?
@@ -428,7 +429,7 @@ class Radio_Player_Widget extends WP_Widget {
 // ----------------------
 // Register Player Widget
 // ----------------------
-add_action( 'widgets_init', 'radio_station_register_player_widget' );
-function radio_station_register_player_widget() {
+add_action( 'widgets_init', 'stream_player_register_player_widget' );
+function stream_player_register_player_widget() {
 	register_widget( 'Radio_Player_Widget' );
 }
