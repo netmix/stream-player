@@ -24,10 +24,13 @@ if ( !defined( 'ABSPATH' ) ) exit;
 // - Get Plugin Notices
 // - AJAX Mark Notice Read
 // === Admin Notices ===
+// x Admin Notice Dismiss Iframe
+// - Admin Notice Dismiss Javascript
 // - Plugin Settings Page Top
 // - Plugin Settings Page Bottom
 // - Launch Offer Notice
 // - Launch Offer Content
+// - Dismiss Launch Offer
 // - MailChimp Subscriber Form
 // - AJAX Record Subscriber
 // - AJAX Clear Subscriber
@@ -543,17 +546,21 @@ function stream_player_update_notice() {
 		echo '</ul>' . "\n";
 
 		// --- dismiss notice link ---
-		$dismiss_url = add_query_arg( 'action', 'stream_player_notice_dismiss', admin_url( 'admin-ajax.php' ) );
-		$dismiss_url = add_query_arg( 'upgrade', $notice['update_id'], $dismiss_url );
 		echo '<div style="position:absolute; top:20px; right: 20px;">' . "\n";
-			echo '<a href="' . esc_url( $dismiss_url ) . '" target="stream-player-notice-iframe" style="text-decoration:none;">' . "\n";
+			// 2.5.7: deprecated admin notice iframe
+			// $dismiss_url = add_query_arg( 'action', 'stream_player_notice_dismiss', admin_url( 'admin-ajax.php' ) );
+			// $dismiss_url = add_query_arg( 'upgrade', $notice['update_id'], $dismiss_url );
+			// echo '<a href="' . esc_url( $dismiss_url ) . '" target="stream-player-notice-iframe" style="text-decoration:none;">' . "\n";
+			echo '<a href="#" onclick="stream_player_dismiss_notice(\'upgrade\',\'' . esc_attr( $notice['update_id'] ) . '\');" style="text-decoration:none;">' . "\n";
 			echo '<span class="dashicons dashicons-dismiss" title="' . esc_attr( __( 'Dismiss this Notice', 'stream-player' ) ) . '"></span></a>' . "\n";
 		echo '</div>' . "\n";
 
 	echo '</div>' . "\n";
 
-	// --- notice dismissal iframe (once only) ---
-	stream_player_admin_notice_iframe();
+	// --- notice dismissal ---
+	// 2.5.7: replace admin notice iframe with javascript
+	// stream_player_admin_notice_iframe();
+	stream_player_dismiss_notice_javascript();
 }
 
 // ---------------------
@@ -635,18 +642,21 @@ function stream_player_notice() {
 		echo '</ul>' . "\n";
 
 		// --- notice dismissal button ---
-		$dismiss_url = add_query_arg( 'action', 'stream_player_notice_dismiss', admin_url( 'admin-ajax.php' ) );
-		$dismiss_url = add_query_arg( 'notice', $notice['id'], $dismiss_url );
 		echo '<div style="position:absolute; top:20px; right: 20px;">' . "\n";
-			echo '<a href="' . esc_url( $dismiss_url ) . '" target="stream-player-notice-iframe" id+style="text-decoration:none;">' . "\n";
+			// $dismiss_url = add_query_arg( 'action', 'stream_player_notice_dismiss', admin_url( 'admin-ajax.php' ) );
+			// $dismiss_url = add_query_arg( 'notice', $notice['id'], $dismiss_url );
+			// echo '<a href="' . esc_url( $dismiss_url ) . '" target="stream-player-notice-iframe" id+style="text-decoration:none;">' . "\n";
+			echo '<a href="#" onclick="stream_player_notice_dismiss(\'notice\',\'' . esc_attr( $notice['id'] ) . '\');" id+style="text-decoration:none;">' . "\n";
 			echo '<span class="dashicons dashicons-dismiss" title="' . esc_attr( __( 'Dismiss this Notice', 'stream-player' ) ) . '"></span></a>' . "\n";
 		echo '</div>' . "\n";
 
 	// --- close notice wrap ---
 	echo '</div>' . "\n";
 
-	// --- notice dismissal iframe (once only) ---
-	stream_player_admin_notice_iframe();
+	// --- notice dismissal ---
+	// 2.5.7: replace admin notice iframe with javascript
+	// stream_player_admin_notice_iframe();
+	stream_player_dismiss_notice_javascript();
 
 }
 
@@ -715,7 +725,7 @@ function stream_player_notice_dismiss() {
 			}
 			$notices[$notice] = '1';
 			update_option( 'stream_player_read_notices', $notices );
-			echo "<script>parent.document.getElementById('stream-player-notice-" . esc_js( $notice ) . "').style.display = 'none';</script>" . "\n";
+			// echo "<script>parent.document.getElementById('stream-player-notice-" . esc_js( $notice ) . "').style.display = 'none';</script>" . "\n";
 
 		} elseif ( isset( $_GET['upgrade'] ) ) {
 
@@ -729,12 +739,15 @@ function stream_player_notice_dismiss() {
 			}
 			$upgrades[$upgrade] = '1';
 			update_option( 'stream_player_read_upgrades', $upgrades );
-			echo "<script>parent.document.getElementById('stream-player-update-" . esc_js( $upgrade ) . "').style.display = 'none';</script>" . "\n";
+			// echo "<script>parent.document.getElementById('stream-player-update-" . esc_js( $upgrade ) . "').style.display = 'none';</script>" . "\n";
 
 		}
 	}
+	// exit;
 
-	exit;
+	// --- send success data ---
+	$success = array( 'success' => '1' );
+	wp_send_json( $success , 200 );
 }
 
 
@@ -745,12 +758,49 @@ function stream_player_notice_dismiss() {
 // --------------------------
 // Admin Notice Action Iframe
 // --------------------------
-function stream_player_admin_notice_iframe() {
+// 2.5.7: deprecated notice action iframe
+/* function stream_player_admin_notice_iframe() {
 	global $stream_player_notice_iframe;
 	if ( !isset( $stream_player_notice_iframe ) || !$stream_player_notice_iframe ) {
 		echo '<iframe src="javascript:void(0);" name="stream-player-notice-iframe" id="stream-player-notice-iframe" style="display:none;"></iframe>' . PHP_EOL;
 		$stream_player_notice_iframe = true;
 	}
+} */
+
+// -------------------------------
+// Admin Notice Dismiss Javascript
+// -------------------------------
+function stream_player_dismiss_notice_javascript() {
+
+	// --- once only output ---
+	global $stream_player_notice_js;
+	if ( isset( $stream_player_notice_iframe ) || $stream_player_notice_iframe ) {
+		return;
+	}
+	$stream_player_notice_js = true;
+
+	// --- dismiss notices javascript function ---
+	$ajax_url = admin_url( 'admin-ajax.php' );
+	echo "<script>function stream_display_notice_dismiss(context,id) {
+		if (context == 'offer') {
+			url = '" . esc_url_raw( $ajax_url ) . "?action=stream_player_launch_offer_dismiss&accept='+id;
+			jQuery.get(url, function(data) {
+				document.getElementById('stream-player-launch-offer-notice').style.display = 'none';
+			}
+		} else if (context == 'notice') {
+			url = '" . esc_url_raw( $ajax_url ) . "?action=stream_player_notice_dismiss&notice='+id;
+			jQuery.get(url, function(data) {
+				console.log(data); result = JSON.parse(data); console.log(id);
+				document.getElementById('stream-player-notice-'+data.id+').style.display = 'none';
+			}
+		} else if (context == 'upgrade') {
+			url = '" . esc_url_raw( $ajax_url ) . "?action=stream_player_notice_dismiss&upgrade='+id;
+			jQuery.get(url, function(data) {
+				console.log(data); result = JSON.parse(data); console.log(id);
+				document.getElementById('stream-player-update-'+result.id+').style.display = 'none';
+			}
+		}
+	}</script>" . "\n";
 }
 
 // ------------------------
@@ -832,7 +882,10 @@ function stream_player_launch_offer_notice( $sppage = false ) {
 	echo '</div>' . "\n";
 
 	// --- notice dismissal frame (once) ---
-	stream_player_admin_notice_iframe();
+	// 2.5.7: replace notice iframe with javascript
+	// stream_player_admin_notice_iframe();
+	stream_player_dismiss_notice_javascript();
+	
 }
 
 // --------------------
@@ -840,8 +893,6 @@ function stream_player_launch_offer_notice( $sppage = false ) {
 // --------------------
 function stream_player_launch_offer_content( $dismissable = true, $prelaunch = false ) {
 
-	$dismiss_url = admin_url( 'admin-ajax.php?action=stream_player_launch_offer_dismiss' );
-	$accept_dismiss_url = add_query_arg( 'accepted', '1', $dismiss_url );
 	echo '<ul style="list-style:none;">' . "\n";
 
 		// --- directory logo image ---
@@ -882,20 +933,22 @@ function stream_player_launch_offer_content( $dismissable = true, $prelaunch = f
 		if ( $prelaunch ) {
 			echo '<a href="' . esc_url( STREAM_PLAYER_PRO_URL ) . 'plugin-launch-discount/" style="font-size: 16px;" target="_blank" class="button-primary"';
 			if ( $dismissable ) {
-				echo ' onclick="stream_display_dismiss_link();"';
+				echo ' onclick="stream_player_dismiss_notice(\'launch\',1);"';
 			}
 			echo '>' . esc_html( __( "Yes, I'm in!", 'stream-player' ) ) . '</a>' . "\n";
 		} else {
 			echo '<a href="' . esc_url( STREAM_PLAYER_PRO_URL ) . 'pricing/" style="font-size: 16px;" target="_blank" class="button-primary"';
 			if ( $dismissable ) {
-				echo ' onclick="stream_display_dismiss_link();"';
+				echo ' onclick="stream_player_dismiss_notice(\'launch\',1);"';
 			}
 			echo '>' . esc_html( __( 'Go PRO', 'stream-player' ) ) . '</a>' . "\n";
 		}
 		echo '</div>' . "\n";
 
 		echo '<div id="launch-offer-dismiss-link" style="display:none;">' . "\n";
-			echo '<a href="' . esc_url( $accept_dismiss_url ) . '" style="font-size: 12px;" target="stream-player-notice-iframe">' . esc_html( __( 'Thanks, already done.', 'stream-player' ) ) . '</a>' . "\n";
+			// $accept_dismiss_url = add_query_arg( 'accepted', '1', $dismiss_url );
+			// echo '<a href="' . esc_url( $accept_dismiss_url ) . '" style="font-size: 12px;" target="stream-player-notice-iframe">' . esc_html( __( 'Thanks, already done.', 'stream-player' ) ) . '</a>' . "\n";
+			echo '<a href="#" style="font-size: 12px;" onclick="stream_player_dismiss_notice(\'launch\',1);">' . esc_html( __( 'Thanks, already done.', 'stream-player' ) ) . '</a>' . "\n";
 		echo '</div>' . "\n";
 		echo '</center><br>' . "\n";
 
@@ -906,18 +959,13 @@ function stream_player_launch_offer_content( $dismissable = true, $prelaunch = f
 	// --- dismiss notice icon ---
 	if ( $dismissable ) {
 		echo '<div style="position:absolute; top:20px; right: 20px;">' . "\n";
-			echo '<a href="' . esc_url( $dismiss_url ) . '" target="stream-player-notice-iframe" style="text-decoration:none;">' . "\n";
+			// $dismiss_url = admin_url( 'admin-ajax.php?action=stream_player_launch_offer_dismiss' );
+			// echo '<a href="' . esc_url( $dismiss_url ) . '" target="stream-player-notice-iframe" style="text-decoration:none;">' . "\n";
+			echo '<a href="#" onclick="stream_player_dismiss_notice(\'launch\',0);" style="text-decoration:none;">' . "\n";
 				echo '<span class="dashicons dashicons-dismiss" title="' . esc_html( __( 'Dismiss this Notice', 'stream-player' ) ) . '"></span>' . "\n";
 			echo '</a>' . "\n";
 		echo '</div>' . "\n";
 	}
-
-	// --- display dismiss link script ---
-	echo "<script>function stream_display_dismiss_link() {
-		document.getElementById('launch-offer-accept-button').style.display = 'none';
-		document.getElementById('launch-offer-dismiss-link').style.display = '';
-		document.getElementById('stream-player-notice-iframe').src = '" . esc_url( $accept_dismiss_url ) . "';
-	}</script>" . "\n";
 
 }
 
@@ -945,7 +993,9 @@ function stream_player_launch_offer_dismiss() {
 	update_option( 'stream_player_launch_offer_dismissed', $user_ids );
 
 	// --- maybe set option for accepted ---
+	$accepted = 0;
 	if ( isset( $_REQUEST['accept'] ) && ( '1' == sanitize_text_field( $_REQUEST['accepted'] ) ) ) {
+		$accepted = 1;
 		$user_ids = get_option( 'stream_player_launch_offer_accepted' );
 		if ( !$user_ids || !is_array( $user_ids ) ) {
 			$user_ids = array( $user_id );
@@ -956,8 +1006,12 @@ function stream_player_launch_offer_dismiss() {
 	}
 
 	// --- hide the announcement in parent frame ---
-	echo "<script>parent.document.getElementById('stream-player-launch-offer-notice').style.display = 'none';</script>" . "\n";
-	exit;
+	// echo "<script>parent.document.getElementById('stream-player-launch-offer-notice').style.display = 'none';</script>" . "\n";
+	// exit;
+
+	// --- send success data ---
+	$success = array( 'success' => '1', 'accepted' => $accepted );
+	wp_send_json( $success , 200 );
 }
 
 // -------------------------
@@ -1022,7 +1076,6 @@ function stream_player_mailchimp_form() {
 		jQuery('#mc-embedded-button').on('click', function(e) {
 			email = document.getElementById('mce-EMAIL').value;
 			url = '" . esc_url( admin_url( 'admin-ajax.php' ) ) . "&action=stream_player_record_subscribe&email='+encodeURIComponent(email);
-			/* document.getElementById('mc-subscribe-record').src = url; */
 			jQuery.get(url, function(data) {
 				console.log(data);
 				jQuery('#mc-embedded-subscribe-form').submit();
