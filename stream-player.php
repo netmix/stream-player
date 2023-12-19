@@ -6,7 +6,7 @@ Plugin Name: Stream Player
 Plugin URI: https://radiostation.pro/stream-player/
 Description: Adds an advanced Streaming Audio Player your site.
 Author: Tony Hayes, Tony Zeoli
-Version: 2.5.7
+Version: 2.5.7.1
 Requires at least: 4.0.0
 Text Domain: stream-player
 Domain Path: /languages
@@ -150,7 +150,7 @@ $settings = array(
 	'hasaddons'    => $plan_options['has_addons'],
 	'addons_link'  => add_query_arg( 'page', STREAM_PLAYER_SLUG . '-addons', admin_url( 'admin.php' ) ),
 	'plan'         => $plan_options['plan_type'],
-	'affiliation'  => 'selected',
+	// 'affiliation'  => 'selected', // temporarily disabled
 
 	/* --- for Stream Player standalone version --- */
 	'freemius_id'  => '11590',
