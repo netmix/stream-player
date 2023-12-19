@@ -4,6 +4,11 @@
 // === Stream Player Options ===
 // -----------------------------
 
+if ( !defined( 'ABSPATH' ) ) exit;
+
+// ------------------
+// Set Plugin Options
+// ------------------
 $options = array(
 
 	// --------------

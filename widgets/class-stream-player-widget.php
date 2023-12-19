@@ -4,6 +4,8 @@
 // === Player Widget ===
 // ---------------------
 
+if ( !defined( 'ABSPATH' ) ) exit;
+
 // -------------
 // Player Widget
 // -------------
@@ -194,7 +196,7 @@ class Radio_Player_Widget extends WP_Widget {
 				'dark'    => __( 'Dark', 'stream-player' ),
 			);
 			$options = apply_filters( 'stream_player_player_theme_options', $options );
-			$options = apply_filters( 'radio_player_theme_options', $options );
+			$options = apply_filters( 'stream_player_theme_options', $options );
 			foreach ( $options as $option => $label ) {
 				$field .= '<option value="' . esc_attr( $option ) . '" ' . selected( $theme, $option, false ) . '>' . esc_html( $label ) . '</option>';
 			}
@@ -215,7 +217,7 @@ class Radio_Player_Widget extends WP_Widget {
 				'square'   => __( 'Square', 'stream-player' ),
 			);
 			$options = apply_filters( 'stream_player_player_button_options', $options );
-			$options = apply_filters( 'radio_player_button_options', $options );
+			$options = apply_filters( 'stream_player_button_options', $options );
 			foreach ( $options as $option => $label ) {
 				$field .= '<option value="' . esc_attr( $option ) . '" ' . selected( $buttons, $option, false ) . '>' . esc_html( $label ) . '</option>';
 			}
@@ -406,7 +408,7 @@ class Radio_Player_Widget extends WP_Widget {
 			echo wp_kses( $args['after_title'], $allowed );
 
 			// --- get default display output ---
-			$output = radio_player_shortcode( $atts );
+			$output = stream_player_shortcode( $atts );
 
 			// --- check for widget output override ---
 			$output = apply_filters( 'stream_player_player_widget_override', $output, $args, $atts );

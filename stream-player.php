@@ -6,7 +6,7 @@ Plugin Name: Stream Player
 Plugin URI: https://radiostation.pro/stream-player/
 Description: Adds an advanced Streaming Audio Player your site.
 Author: Tony Hayes, Tony Zeoli
-Version: 2.5.6
+Version: 2.5.7.1
 Requires at least: 4.0.0
 Text Domain: stream-player
 Domain Path: /languages
@@ -14,6 +14,8 @@ Author URI: https://netmix.com/
 GitHub Plugin URI: netmix/stream-player
 
 */
+
+if ( !defined( 'ABSPATH' ) ) exit;
 
 // === Setup ===
 // - Define Plugin Constants
@@ -148,7 +150,7 @@ $settings = array(
 	'hasaddons'    => $plan_options['has_addons'],
 	'addons_link'  => add_query_arg( 'page', STREAM_PLAYER_SLUG . '-addons', admin_url( 'admin.php' ) ),
 	'plan'         => $plan_options['plan_type'],
-	'affiliation'  => 'selected',
+	// 'affiliation'  => 'selected', // temporarily disabled
 
 	/* --- for Stream Player standalone version --- */
 	'freemius_id'  => '11590',
@@ -234,7 +236,8 @@ function stream_player_add_pricing_path_filter() {
 // ------------------------
 // 2.5.0: added for Freemius Pricing Page v2
 function stream_player_pricing_page_path( $default_pricing_js_path ) {
-	return STREAM_PLAYER_DIR . '/freemius-pricing/freemius-pricing.js';
+	$suffix = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) || STREAM_PLAYER_DEBUG ? '' : '.min';
+	return STREAM_PLAYER_DIR . '/freemius-pricing/freemius-pricing' . $suffix . '.js';
 }
 
 
@@ -271,12 +274,19 @@ function stream_player_add_inline_script( $handle, $js, $position = 'after' ) {
 		wp_add_inline_script( $handle, $js, $position );
 	} else {
 		// --- store extra javascript for later output ---
-		global $stream_player_scripts;
-		add_action( 'wp_print_footer_scripts', 'stream_player_print_footer_scripts', 20 );
+		/* global $stream_player_scripts;
 		if ( !isset( $stream_player_scripts[$handle] ) ) {
 			$stream_player_scripts[$handle] = '';
 		}
-		$radio_station_scripts[$handle] .= $js;
+		$stream_player_scripts[$handle] .= $js;
+		add_action( 'wp_print_footer_scripts', 'stream_player_print_footer_scripts', 20 ); */
+
+		// 2.5.7: enqueue dummy javascript file to output in footer
+		if ( !wp_script_is( 'sp-footer', 'registered' ) ) {
+			$script_url = plugins_url( '/js/sp-footer.js', STREAM_PLAYER_FILE );
+			wp_register_script( 'sp-footer', $script_url, array(), '', true );
+		}
+		wp_add_inline_script( 'sp-footer', $js, $position );
 	}
 }
 
@@ -284,7 +294,8 @@ function stream_player_add_inline_script( $handle, $js, $position = 'after' ) {
 // Print Footer Scripts
 // --------------------
 // 2.5.0: added for missed inline scripts
-function stream_player_print_footer_scripts() {
+// 2.5.7: deprecated in favour of adding inline to dummy script
+/* function stream_player_print_footer_scripts() {
 	global $stream_player_scripts;
 	if ( is_array( $stream_player_scripts ) && ( count( $stream_player_scripts ) > 0 ) ) {
 		foreach ( $stream_player_scripts as $handle => $js ) {
@@ -292,13 +303,13 @@ function stream_player_print_footer_scripts() {
 			echo '<script id="' . esc_attr( $handle ) . '-js-after">' . $js . '</script>';
 		}
 	}
-}
+} */
 
 // -----------------
 // Add Inline Styles
 // -----------------
 // 2.5.0: added for missed inline styles (via shortcodes)
-function stream_player_add_inline_style( $handle, $css ) {
+/* function stream_player_add_inline_style( $handle, $css ) {
 
 	// --- add check if style is already done ---
 	if ( !wp_style_is( $handle, 'done' ) ) {
@@ -307,26 +318,26 @@ function stream_player_add_inline_style( $handle, $css ) {
 	} else {
 		// --- store extra styles for later output ---
 		global $stream_player_styles;
-		add_action( 'wp_print_footer_scripts', 'stream_player_print_footer_styles', 20 );
 		if ( !isset( $stream_player_styles[$handle] ) ) {
 			$stream_player_styles[$handle] = '';
 		}
 		$stream_player_styles[$handle] .= $css;
+		add_action( 'wp_print_footer_scripts', 'stream_player_print_footer_styles', 20 );
 	}
-}
+} */
 
 // -------------------
 // Print Footer Styles
 // -------------------
 // 2.5.0: added for missed inline styles
-function stream_player_print_footer_styles() {
+/* function stream_player_print_footer_styles() {
 	global $stream_player_styles;
 	if ( is_array( $stream_player_styles ) && ( count( $stream_player_styles ) > 0 ) ) {
 		foreach ( $stream_player_styles as $handle => $css ) {
 			echo '<style>' . wp_kses_post( $css ) . '</style>';
 		}
 	}
-}
+} */
 
 // ---------------------------
 // Enqueue Widget Color Picker
@@ -349,9 +360,9 @@ function stream_player_enqueue_color_picker() {
 // -----------------------
 // Stream Player Shortcode
 // -----------------------
-function stream_player_shortcode( $settings = array() ) {
-	return radio_player_shortcode( $settings );
-}
+// function stream_player_shortcode( $settings = array() ) {
+//	return radio_player_shortcode( $settings );
+// }
 
 // ------------------
 // Check Plan Options

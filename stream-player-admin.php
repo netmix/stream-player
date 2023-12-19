@@ -3,6 +3,8 @@
  * Stream Player Plugin Admin Functions
  */
 
+if ( !defined( 'ABSPATH' ) ) exit;
+
 // === Admin Setup ===
 // - Enqueue Admin Scripts
 // - Admin Style Fixes
@@ -158,7 +160,7 @@ function stream_player_settings_page_redirect() {
 	}
 
 	// --- check if link is for options-general.php ---
-	if ( strstr( $_SERVER['REQUEST_URI'], '/options-general.php' ) ) {
+	if ( strstr( sanitize_text_field( $_SERVER['REQUEST_URI'] ), '/options-general.php' ) ) {
 
 		// --- redirect to plugin settings page (admin.php) ---
 		$url = add_query_arg( 'page', STREAM_PLAYER_SLUG, admin_url( 'admin.php' ) );
@@ -984,6 +986,7 @@ function stream_player_mailchimp_form() {
 
 	// --- output MailChimp signup form ---
 	// TODO: update list action for stream player mailchimp list
+	// 2.5.7: added translation wrapper to your email address placeholder
 	?>
 
 	<div id="mc_embed_signup">
@@ -993,15 +996,14 @@ function stream_player_mailchimp_form() {
 			</div>
 			<div id="mc_embed_signup_scroll">
 				<div id="plugin-icon">
-					<img src="<?php echo esc_url( $icon ); ?>" alt='<?php echo esc_html( __( 'Radio Station', 'stream-player' ) ); ?>'>
+					<img src="<?php echo esc_url( $icon ); ?>" alt='<?php echo esc_html( __( 'Stream Player', 'stream-player' ) ); ?>'>
 				</div>
 				<label id="signup-label" for="mce-EMAIL"><?php echo esc_html( __( "Stay tuned! Subscribe to Stream Player's", 'stream-player' ) ); ?>
 					<br>
 					<?php echo esc_html( __( 'Plugin Updates and Announcements List', 'stream-player' ) ); ?></label>
-				<input type="email" name="EMAIL" class="email" id="mce-EMAIL" value="<?php echo esc_html( $user_email ); ?>" placeholder="Your email address" required>
+				<input type="email" name="EMAIL" class="email" id="mce-EMAIL" value="<?php echo esc_html( $user_email ); ?>" placeholder="<?php echo esc_attr( __( 'Your email address', 'stream-player' ) ); ?>" required>
 				<div class="subscribe">
 					<input type="button" value="Subscribe" name="subscribe" id="mc-embedded-button" class="button">
-					<!-- input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button" -->
 				</div>
 			</div>
 		</form>
@@ -1009,17 +1011,22 @@ function stream_player_mailchimp_form() {
 
 	<?php
 
-	echo '<iframe id="mc-subscribe-record" src="javascript:void(0);" style="display:none;"></iframe>' . "\n";
+	// 2.6.7: removed iframe (no longer used)
+	// echo '<iframe id="mc-subscribe-record" src="javascript:void(0);" style="display:none;"></iframe>' . "\n";
 
 	// --- AJAX subscription call ---
 	// 2.3.0: added to record subscribers
-	$recordurl = add_query_arg( 'action', 'stream_player_record_subscribe', admin_url( 'admin-ajax.php' ) );
+	// 2.5.7: modified to use AJAX via jquery instead of iframe
 	echo "<script>
 	jQuery(document).ready(function() {
 		jQuery('#mc-embedded-button').on('click', function(e) {
 			email = document.getElementById('mce-EMAIL').value;
-			url = '" . esc_url_raw( $recordurl ) . "&email='+encodeURIComponent(email);
-			document.getElementById('mc-subscribe-record').src = url;
+			url = '" . esc_url( admin_url( 'admin-ajax.php' ) ) . "&action=stream_player_record_subscribe&email='+encodeURIComponent(email);
+			/* document.getElementById('mc-subscribe-record').src = url; */
+			jQuery.get(url, function(data) {
+				console.log(data);
+				jQuery('#mc-embedded-subscribe-form').submit();
+			}
 		});
 	});</script>" . "\n";
 
@@ -1042,10 +1049,13 @@ function stream_player_record_subscribe() {
 	}
 
 	// --- submit form in parent window ---
-	echo "<script>console.log('Subscription Recorded');";
-	echo "parent.jQuery('#mc-embedded-subscribe-form').submit();</script>" . "\n";
+	// echo "<script>console.log('Subscription Recorded');";
+	// echo "parent.jQuery('#mc-embedded-subscribe-form').submit();</script>" . "\n";
+	// exit;
+	// 2.6.7: just return success JSON data
+	$success = array( 'success' => '1' );
+	wp_send_json( $success , 200 );
 
-	exit;
 }
 
 // ------------------
