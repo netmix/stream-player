@@ -490,6 +490,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 				return;
 			}
 			$updatekey = $args['namespace'] . '_update_settings';
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing
 			if ( !isset( $_POST[$updatekey] ) || ( 'yes' != sanitize_text_field( $_POST[$args['namespace'] . '_update_settings'] ) ) ) {
 				return;
 			}

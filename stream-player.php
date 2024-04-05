@@ -6,7 +6,7 @@ Plugin Name: Stream Player
 Plugin URI: https://radiostation.pro/stream-player/
 Description: Adds an advanced Streaming Audio Player your site.
 Author: Tony Hayes, Tony Zeoli
-Version: 2.5.7.1
+Version: 2.5.9.1
 Requires at least: 4.0.0
 Text Domain: stream-player
 Domain Path: /languages
@@ -73,6 +73,7 @@ define( 'STREAM_PLAYER_PRO_URL', 'https://radiostation.pro/stream-player-pro/' )
 // Set Debug Mode Constant
 // -----------------------
 if ( !defined( 'STREAM_PLAYER_DEBUG' ) ) {
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	$sp_debug = ( isset( $_REQUEST['sp-debug'] ) && ( '1' == sanitize_text_field( $_REQUEST['sp-debug'] ) ) ) ? true : false;
 	define( 'STREAM_PLAYER_DEBUG', $sp_debug );
 }
@@ -254,7 +255,9 @@ function stream_player_get_now() {
 	$now = $datetime->format( 'U' );
 
 	// 2.5.6: allow explicit override of now time
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	if ( isset( $_REQUEST['for_time'] ) ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$now = absint( $_REQUEST['for_time'] );
 	}
 	$now = apply_filters( 'stream_player_now_time', $now );
@@ -284,7 +287,7 @@ function stream_player_add_inline_script( $handle, $js, $position = 'after' ) {
 		// 2.5.7: enqueue dummy javascript file to output in footer
 		if ( !wp_script_is( 'sp-footer', 'registered' ) ) {
 			$script_url = plugins_url( '/js/sp-footer.js', STREAM_PLAYER_FILE );
-			wp_register_script( 'sp-footer', $script_url, array(), '', true );
+			wp_register_script( 'sp-footer', $script_url, array(), '1.0.0', true );
 		}
 		wp_add_inline_script( 'sp-footer', $js, $position );
 	}
