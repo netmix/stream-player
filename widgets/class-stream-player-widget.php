@@ -382,6 +382,7 @@ class Radio_Player_Widget extends WP_Widget {
 		// --- maybe debug widget attributes --
 		// 2.5.0: added for debugging widget attributes
 		// 2.5.6: added sanitize_text_field wrapper
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_REQUEST['player-debug'] ) && ( '1' === sanitize_text_field( $_REQUEST['player-debug'] ) ) ) {
 			echo '<span style="display:none;">Radio Player Widget Attributes: ';
 			echo esc_html( print_r( $atts, true ) ) . '</span>';
