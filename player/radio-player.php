@@ -290,10 +290,11 @@ function stream_player_output( $args = array(), $echo = false ) {
 			$url_host = parse_url( $args['url'], PHP_URL_HOST );
 		}
 		// 2.5.6: added to prevent possible deprecated warning in esc_url
-		if ( ( null != $url_host ) && ( '' != $url_host ) ) {
-			$html['player_open'] .= '<link rel="preconnect" href="' . esc_url( $url_host ) . '">' . "\n";
-			$html['player_open'] .= '<link rel="dns-prefetch" href="' . esc_url( $url_host ) . '">' . "\n";
-		}
+		// 2.5.11: temporarily removed pending better output method
+		// if ( ( null != $url_host ) && ( '' != $url_host ) ) {
+		//	$html['player_open'] .= '<link rel="preconnect" href="' . esc_url( $url_host ) . '">' . "\n";
+		//	$html['player_open'] .= '<link rel="dns-prefetch" href="' . esc_url( $url_host ) . '">' . "\n";
+		// }
 		$classes[] = 'rp-audio-stream';
 	}
 
@@ -324,7 +325,8 @@ function stream_player_output( $args = array(), $echo = false ) {
 		$image = '';
 		$classes = array( 'rp-station-image' );
 		if ( ( '0' != (string)$args['image'] ) && ( 0 !== $args['image'] ) && ( '' != $args['image'] ) ) {
-			$image = '<img id="rp-station-default-image-' . esc_attr( $instance ) . '" class="rp-station-default-image" src="' . esc_url( $args['image'] ) . '" width="100%" height="100%" border="0" aria-label="' . esc_attr( __( 'Station Logo Image' ) ) . '">' . "\n";
+			// 2.5.11: added missing translation text domain
+			$image = '<img id="rp-station-default-image-' . esc_attr( $instance ) . '" class="rp-station-default-image" src="' . esc_url( $args['image'] ) . '" width="100%" height="100%" border="0" aria-label="' . esc_attr( __( 'Station Logo Image', 'stream-player' ) ) . '">' . "\n";
 			if ( function_exists( 'apply_filters' ) ) {
 				// 2.4.0.3: fix atts to args in third filter argument
 				$image = apply_filters( 'radio_station_player_station_image_tag', $image, $args['image'], $args, $instance );
@@ -345,7 +347,7 @@ function stream_player_output( $args = array(), $echo = false ) {
 		$html['station'] .= '	<div class="rp-station-text">' . "\n";
 
 			// --- station title ---
-			$station_text_html = '		<div class="rp-station-title" aria-label="' . esc_attr( __( 'Station Name' ) ) . '">';
+			$station_text_html = '		<div class="rp-station-title" aria-label="' . esc_attr( __( 'Station Name', 'stream-player' ) ) . '">';
 			if ( ( '0' != (string)$args['title'] ) && ( 0 !== $args['title'] ) && ( '' != $args['title'] ) ) {
 				$station_text_html .= esc_html( $args['title'] );
 			}
@@ -377,9 +379,9 @@ function stream_player_output( $args = array(), $echo = false ) {
 	$html['controls'] = '<div class="rp-controls-holder">' . "\n";
 		$html['controls'] .= '<div class="rp-controls">' . "\n";
 			$html['controls'] .= '<div class="rp-play-pause-button-bg">' . "\n";
-				$html['controls'] .= '<div class="rp-play-pause-button" role="button" aria-label="' . esc_attr( __( 'Play Radio Stream' ) ) . '"></div>' . "\n";
+				$html['controls'] .= '<div class="rp-play-pause-button" role="button" aria-label="' . esc_attr( __( 'Play Radio Stream', 'stream-player' ) ) . '"></div>' . "\n";
 			$html['controls'] .= '</div>' . "\n";
-			// $html['controls'] .= '		<button class="rp-stop" role="button" tabindex="0">' . esc_html( __( 'Stop', 'radio-player' ) ) . '</button>' . "\n";
+			// $html['controls'] .= '		<button class="rp-stop" role="button" tabindex="0">' . esc_html( __( 'Stop', 'stream-player' ) ) . '</button>' . "\n";
 		$html['controls'] .= '	</div>' . "\n";
 	$html['controls'] .= '</div>' . "\n";
 
@@ -387,24 +389,24 @@ function stream_player_output( $args = array(), $echo = false ) {
 	$html['volume'] = '<div class="rp-volume-controls">' . "\n";
 
 		// --- Volume Mute ---
-		$html['volume'] .= '<button class="rp-mute" role="button" tabindex="0">' . esc_html( __( 'Mute', 'radio-player' ) ) . '</button>' . "\n";
+		$html['volume'] .= '<button class="rp-mute" role="button" tabindex="0">' . esc_html( __( 'Mute', 'stream-player' ) ) . '</button>' . "\n";
 
 		// --- Volume Decrease ---
 		// 2.5.0: fix to attribute typo area-label
-		$html['volume'] .= '<button class="rp-volume-down" role="button" aria-label="' . esc_attr( __( 'Volume Down' ) ) . '">-</button>' . "\n";
+		$html['volume'] .= '<button class="rp-volume-down" role="button" aria-label="' . esc_attr( __( 'Volume Down', 'stream-player' ) ) . '">-</button>' . "\n";
 
 		// --- Custom Range volume slider ---
 		$html['volume'] .= '<div class="rp-volume-slider-container">' . "\n";
 			$html['volume'] .= '<div class="rp-volume-slider-bg" style="width: 0; border: none;"></div>' . "\n";
-				$html['volume'] .= '<input type="range" class="rp-volume-slider" value="' . esc_attr( $args['volume'] ) . '" max="100" min="0" aria-label="' . esc_attr( __( 'Volume Slider' ) ) . '">' . "\n";
+				$html['volume'] .= '<input type="range" class="rp-volume-slider" value="' . esc_attr( $args['volume'] ) . '" max="100" min="0" aria-label="' . esc_attr( __( 'Volume Slider', 'stream-player' ) ) . '">' . "\n";
 			$html['volume'] .= '<div class="rp-volume-thumb"></div>' . "\n";
 		$html['volume'] .= '</div>' . "\n";
 
 		// --- Volume Increase ---
-		$html['volume'] .= '<button class="rp-volume-up" role="button" aria-label="' . esc_attr( __( 'Volume Up' ) ) . '">+</button>' . "\n";
+		$html['volume'] .= '<button class="rp-volume-up" role="button" aria-label="' . esc_attr( __( 'Volume Up', 'stream-player' ) ) . '">+</button>' . "\n";
 
 		// --- Volume Max ---
-		$html['volume'] .= '<button class="rp-volume-max" role="button" tabindex="0">' . esc_html( __( 'Max', 'radio-player' ) ) . '</button>' . "\n";
+		$html['volume'] .= '<button class="rp-volume-max" role="button" tabindex="0">' . esc_html( __( 'Max', 'stream-player' ) ) . '</button>' . "\n";
 
 	$html['volume'] .= '</div>' . "\n";
 
@@ -429,13 +431,13 @@ function stream_player_output( $args = array(), $echo = false ) {
 	// --- Current Show Texts ---
 	// TODO: add other show info divs ( with expander ) ?
 	$show_text_html = '<div class="rp-show-text">' . "\n";
-		$show_text_html .= '<div class="rp-show-title" aria-label="' . esc_attr( __( 'Show Title', 'radio-player' ) ) . '"></div>' . "\n";
+		$show_text_html .= '<div class="rp-show-title" aria-label="' . esc_attr( __( 'Show Title', 'stream-player' ) ) . '"></div>' . "\n";
 		$show_text_html .= '<div class="rp-show-hosts"></div>' . "\n";
 		$show_text_html .= '<div class="rp-show-producers"></div>' . "\n";
 		$show_text_html .= '<div class="rp-show-shift"></div>' . "\n";
 		$show_text_html .= '<div class="rp-show-remaining"></div>' . "\n";
 	$show_text_html .= '</div>' . "\n";
-	$show_text_html .= '<div id="rp-show-image-' . esc_attr( $instance ) . '" class="rp-show-image no-image" aria-label="' . esc_attr( __( 'Show Logo Image', 'radio-player' ) ) . '"></div>' . "\n";
+	$show_text_html .= '<div id="rp-show-image-' . esc_attr( $instance ) . '" class="rp-show-image no-image" aria-label="' . esc_attr( __( 'Show Logo Image', 'stream-player' ) ) . '"></div>' . "\n";
 
 	$html['show'] = '<div class="rp-show-info">' . "\n";
 		$html['show'] .= $show_text_html;
@@ -457,7 +459,7 @@ function stream_player_output( $args = array(), $echo = false ) {
 
 	// --- no solution section ---
 	// $html['no-solution'] = '<div class="rp-no-solution">' . "\n";
-	// $html['no-solution'] .= '<span>' . esc_html( __( 'Update Required' ) ) . '</span>' . "\n";
+	// $html['no-solution'] .= '<span>' . esc_html( __( 'Update Required', 'stream-player' ) ) . '</span>' . "\n";
 	// $html['no-solution'] .= 'To play the media you will need to either update your browser to a recent version or update your <a href="https://get.adobe.com/flashplayer/" target="_blank">Flash plugin</a>.' . "\n";
 	// $html['no-solution'] .= '</div>' . "\n";
 
@@ -3224,7 +3226,8 @@ function stream_player_control_styles( $instance ) {
 // 2.5.7: echo instead of return script tag
 function stream_player_script_tag( $url, $version ) {
 	// 2.5.10: use esc_url not esc_url_raw
-	echo '<script type="text/javascript" src="' . esc_url( $url . '?' . $version ) . '"></script>';
+	// 2.5.11: removed for WordPress only usage
+	// echo '<script type="text/javascript" src="' . esc_url( $url . '?' . $version ) . '"></script>';
 }
 
 // ----------------
@@ -3233,7 +3236,8 @@ function stream_player_script_tag( $url, $version ) {
 // 2.5.7: echo instead of return style tag
 function stream_player_style_tag( $id, $url, $version ) {
 	// 2.5.10: use esc_url not esc_url_raw
-	echo '<link id="' . esc_attr( $id ) . '-css" href="' . esc_url( $url . '?' . $version ) . '" rel="stylesheet" type="text/css" media="all">';
+	// 2.5.11: removed for WordPress only usage
+	// echo '<link id="' . esc_attr( $id ) . '-css" href="' . esc_url( $url . '?' . $version ) . '" rel="stylesheet" type="text/css" media="all">';
 }
 
 // ----------------
