@@ -6,7 +6,7 @@ Plugin Name: Stream Player
 Plugin URI: https://radiostation.pro/stream-player/
 Description: Adds an advanced Streaming Audio Player your site.
 Author: Tony Hayes, Tony Zeoli
-Version: 2.5.9.1
+Version: 2.5.10.1
 Requires at least: 4.0.0
 Text Domain: stream-player
 Domain Path: /languages
@@ -626,6 +626,57 @@ function stream_player_settings_allowed_html( $allowed, $type, $context ) {
 	// --- allow onclick on spans and divs ---
 	$allowed['span']['onclick'] = array();
 	$allowed['div']['onclick'] = array();
+
+	return $allowed;
+}
+
+// --------------------------
+// Player Widget Allowed HTML
+// --------------------------
+// 2.5.10: added allowed HTML for player widget
+add_filter( 'stream_player_allowed_html', 'stream_player_widget_player_allowed_html', 10, 3 );
+function stream_player_widget_player_allowed_html( $allowed, $type, $context ) {
+
+	if ( ( 'widget' != $type ) || ( 'player' != $context ) ) {
+		return $allowed;
+	}
+
+	// --- link ---
+	$allowed['link'] = array(
+		'rel'         => array(),
+		'href'        => array(),
+	);
+
+	// --- button ---
+	$allowed['button'] = array(
+		'id'          => array(),
+		'class'       => array(),
+		'role'        => array(),
+		'onclick'     => array(),
+		'tabindex'    => array(),
+		'aria-label'  => array(),
+		'style'       => array(),
+	);
+
+	// --- input ---
+	$allowed['input'] = array(
+		'id'          => array(),
+		'class'       => array(),
+		'name'        => array(),
+		'value'       => array(),
+		'type'        => array(),
+		'data'        => array(),
+		'placeholder' => array(),
+		'style'       => array(),
+		'checked'     => array(),
+		'onclick'     => array(),
+		'max'         => array(),
+		'min'         => array(),
+		'aria-label'  => array(),
+	);
+
+	// --- styles ---
+	$allowed['style'] = array();
 
 	return $allowed;
 }

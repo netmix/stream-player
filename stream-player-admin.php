@@ -682,12 +682,27 @@ function stream_player_get_notices() {
 		$contents = file_get_contents( $readme );
 
 		// --- fix to parser failing on license lines ---
-		$contents = str_replace( 'License: GPLv2 or later', '', $contents );
-		$contents = str_replace( 'License URI: http://www.gnu.org/licenses/gpl-2.0.html', '', $contents );
+		// $contents = str_replace( 'License: GPLv2 or later', '', $contents );
+		// $contents = str_replace( 'License URI: http://www.gnu.org/licenses/gpl-2.0.html', '', $contents );
+		$strip_lines = array( 'License', 'License URI' );
+		foreach( $strip_lines as $strip_line ) {
+			if ( strstr( $contents, $strip_line ) ) {
+				$pos = strpos( $contents, $strip_line . ':' );
+				$chunks = str_split( $contents, $pos );
+				$before = $chunks[0];
+				unset( $chunks[0] );
+				$remainder = implode( '', $chunks );
+				$posb = strpos( $remainder, "\n" );
+				$chunks = str_split( $remainder, $posb );
+				unset( $chunks[0] );
+				$remainder = implode( '', $chunks );
+				$contents = $before . $remainder;
+			}
+		}
 
 		// --- include Markdown Readme Parser ---
 		include $parser;
-		$readme = new WordPress_Readme_Parser();
+		$readme = new stream_player_readme_parser();
 		$parsed = $readme->parse_readme_contents( $contents );
 
 		// --- parse all the notices to get notice info ---
@@ -781,9 +796,9 @@ function stream_player_dismiss_notice_javascript() {
 
 	// --- once only output ---
 	global $stream_player_notice_js;
-	if ( isset( $stream_player_notice_iframe ) || $stream_player_notice_iframe ) {
-		return;
-	}
+	// if ( isset( $stream_player_notice_iframe ) && $stream_player_notice_iframe ) {
+	// 	return;
+	// }
 	$stream_player_notice_js = true;
 
 	// --- dismiss notices javascript function ---
@@ -1107,7 +1122,8 @@ function stream_player_mailchimp_form() {
 add_action( 'wp_ajax_stream_player_record_subscribe', 'stream_player_record_subscribe' );
 function stream_player_record_subscribe() {
 
-	if ( !wp_verify_nonce( $_REQUEST['nonce'], 'stream_player_subscribe' ) ) {
+	// 2.5.11: add sanitize_text_field to request nonce
+	if ( !wp_verify_nonce( sanitize_text_field( $_REQUEST['nonce'] ), 'stream_player_subscribe' ) ) {
 		$response = array( 'success' => '0' );
 	} else {
 
@@ -1128,7 +1144,7 @@ function stream_player_record_subscribe() {
 		$response = array( 'success' => '1' );
 	}
 
-	wp_send_json( $response , 200 );
+	wp_send_json( $response, 200 );
 }
 
 // ------------------

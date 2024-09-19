@@ -290,11 +290,10 @@ function stream_player_output( $args = array(), $echo = false ) {
 			$url_host = parse_url( $args['url'], PHP_URL_HOST );
 		}
 		// 2.5.6: added to prevent possible deprecated warning in esc_url
-		// 2.5.11: temporarily removed pending better output method
-		// if ( ( null != $url_host ) && ( '' != $url_host ) ) {
-		//	$html['player_open'] .= '<link rel="preconnect" href="' . esc_url( $url_host ) . '">' . "\n";
-		//	$html['player_open'] .= '<link rel="dns-prefetch" href="' . esc_url( $url_host ) . '">' . "\n";
-		// }
+		if ( ( null != $url_host ) && ( '' != $url_host ) ) {
+			$html['player_open'] .= '<link rel="preconnect" href="' . esc_url( $url_host ) . '">' . "\n";
+			$html['player_open'] .= '<link rel="dns-prefetch" href="' . esc_url( $url_host ) . '">' . "\n";
+		}
 		$classes[] = 'rp-audio-stream';
 	}
 
@@ -1547,7 +1546,7 @@ function stream_player_enqueue_script( $script ) {
 
 	// --- output script tag ---
 	if ( '' != $js ) {
-		stream_player_add_inline_script( $js, 'after' );
+		stream_player_inline_script( $js, 'after' );
 	}
 	
 	// --- set specific script as enqueued ---
@@ -1559,7 +1558,7 @@ function stream_player_enqueue_script( $script ) {
 // Add Inline Script
 // -----------------
 // 2.5.10: added for fallback printing of scripts in footer
-function stream_player_add_inline_script( $js, $position = 'after' ) {
+function stream_player_inline_script( $js, $position = 'after' ) {
 
 	$enqueue_in_footer = false;
 	if ( function_exists( 'wp_add_inline_script' ) ) {
@@ -1990,7 +1989,7 @@ function stream_player_get_player_settings( $echo = false ) {
 	// --- set radio player settings and radio data objects ---
 	// (with empty arrays for instances, script types, failbacks, audio targets and stream data)
 	echo "var radio_player = {settings:player_settings, scripts:scripts, formats:formats, loading:false, touchscreen:touchscreen, debug:" . esc_js( $debug ) . "}" . "\n";
-	echo "var radio_data = {state:{}, players:[], scripts:[], failed:[], data:[], types:[], channels:[], faders:[]}" . "\n";
+	echo "var radio_player_data = {state:{}, players:[], scripts:[], failed:[], data:[], types:[], channels:[], faders:[]}" . "\n";
 
 	// --- logged in / user state settings ---
 	$loggedin = 'false';
@@ -1999,21 +1998,21 @@ function stream_player_get_player_settings( $echo = false ) {
 		$user_id = get_current_user_id();
 		$state = get_user_meta( $user_id, 'stream_player_state', true );
 	}
-	echo "radio_data.state.loggedin = " . esc_js( $loggedin ) . ";" . "\n";
+	echo "radio_player_data.state.loggedin = " . esc_js( $loggedin ) . ";" . "\n";
 
 	// ---- maybe set play state ---
 	// 2.5.0: set playing variable in single line
 	$playing = ( isset( $state ) && isset( $state['playing'] ) && $state['playing'] ) ? 'true' : 'false';
-	echo "radio_data.state.playing = " . esc_js( $playing ) . "; " . "\n";
+	echo "radio_player_data.state.playing = " . esc_js( $playing ) . "; " . "\n";
 
 	// --- maybe set station ID ---
 	if ( isset( $state ) && isset( $state['station'] ) ) {
 		$station = abs( intval( $state['station'] ) );
 	}
 	if ( isset( $station ) && $station && ( $station > 0 ) ) {
-		echo "radio_data.state.station = " . esc_js( $station ) . ";" . "\n";
+		echo "radio_player_data.state.station = " . esc_js( $station ) . ";" . "\n";
 	} else {
-		echo "radio_data.state.station = 0;" . "\n";
+		echo "radio_player_data.state.station = 0;" . "\n";
 	}
 
 	// --- maybe set user volume ---
@@ -2021,17 +2020,17 @@ function stream_player_get_player_settings( $echo = false ) {
 	if ( isset( $state ) && isset( $state['volume'] ) ) {
 		$player_volume = abs( intval( $state['volume'] ) );
 	}
-	echo "radio_data.state.volume = " . esc_js( $player_volume ) . "; " . "\n";
+	echo "radio_player_data.state.volume = " . esc_js( $player_volume ) . "; " . "\n";
 
 	// --- maybe set user mute ---
 	$player_mute = 'false';
 	if ( isset( $state ) && isset( $state['mute'] ) && ( $state['mute'] ) ) {
 		$player_mute = 'true';
 	}
-	echo "radio_data.state.mute = " . esc_js( $player_mute ) . "; " . "\n";
+	echo "radio_player_data.state.mute = " . esc_js( $player_mute ) . "; " . "\n";
 
 	// --- set main radio stream data ---
-	echo "radio_data.state.data = {};" . "\n";
+	echo "radio_player_data.state.data = {};" . "\n";
 	if ( function_exists( 'apply_filters' ) ) {
 		$station = ( isset( $state['station'] ) ) ? $state['station'] : 0;
 		// note: this is the main stream data filter hooked into by Radio Station plugin
@@ -2051,10 +2050,10 @@ function stream_player_get_player_settings( $echo = false ) {
 		}
 		if ( $set_data ) {
 			foreach ( $data as $key => $value ) {
-				echo "radio_data.state.data['" . esc_js( $key ) . "'] = '" . esc_js( $value ) . "';" . "\n";
+				echo "radio_player_data.state.data['" . esc_js( $key ) . "'] = '" . esc_js( $value ) . "';" . "\n";
 			}
 		}
-		echo "radio_player.stream_data = radio_data.state.data;" . "\n";
+		echo "radio_player.stream_data = radio_player_data.state.data;" . "\n";
 	}
 
 	// --- attempt to set player state from cookies ---
@@ -2070,8 +2069,8 @@ function stream_player_get_player_settings( $echo = false ) {
 	// --- periodic save to user meta ---
 	echo "rp_save_interval = radio_player.settings.saveinterval * 1000;
 	var stream_player_state_saver = setInterval(function() {
-		if (typeof radio_data.state != 'undefined') {
-			if (!radio_data.state.loggedin) {clearInterval(stream_player_state_saver); return;}
+		if (typeof radio_player_data.state != 'undefined') {
+			if (!radio_player_data.state.loggedin) {clearInterval(stream_player_state_saver); return;}
 			radio_player_save_user_state();
 		}
 	}, rp_save_interval);" . "\n";
@@ -2109,7 +2108,7 @@ function stream_player_state() {
 
 	// --- reset saving state in parent frame ---
 	// 2.5.8: not necessary to do this here
-	// echo "<script>parent.radio_data.state.saving = false;</script>" . "\n";
+	// echo "<script>parent.radio_player_data.state.saving = false;</script>" . "\n";
 
 	if ( !function_exists( 'get_current_user_id' ) || !function_exists( 'update_user_meta' ) ) {
 		exit;
@@ -2178,12 +2177,12 @@ function stream_player_script_amplitude() {
 		if (!fallback || !fformat || (fformat == '')) {fallback = ''; fformat = '';}
 
 		/* check if already loaded with same source 
-		if ( (typeof radio_data.scripts[instance] != 'undefined') && (radio_data.scripts[instance] == 'amplitude')
+		if ( (typeof radio_player_data.scripts[instance] != 'undefined') && (radio_player_data.scripts[instance] == 'amplitude')
 		  && (typeof radio_player.previous_data != 'undefined') ) {
 			pdata = radio_player.previous_data;
 			if ( (pdata.url == url) && (pdata.format == format) && (pdata.fallback == fallback) && (pdata.fformat == fformat) ) {
 				if (radio_player.debug) {console.log('Player already loaded with this stream data.');}
-				return radio_data.players[instance];
+				return radio_player_data.players[instance];
 			}
 		} */
 
@@ -2195,7 +2194,7 @@ function stream_player_script_amplitude() {
 		/* set volume */
 		if (jQuery('#'+container_id+' .rp-volume-slider').hasClass('changed')) {
 			volume = jQuery('#'+container_id+' .rp-volume-slider').val();
-		} else if (typeof radio_data.state.volume != 'undefined') {volume = radio_data.state.volume;}
+		} else if (typeof radio_player_data.state.volume != 'undefined') {volume = radio_player_data.state.volume;}
 		else {volume = radio_player.settings.volume;}
 		radio_player_volume_slider(instance, volume);
 		if (radio_player.debug) {console.log('Amplitude init Volume: '+volume);}
@@ -2224,7 +2223,7 @@ function stream_player_script_amplitude() {
 					instance = radio_player_event_instance(e, 'Loaded', 'amplitude');
 					radio_player_event_handler('loaded', {instance:instance, script:'amplitude'});
 
-					channel = radio_data.channels[instance];
+					channel = radio_player_data.channels[instance];
 					if (channel) {radio_player_set_state('channel', channel);}
 					station = jQuery('#radio_player_'+instance).attr('station-id');
 					if (station) {radio_player_set_state('station', station);}
@@ -2248,8 +2247,8 @@ function stream_player_script_amplitude() {
 				},
 				'volumechange': function(e) {
 					instance = radio_player_event_instance(e, 'Volume', 'amplitude');
-					if (instance && (radio_data.scripts[instance] == 'amplitude')) {
-						volume = radio_data.players[instance].getConfig().volume;
+					if (instance && (radio_player_data.scripts[instance] == 'amplitude')) {
+						volume = radio_player_data.players[instance].getConfig().volume;
 						radio_player_player_volume(instance, 'amplitude', volume);
 					}
 				},
@@ -2264,8 +2263,8 @@ function stream_player_script_amplitude() {
 		}
 
 	$js .= "});
-		radio_data.players[instance] = radio_player_instance;
-		radio_data.scripts[instance] = 'amplitude';
+		radio_player_data.players[instance] = radio_player_instance;
+		radio_player_data.scripts[instance] = 'amplitude';
 
 		/* set instance on audio source */
 		audio = radio_player_instance.getAudio();
@@ -2279,7 +2278,7 @@ function stream_player_script_amplitude() {
 			instance = radio_player_event_instance(e, 'Loaded', 'amplitude');
 			radio_player_event_handler('loaded', {instance:instance, script:'amplitude'});
 
-			channel = radio_data.channels[instance];
+			channel = radio_player_data.channels[instance];
 			if (channel) {radio_player_set_state('channel', channel);}
 			station = jQuery('#radio_player_'+instance).attr('station-id');
 			if (station) {radio_player_set_state('station', station);}
@@ -2298,8 +2297,8 @@ function stream_player_script_amplitude() {
 		/* bind volume change event */
 		audio.addEventListener('volumechange', function(e) {
 			instance = radio_player_event_instance(e, 'Volume', 'amplitude');
-			if (instance && (radio_data.scripts[instance] == 'amplitude')) {
-				volume = radio_data.players[instance].getConfig().volume;
+			if (instance && (radio_player_data.scripts[instance] == 'amplitude')) {
+				volume = radio_player_data.players[instance].getConfig().volume;
 				radio_player_player_volume(instance, 'amplitude', volume);
 			}
 		}, false);
@@ -2315,7 +2314,7 @@ function stream_player_script_amplitude() {
 		/* listen for pause event */
 		document.addEventListener('rp-pause', function(e) {
 			instance = e.detail.instance;
-			if (radio_data.scripts[instance] == 'amplitude') {
+			if (radio_player_data.scripts[instance] == 'amplitude') {
 				radio_player_event_handler('paused', {instance:instance, script:'amplitude'});
 			}
 		}, false);
@@ -2323,7 +2322,7 @@ function stream_player_script_amplitude() {
 		/* listen for stop event */
 		document.addEventListener('rp-stop', function(e) {
 			instance = e.detail.instance;
-			if (radio_data.scripts[instance] == 'amplitude') {
+			if (radio_player_data.scripts[instance] == 'amplitude') {
 				radio_player_event_handler('stopped', {instance:instance, script:'amplitude'});
 			}
 		}, false);" . "\n";
@@ -2378,12 +2377,12 @@ function stream_player_script_howler() {
 		if (!fallback || !fformat || (fformat == '')) {fallback = ''; fformat = '';}
 
 		/* check if already loaded with same source
-		if ( (typeof radio_data.scripts[instance] != 'undefined') && (radio_data.scripts[instance] == 'howler')
+		if ( (typeof radio_player_data.scripts[instance] != 'undefined') && (radio_player_data.scripts[instance] == 'howler')
 		  && (typeof radio_player.previous_data != 'undefined') ) {
 			pdata = radio_player.previous_data;
 			if ( (pdata.url == url) && (pdata.format == format) && (pdata.fallback == fallback) && (pdata.fformat == fformat) ) {
 				if (radio_player.debug) {console.log('Player already loaded with this stream data.');}
-				return radio_data.players[instance];
+				return radio_player_data.players[instance];
 			}
 		} */
 
@@ -2395,7 +2394,7 @@ function stream_player_script_howler() {
 		/* set volume */
 		if (jQuery('#'+container_id+' .rp-volume-slider').hasClass('changed')) {
 			volume = jQuery('#'+container_id+' .rp-volume-slider').val();
-		} else if (typeof radio_data.state.volume != 'undefined') {volume = radio_data.state.volume;}
+		} else if (typeof radio_player_data.state.volume != 'undefined') {volume = radio_player_data.state.volume;}
 		else {volume = radio_player.settings.volume;}
 		radio_player_volume_slider(instance, volume);
 		volume = parseFloat(volume / 100);
@@ -2416,7 +2415,7 @@ function stream_player_script_howler() {
 				instance = radio_player_match_instance(this, e, 'howler');
 				radio_player_event_handler('loaded', {instance:instance, script:'howler'});
 
-				channel = radio_data.channels[instance];
+				channel = radio_player_data.channels[instance];
 				if (channel) {radio_player_set_state('channel', channel);}
 				station = jQuery('#radio_player_'+instance).attr('station-id');
 				if (station) {radio_player_set_state('station', station);}
@@ -2437,7 +2436,7 @@ function stream_player_script_howler() {
 			},
 			onvolume: function(e) {
 				instance = radio_player_match_instance(this, e, 'howler');
-				if (instance && (radio_data.scripts[instance] == 'howler')) {
+				if (instance && (radio_player_data.scripts[instance] == 'howler')) {
 					volume = this.volume() * 100;
 					if (volume > 100) {volume = 100;}
 					radio_player_player_volume(instance, 'howler', volume);
@@ -2456,8 +2455,8 @@ function stream_player_script_howler() {
 				radio_player_player_fallback(instance, 'howler', 'Howler Play Error');
 			},
 		});
-		radio_data.players[instance] = radio_player_instance;
-		radio_data.scripts[instance] = 'howler';
+		radio_player_data.players[instance] = radio_player_instance;
+		radio_player_data.scripts[instance] = 'howler';
 
 		/* match script select dropdown value */
 		if (jQuery('#'+container_id+' .rp-script-select').length) {
@@ -2498,19 +2497,19 @@ function stream_player_script_jplayer() {
 		if (fformat == 'aac') {fformat = 'm4a';}
 
 		/* check if already loaded with same source
-		if ( (typeof radio_data.scripts[instance] != 'undefined') && (radio_data.scripts[instance] == 'jplayer')
+		if ( (typeof radio_player_data.scripts[instance] != 'undefined') && (radio_player_data.scripts[instance] == 'jplayer')
 		  && (typeof radio_player.previous_data != 'undefined') ) {
 			pdata = radio_player.previous_data;
 			if ( (pdata.url == url) && (pdata.format == format) && (pdata.fallback == fallback) && (pdata.fformat == fformat) ) {
 				if (radio_player.debug) {console.log('Player already loaded with this stream data.');}
-				return radio_data.players[instance];
+				return radio_player_data.players[instance];
 			}
 		} */
 
 		/* set volume */
 		if (jQuery('#'+container_id+' .rp-volume-slider').hasClass('changed')) {
 			volume = jQuery('#'+container_id+' .rp-volume-slider').val();
-		} else if (typeof radio_data.state.volume != 'undefined') {volume = radio_data.state.volume;}
+		} else if (typeof radio_player_data.state.volume != 'undefined') {volume = radio_player_data.state.volume;}
 		else {volume = radio_player.settings.volume;}
 		radio_player_volume_slider(instance, volume);
 		volume = parseFloat(volume / 100);
@@ -2578,8 +2577,8 @@ function stream_player_script_jplayer() {
 			  noVolume: 'rp-state-no-volume'
 			}, */
 		});
-		radio_data.players[instance] = radio_player_instance;
-		radio_data.scripts[instance] = 'jplayer';
+		radio_player_data.players[instance] = radio_player_instance;
+		radio_player_data.scripts[instance] = 'jplayer';
 
 		/* bind load event */
 		jQuery('#'+player_id).bind(jQuery.jPlayer.event.load, function(e) {
@@ -2587,7 +2586,7 @@ function stream_player_script_jplayer() {
 			instance = radio_player_event_instance(e, 'Loaded', 'jplayer');
 			radio_player_event_handler('loaded', {instance:instance, script:'jplayer'});
 
-			channel = radio_data.channels[instance];
+			channel = radio_player_data.channels[instance];
 			if (channel) {radio_player_set_state('channel', channel);}
 			/* station = jQuery('#radio_player_'+instance).attr('station-id');
 			if (station) {radio_player_set_state('station', station);} */
@@ -2614,7 +2613,7 @@ function stream_player_script_jplayer() {
 		/* bind volume change event */
 		jQuery('#'+player_id).bind(jQuery.jPlayer.event.volumechange, function(e) {
 			instance = radio_player_event_instance(e, 'Volume', 'jplayer');
-			if (instance && (radio_data.scripts[instance] == 'jplayer')) {
+			if (instance && (radio_player_data.scripts[instance] == 'jplayer')) {
 				radio_player_player_volume(instance, 'jplayer', volume);
 			}
 		});
@@ -2666,14 +2665,14 @@ function stream_player_script_mediaelements() {
 		if (fallback == '') {fallback = radio_player.settings.fallback;}
 		if (!fallback || !fformat || (fformat == '')) {fallback = ''; fformat = '';}
 
-		radio_data.scripts[instance] = 'mediaelements';
+		radio_player_data.scripts[instance] = 'mediaelements';
 		player_id = 'radio_player_'+instance;
 		container_id = 'radio_container_'+instance;
 
 		/* load media element player */
 		/* TODO: only initialize on new media elements? */
 		radio_player_instance = jQuery('#'+player_id).mediaelementplayer(rpSettings);
-		radio_data.players[instance] = radio_player_instance;
+		radio_player_data.players[instance] = radio_player_instance;
 
 		// radio_player.instance = jQuery('.rp-audio').not('.rp-container').filter(function () {
 		// 	return !jQuery(this).parent().hasClass('rp-mediaelement');	})
@@ -3226,8 +3225,7 @@ function stream_player_control_styles( $instance ) {
 // 2.5.7: echo instead of return script tag
 function stream_player_script_tag( $url, $version ) {
 	// 2.5.10: use esc_url not esc_url_raw
-	// 2.5.11: removed for WordPress only usage
-	// echo '<script type="text/javascript" src="' . esc_url( $url . '?' . $version ) . '"></script>';
+	echo '<script type="text/javascript" src="' . esc_url( $url . '?' . $version ) . '"></script>';
 }
 
 // ----------------
@@ -3236,8 +3234,7 @@ function stream_player_script_tag( $url, $version ) {
 // 2.5.7: echo instead of return style tag
 function stream_player_style_tag( $id, $url, $version ) {
 	// 2.5.10: use esc_url not esc_url_raw
-	// 2.5.11: removed for WordPress only usage
-	// echo '<link id="' . esc_attr( $id ) . '-css" href="' . esc_url( $url . '?' . $version ) . '" rel="stylesheet" type="text/css" media="all">';
+	echo '<link id="' . esc_attr( $id ) . '-css" href="' . esc_url( $url . '?' . $version ) . '" rel="stylesheet" type="text/css" media="all">';
 }
 
 // ----------------

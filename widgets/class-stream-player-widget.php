@@ -9,16 +9,16 @@ if ( !defined( 'ABSPATH' ) ) exit;
 // -------------
 // Player Widget
 // -------------
-class Radio_Player_Widget extends WP_Widget {
+class Stream_Player_Widget extends WP_Widget {
 
 	// --- construct widget ---
 	public function __construct() {
 		$widget_ops = array(
-			'classname'   => 'Radio_Player_Widget',
+			'classname'   => 'Stream_Player_Widget',
 			'description' => __( 'Stream Player Stream Player.', 'stream-player' ),
 		);
 		$widget_display_name = __( '(Stream Player) Stream Player', 'stream-player' );
-		parent::__construct( 'Radio_Player_Widget', $widget_display_name, $widget_ops );
+		parent::__construct( 'Stream_Player_Widget', $widget_display_name, $widget_ops );
 	}
 
 	// --- widget instance form ---
@@ -389,7 +389,7 @@ class Radio_Player_Widget extends WP_Widget {
 		}
 
 		// 2.5.0: get context filtered allowed HTML
-		$allowed = stream_player_allowed_html( 'widget', 'radio-player' );
+		$allowed = stream_player_allowed_html( 'widget', 'player' );
 
 		// --- before widget ---
 		// 2.5.0: use wp_kses on output
@@ -415,10 +415,10 @@ class Radio_Player_Widget extends WP_Widget {
 			$output = apply_filters( 'stream_player_player_widget_override', $output, $args, $atts );
 
 			// --- output widget display ---
-			// TODO: test wp_kses on widget output ?
-			// wp_kses( $output, $allowed );
+			// 2.5.10: use wp_kses with allowed HTML on output
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo $output;
+			// echo $output;
+			echo wp_kses( $output, $allowed );
 
 		echo '</div>' . "\n";
 
@@ -434,5 +434,5 @@ class Radio_Player_Widget extends WP_Widget {
 // ----------------------
 add_action( 'widgets_init', 'stream_player_register_player_widget' );
 function stream_player_register_player_widget() {
-	register_widget( 'Radio_Player_Widget' );
+	register_widget( 'Stream_Player_Widget' );
 }
