@@ -3,8 +3,8 @@ Contributors: tonyzeoli, majick
 Donate link: https://netmix.co/donate
 Tags: player, stream, audio, radio, broadcast
 Requires at least: 4.0
-Tested up to: 6.5.2
-Stable tag: 2.5.11
+Tested up to: 6.4.3
+Stable tag: 2.5.10
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,6 +42,14 @@ Stream Player uses the Amplitude and jPlayer scripts to play audio. In the that 
 == Screenshots ==
 
 == Changelog ==
+
+= 2.5.10 =
+* Updated: Freemius SDK (2.8.0)
+* Updated: reader.php with prefixed reader functions
+* Updated: Plugin Panel (1.3.1) with new reader function
+* Updated: Color Picker Alpha Library (3.0.4)
+* Updated: Howler Library (2.2.4)
+* Improved: use wp_kses on player widget output
 
 = 2.5.9 =
 * Updated: Freemius SDK (2.6.2)
@@ -110,16 +118,3 @@ Stream Player uses the Amplitude and jPlayer scripts to play audio. In the that 
 
 = 2.4.0 =
 * Added: Radio Stream Player!
-
-== Upgrade Notice ==
-
-= 2.5.0 =
-* Radio Station Blocks for Gutenberg Block Editor!
-* https://radiostation.pro/radio-station-2-5-0-release-with-blocks/
-* Numerous bugfixes and improvements
-* Escape debug output security fix
-
-= 2.4.0 =
-* Radio Station Stream Player Widget!
-* https://radiostation.pro/radio-station-update-version-2-4-0-with-streaming-audio-player/
-

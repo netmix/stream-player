@@ -4,17 +4,58 @@
 // === Plugin Panel Loader Class ===
 // =================================
 
+// -------------
+// Loader v1.3.1
+// -------------
+// Note: Changelog at end of file.
+
 if ( !defined( 'ABSPATH' ) ) exit;
 
-// --------------
-// Version: 1.3.0
-// --------------
-// Note: Changelog and structure at end of file.
-//
+// === Loader Class ===
+// - Initialize Loader
+// - Setup Plugin
+// - Get Plugin Data
+// - Get Plugin Version
+// - Set Pro Namespace
+// === Plugin Settings ===
+// - Get Default Settings
+// - Add Settings
+// - Maybe Transfer Settings
+// - Get All Plugin Settings
+// - Get Plugin Setting
+// - Reset Plugin Settings
+// - Update Plugin Settings
+// - Validate Plugin Setting
+// === Plugin Loading ===
+// - Load Plugin Settings
+// - Add Actions
+// - Load Helper Libraries
+// - Maybe Load Thickbox
+// - Readme Viewer AJAX
+// === Freemius Loading ===
+// - Load Freemius
+// - Filter Freemius Connect
+// - Freemius Connect Message
+// - Connect Update Message
+// === Plugin Admin ===
+// - Add Settings Menu
+// - Plugin Page Links
+// - Message Box
+// - Notice Boxer
+// - Plugin Page Header
+// - Settings Page
+// - Settings Table
+// - Setting Row
+// - Settings Scripts
+// - Settings Styles
+// === Namespaced Functions ===
+
+
 // ============
 // Loader Usage
 // ============
 // 1. replace all occurrences of stream_player_ in this file with the plugin namespace prefix eg. my_plugin_
+// 2. replace all occurrences of 'text-domain' in this file with the plugin's translation text domain
 // 2. define plugin options, default settings, and setup arguments your main plugin file
 // 3. require this file in the main plugin file and instantiate the loader class (see example below)
 //
@@ -58,11 +99,11 @@ if ( !defined( 'ABSPATH' ) ) exit;
 //	'parentmenu'	=> 'wordquest',		// parent menu slug
 //	'home'			=> 'http://mysite.com/plugins/plugin/',
 //	'support'		=> 'http://mysite.com/plugins/plugin/support/',
-//	'ratetext'		=> __('Rate on WordPress.org'),		// (overrides default rate text)
+//	'ratetext'		=> __( 'Rate on WordPress.org', 'text-domain' ),		// (overrides default rate text)
 //	'share'			=> 'http://mysites.com/plugins/plugin/#share', // (set sharing URL)
-//	'sharetext'		=> __('Share the Plugin Love'),		// (overrides default sharing text)
+//	'sharetext'		=> __( 'Share the Plugin Love', 'text-domain' ),		// (overrides default sharing text)
 //	'donate'		=> 'https://patreon.com/pagename',	// (overrides plugin Donate URI)
-//	'donatetext'	=> __('Support this Plugin'),		// (overrides default donate text)
+//	'donatetext'	=> __( 'Support this Plugin', 'text-domain' ),		// (overrides default donate text)
 //	'readme'		=> false,			// to not link to popup readme in settings page header
 //	'settingsmenu'	=> false,			// to not automatically add a settings menu [non-WQ]
 //
@@ -1372,24 +1413,40 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 				// --- include Markdown Readme Parser ---
 				include $parser;
 
-				// --- remove license info as causes breakage! ---
-				// TODO: find line start and end to handle other possible licenses
-				$contents = str_replace( 'License: GPLv2 or later', '', $contents );
-				$contents = str_replace( 'License URI: http://www.gnu.org/licenses/gpl-2.0.html', '', $contents );
+				// --- remove license lines as causing breakage! ---
+				// 1.3.1: find license lines to handle other possible licenses
+				// $contents = str_replace( 'License: GPLv2 or later', '', $contents );
+				// $contents = str_replace( 'License URI: http://www.gnu.org/licenses/gpl-2.0.html', '', $contents );
+				$strip_lines = array( 'License', 'License URI' );
+				foreach( $strip_lines as $strip_line ) {
+					if ( strstr( $contents, $strip_line ) ) {
+						$pos = strpos( $contents, $strip_line . ':' );
+						$chunks = str_split( $contents, $pos );
+						$before = $chunks[0];
+						unset( $chunks[0] );
+						$remainder = implode( '', $chunks );
+						$posb = strpos( $remainder, "\n" );
+						$chunks = str_split( $remainder, $posb );
+						unset( $chunks[0] );
+						$remainder = implode( '', $chunks );
+						$contents = $before . $remainder;
+					}
+				}
 
 				// --- instantiate Parser class ---
-				$readme = new WordPress_Readme_Parser();
+				// 1.3.1: prefix readme parser
+				$readme = new stream_player_readme_parser();
 				$parsed = $readme->parse_readme_contents( $contents );
 
 				// --- output plugin info ---
-				echo '<b>' . esc_html( __( 'Plugin Name' ) ) . '</b>: ' . esc_html( $parsed['name'] ) . '<br>' . "\n";
-				// echo '<b>' . esc_html( __( 'Tags' ) ) . '</b>: ' . esc_html( implode( ', ', $parsed['tags'] ) ) . '<br>' . "\n";
-				echo '<b>' . esc_html( __( 'Requires at least' ) ) . '</b>: ' . esc_html( __( 'WordPress' ) ) . ' v' . esc_html( $parsed['requires_at_least'] ) . '<br>' . "\n";
-				echo '<b>' . esc_html( __( 'Tested up to' ) ) . '</b>: ' . esc_html( __( 'WordPress' ) ) . ' v' . esc_html( $parsed['tested_up_to'] ) . '<br>' . "\n";
+				echo '<b>' . esc_html( __( 'Plugin Name', 'text-domain' ) ) . '</b>: ' . esc_html( $parsed['name'] ) . '<br>' . "\n";
+				// echo '<b>' . esc_html( __( 'Tags', 'text-domain' ) ) . '</b>: ' . esc_html( implode( ', ', $parsed['tags'] ) ) . '<br>' . "\n";
+				echo '<b>' . esc_html( __( 'Requires at least', 'text-domain' ) ) . '</b>: ' . esc_html( __( 'WordPress', 'text-domain' ) ) . ' v' . esc_html( $parsed['requires_at_least'] ) . '<br>' . "\n";
+				echo '<b>' . esc_html( __( 'Tested up to', 'text-domain' ) ) . '</b>: ' . esc_html( __( 'WordPress', 'text-domain' ) ) . ' v' . esc_html( $parsed['tested_up_to'] ) . '<br>' . "\n";
 				if ( isset( $parsed['stable_tag'] ) ) {
-					echo '<b>' . esc_html( __( 'Stable Tag' ) ) . '</b>: ' . esc_html( $parsed['stable_tag'] ) . '<br>' . "\n";
+					echo '<b>' . esc_html( __( 'Stable Tag', 'text-domain' ) ) . '</b>: ' . esc_html( $parsed['stable_tag'] ) . '<br>' . "\n";
 				}
-				echo '<b>' . esc_html( __( 'Contributors' ) ) . '</b>: ' . esc_html( implode( ', ', $parsed['contributors'] ) ) . '<br>' . "\n";
+				echo '<b>' . esc_html( __( 'Contributors', 'text-domain' ) ) . '</b>: ' . esc_html( implode( ', ', $parsed['contributors'] ) ) . '<br>' . "\n";
 				// echo '<b>Donate Link</b>: <a href="' . esc_url( $parsed['donate_link'] ) . '" target="_blank">' . esc_html( $parsed['donate_link'] ) . '</a><br>';
 				// 1.2.5: use wp_kses_post on plugin short description markup
 				echo '<br>' . wp_kses_post( $parsed['short_description'] ) . '<br><br>' . "\n";
@@ -1415,7 +1472,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 					}
 				}
 				if ( isset( $parsed['remaining_content'] ) && !empty( $remaining_content ) ) {
-					echo '<h3>' . esc_html( __( 'Extra Notes' ) ) . '</h3>' . "\n";
+					echo '<h3>' . esc_html( __( 'Extra Notes', 'text-domain' ) ) . '</h3>' . "\n";
 					// 1.2.5: use wp_kses_post on readme extra notes output
 					echo wp_kses_post( $parsed['remaining_content'] );
 				}
@@ -1545,7 +1602,8 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 					$args['contact'] = $premium;
 				}
 				if ( !isset( $args['affiliation'] ) ) {
-					$args['affiliaation'] = false;
+					// 1.3.1: fix to key typo (affiliaation)
+					$args['affiliation'] = false;
 				}
 
 				// --- set Freemius settings from plugin settings ---
@@ -1633,7 +1691,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 			// 1.2.4: added ordering to replacement arguments
 			$message .= sprintf(
 				// Translators: plugin title, user name, site link, freemius link
-				__( 'If you want to more easily access support and feedback for this plugins features and functionality, %1$s can connect your user, %2$s at %3$s, to %4$s' ),
+				__( 'If you want to more easily access support and feedback for this plugins features and functionality, %1$s can connect your user, %2$s at %3$s, to %4$s', 'text-domain' ),
 				'<b>' . $plugin_title . '</b>',
 				'<b>' . $user_login . '</b>',
 				$site_link,
@@ -1717,7 +1775,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 				// (depending on whether top level menu or Settings submenu item)
 				$page = $this->menu_added ? 'admin.php' : 'options-general.php';
 				$settings_url = add_query_arg( 'page', $args['slug'], admin_url( $page ) );
-				$settings_link = '<a href="' . esc_url( $settings_url ) . '">' . esc_html( __( 'Settings' ) ) . '</a>';
+				$settings_link = '<a href="' . esc_url( $settings_url ) . '">' . esc_html( __( 'Settings', 'text-domain' ) ) . '</a>';
 				$link = array( 'settings' => $settings_link );
 				$links = array_merge( $link, $links );
 
@@ -1735,7 +1793,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 							$upgrade_url = add_query_arg( 'page', $args['slug'] . '-pricing', admin_url( 'admin.php' ) );
 							$upgrade_target = !strstr( $upgrade_url, '/wp-admin/' ) ? ' target="_blank"' : '';
 						}
-						$upgrade_link = '<b><a href="' . esc_url( $upgrade_url ) . '"' . $upgrade_target . ">" . esc_html( __( 'Upgrade' ) ) . '</a></b>';
+						$upgrade_link = '<b><a href="' . esc_url( $upgrade_url ) . '"' . $upgrade_target . ">" . esc_html( __( 'Upgrade', 'text-domain' ) ) . '</a></b>';
 						$link = array( 'upgrade' => $upgrade_link );
 						$links = array_merge( $link, $links );
 
@@ -1743,7 +1801,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 						// 1.2.0: added separate pro details link
 						if ( isset( $args['pro_link'] ) ) {
 							$pro_target = !strstr( $args['pro_link'], '/wp-admin/' ) ? ' target="_blank"' : '';
-							$pro_link = '<b><a href="' . esc_url( $args['pro_link'] ) . '"' . $pro_target . '>' . esc_html( __( 'Pro Details' ) ) . '</a></b>';
+							$pro_link = '<b><a href="' . esc_url( $args['pro_link'] ) . '"' . $pro_target . '>' . esc_html( __( 'Pro Details', 'text-domain' ) ) . '</a></b>';
 							$link = array( 'pro-details' => $pro_link );
 							$links = array_merge( $link, $links );
 						}
@@ -1757,7 +1815,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 					if ( isset( $args['addons_link'] ) ) {
 						$addons_url = $args['addons_link'];
 						$addons_target = !strstr( $addons_url, '/wp-admin/' ) ? ' target="_blank"' : '';
-						$addons_link = '<a href="' . esc_url( $addons_url ) . '"' . $addons_target . '>' . esc_html( __( 'Add Ons' ) ) . '</a>';
+						$addons_link = '<a href="' . esc_url( $addons_url ) . '"' . $addons_target . '>' . esc_html( __( 'Add Ons', 'text-domain' ) ) . '</a>';
 						$link = array( 'addons' => $addons_link );
 						$links = array_merge( $link, $links );
 					}
@@ -1825,7 +1883,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 			echo '<div style="width: 98%;" id="admin-notices-box" class="postbox">' . "\n";
 			echo '<h3 class="admin-notices-title" style="cursor:pointer; margin:7px 14px; font-size:16px;" onclick="settings_toggle_notices();">' . "\n";
 			echo '<span id="admin-notices-arrow" style="font-size:24px;">&#9656;</span> &nbsp; ' . "\n";
-			echo '<span id="admin-notices-title" style="vertical-align:top;">' . esc_html( __( 'Notices' ) ) . '</span>  &nbsp; ' . "\n";
+			echo '<span id="admin-notices-title" style="vertical-align:top;">' . esc_html( __( 'Notices', 'text-domain' ) ) . '</span>  &nbsp; ' . "\n";
 			echo '<span id="admin-notices-count" style="vertical-align:top;"></span></h3>' . "\n";
 
 			echo '<div id="admin-notices-wrap" style="display:none";><h2 style="display:none;"></h2></div>' . "\n";
@@ -1954,7 +2012,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 			// ---- plugin author ---
 			// 1.0.8: check if author URL is set
 			if ( isset( $args['author_url'] ) ) {
-				echo '<font style="font-size:16px;">' . esc_html( __( 'by' ) ) . '</font> ';
+				echo '<font style="font-size:16px;">' . esc_html( __( 'by', 'text-domain' ) ) . '</font> ';
 				echo '<a href="' . esc_url( $args['author_url'] ) . '" target="_blank" style="text-decoration:none;font-size:16px;" target="_blank"><b>' . esc_html( $args['author'] ) . '</b></a><br><br>' . "\n";
 			}
 
@@ -1964,20 +2022,20 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 			// 1.1.0: added title attributes to links
 			$links = array();
 			if ( isset( $args['home'] ) ) {
-				$links[] = '<a href="' . esc_url( $args['home'] ) . '" class="pluginlink smalllink" title="' . esc_attr( __( 'Plugin Homepage' ) ) . '" target="_blank"><b>' . esc_html( __( 'Home' ) ) . '</b></a>';
+				$links[] = '<a href="' . esc_url( $args['home'] ) . '" class="pluginlink smalllink" title="' . esc_attr( __( 'Plugin Homepage', 'text-domain' ) ) . '" target="_blank"><b>' . esc_html( __( 'Home', 'text-domain' ) ) . '</b></a>';
 			}
 			if ( !isset( $args['readme'] ) || ( false !== $args['readme'] ) ) {
 				$readme_url = add_query_arg( 'action', $namespace . '_readme_viewer', admin_url( 'admin-ajax.php' ) );
-				$links[] = '<a href="' . esc_url( $readme_url ) . '" class="pluginlink smalllink thickbox" title="' . esc_attr( __( 'View Plugin' ) ) . ' readme.txt"><b>' . esc_html( __( 'Readme' ) ) . '</b></a>';
+				$links[] = '<a href="' . esc_url( $readme_url ) . '" class="pluginlink smalllink thickbox" title="' . esc_attr( __( 'View Plugin', 'text-domain' ) ) . ' readme.txt"><b>' . esc_html( __( 'Readme', 'text-domain' ) ) . '</b></a>';
 			}
 			if ( isset( $args['docs'] ) ) {
-				$links[] = '<a href="' . esc_url( $args['docs'] ) . '" class="pluginlink smalllink" title="' . esc_attr( __( 'Plugin Documentation' ) ) . '" target="_blank"><b>' . esc_html( __( 'Docs' ) ) . '</b></a>';
+				$links[] = '<a href="' . esc_url( $args['docs'] ) . '" class="pluginlink smalllink" title="' . esc_attr( __( 'Plugin Documentation', 'text-domain' ) ) . '" target="_blank"><b>' . esc_html( __( 'Docs', 'text-domain' ) ) . '</b></a>';
 			}
 			if ( isset( $args['support'] ) ) {
-				$links[] = '<a href="' . esc_url( $args['support'] ) . '" class="pluginlink smalllink" title="' . esc_attr( __( 'Plugin Support' ) ) . '" target="_blank"><b>' . esc_html( __( 'Support' ) ) . '</b></a>';
+				$links[] = '<a href="' . esc_url( $args['support'] ) . '" class="pluginlink smalllink" title="' . esc_attr( __( 'Plugin Support', 'text-domain' ) ) . '" target="_blank"><b>' . esc_html( __( 'Support', 'text-domain' ) ) . '</b></a>';
 			}
 			if ( isset( $args['development'] ) ) {
-				$links[] = '<a href="' . esc_url( $args['development'] ) . '" class="pluginlink smalllink" title="' . esc_attr( __( 'Plugin Development' ) ) . '" target="_blank"><b>' . esc_html( __( 'Dev' ) ) . '</b></a>';
+				$links[] = '<a href="' . esc_url( $args['development'] ) . '" class="pluginlink smalllink" title="' . esc_attr( __( 'Plugin Development', 'text-domain' ) ) . '" target="_blank"><b>' . esc_html( __( 'Dev', 'text-domain' ) ) . '</b></a>';
 			}
 
 			// 1.0.9: change filter from _plugin_links to disambiguate
@@ -2025,7 +2083,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 				if ( isset( $args['ratetext'] ) ) {
 					$rate_text = $args['ratetext'];
 				} else {
-					$rate_text = __( 'Rate on WordPress.Org' );
+					$rate_text = __( 'Rate on WordPress.Org', 'text-domain' );
 				}
 				$rate_link = '<a href="' . esc_url( $rate_url ) . '" class="pluginlink" target="_blank">';
 				$rate_link .= '<span style="font-size:24px; color:#FC5; margin-right:10px;" class="dashicons dashicons-star-filled"></span>' . "\n";
@@ -2042,7 +2100,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 				if ( isset( $args['sharetext'] ) ) {
 					$share_text = $args['sharetext'];
 				} else {
-					$share_text = __( 'Share the Plugin Love' );
+					$share_text = __( 'Share the Plugin Love', 'text-domain' );
 				}
 				$share_link = '<a href="' . esc_url( $args['share'] ) . '" class="pluginlink" target="_blank">';
 				$share_link .= '<span style="font-size:24px; color:#E0E; margin-right:10px;" class="dashicons dashicons-share"></span> ';
@@ -2059,7 +2117,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 				if ( isset( $args['donatetext'] ) ) {
 					$donate_text = $args['donatetext'];
 				} else {
-					$donate_text = __( 'Support this Plugin' );
+					$donate_text = __( 'Support this Plugin', 'text-domain' );
 				}
 				$donate_link = '<a href="' . esc_url( $args['donate'] ) . '" class="pluginlink" target="_blank">';
 				$donate_link .= '<span style="font-size:24px; color:#E00; margin-right:10px;" class="dashicons dashicons-heart"></span> ';
@@ -2079,11 +2137,11 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 				// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				$updated = sanitize_text_field( $_GET['updated'] );
 				if ( 'yes' == $updated ) {
-					$message = $settings['title'] . ' ' . __( 'Settings Updated.' );
+					$message = $settings['title'] . ' ' . __( 'Settings Updated.', 'text-domain' );
 				} elseif ( 'no' == $updated ) {
-					$message = __( 'Error! Settings NOT Updated.' );
+					$message = __( 'Error! Settings NOT Updated.', 'text-domain' );
 				} elseif ( 'reset' == $updated ) {
-					$message = $settings['title'] . ' ' . __( 'Settings Reset!' );
+					$message = $settings['title'] . ' ' . __( 'Settings Reset!', 'text-domain' );
 				}
 				if ( isset( $message ) ) {
 					echo '<tr><td></td><td></td><td align="center">' . "\n";
@@ -2260,7 +2318,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 				}
 				echo '</ul>' . "\n";
 			} else {
-				$tabs = array( 'general' => __( 'General' ) );
+				$tabs = array( 'general' => __( 'General', 'text-domain' ) );
 			}
 
 			// --- reset to default script ---
@@ -2352,9 +2410,9 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 				$buttons = '<tr height="25"><td> </td></tr>' . "\n";
 				$buttons .= '<tr><td align="center">' . "\n";
 				// 1.2.5: remove reset onclick attribute
-				$buttons .= '<input type="button" id="settingsresetbutton" class="button-secondary settings-button" value="' . esc_attr( __( 'Reset Settings' ) ) . '">' . "\n";
+				$buttons .= '<input type="button" id="settingsresetbutton" class="button-secondary settings-button" value="' . esc_attr( __( 'Reset Settings', 'text-domain' ) ) . '">' . "\n";
 				$buttons .= '</td><td colspan="3"></td><td align="center">' . "\n";
-				$buttons .= '<input type="submit" class="button-primary settings-button" value="' . esc_attr( __( 'Save Settings' ) ) . '">' . "\n";
+				$buttons .= '<input type="submit" class="button-primary settings-button" value="' . esc_attr( __( 'Save Settings', 'text-domain' ) ) . '">' . "\n";
 				$buttons .= '</td></tr>' . "\n";
 				$buttons .= '<tr height="25"><td></td></tr>' . "\n";
 				$buttons = apply_filters( $namespace . '_admin_save_buttons', $buttons, $tab );
@@ -2541,7 +2599,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 
 			$row .= '<td class="settings-label">' . $option['label'] . "\n";
 			if ( 'multiselect' == $type ) {
-				$row .= '<br><span>' . esc_html( __( 'Use Ctrl and Click to Select' ) ) . '</span>' . "\n";
+				$row .= '<br><span>' . esc_html( __( 'Use Ctrl and Click to Select', 'text-domain' ) ) . '</span>' . "\n";
 			}
 			$row .= '</td><td width="25"></td>' . "\n";
 
@@ -2580,9 +2638,9 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 					}
 					if ( $upgrade_link || isset( $pro_link ) ) {
 						// 1.2.2: change text from Available in Pro
-						$row .= __( 'Premium Feature.' ) . '<br>';
+						$row .= __( 'Premium Feature.', 'text-domain' ) . '<br>';
 						if ( $upgrade_link ) {
-							$row .= '<a href="' . esc_url( $upgrade_link ) . '"' . $upgrade_target . '>' . esc_html( __( 'Upgrade Now' ) ) . '</a>';
+							$row .= '<a href="' . esc_url( $upgrade_link ) . '"' . $upgrade_target . '>' . esc_html( __( 'Upgrade Now', 'text-domain' ) ) . '</a>';
 						}
 						if ( $upgrade_link && isset( $pro_link ) ) {
 							$row .= ' | ';
@@ -2591,10 +2649,10 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 							// 1.2.2: change text from Pro details
 							// 1.3.0: add hash link anchor for Pro feature options
 							$option_anchor = str_replace( '_', '-', $option['key'] );
-							$row .= '<a href="' . esc_url( $pro_link ) . '#' . esc_attr( $option_anchor ) . '"' . $pro_target . '>' . esc_html( __( 'Details' ) ) . '</a>' . "\n";
+							$row .= '<a href="' . esc_url( $pro_link ) . '#' . esc_attr( $option_anchor ) . '"' . $pro_target . '>' . esc_html( __( 'Details', 'text-domain' ) ) . '</a>' . "\n";
 						}
 					} else {
-						$row .= esc_html( __( 'Coming soon in Pro version!' ) );
+						$row .= esc_html( __( 'Coming soon in Pro version!', 'text-domain' ) );
 					}
 					$row .= '</td>' . "\n";
 
@@ -2916,7 +2974,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 								$hidden = ' hidden';
 							}
 							$row .= '<a class="upload-custom-image' . esc_attr( $hidden ) . '" href="' . esc_url( $upload_link ) . '">' . "\n";
-							$row .= esc_html( __( 'Add Image' ) );
+							$row .= esc_html( __( 'Add Image', 'text-domain' ) );
 							$row .= '</a>' . "\n";
 
 							$hidden = '';
@@ -2924,7 +2982,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 								$hidden = ' hidden';
 							}
 							$row .= '<a class="delete-custom-image' . esc_attr( $hidden ) . '" href="#">' . "\n";
-							$row .= esc_html( __( 'Remove Image' ) );
+							$row .= esc_html( __( 'Remove Image', 'text-domain' ) );
 							$row .= '</a>' . "\n";
 						$row .= '</p>' . "\n";
 
@@ -3004,7 +3062,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 						// --- reset settings function ---
 						// 1.2.5: changed function prefix for consistency
 						// 1.2.5: changed to jQuery click function to remove onclick button attribute
-						$confirmreset = __( 'Are you sure you want to reset to default settings?' );
+						$confirmreset = __( 'Are you sure you want to reset to default settings?', 'text-domain' );
 						// echo "function plugin_panel_reset_defaults() {" . "\n";
 						echo "jQuery('#settingsresetbutton').on('click', function() {" . "\n";
 						echo "	agree = confirm('" . esc_js( $confirmreset ) . "');" . "\n";
@@ -3045,7 +3103,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 					} elseif ( 'media_functions' == $script ) {
 
 						// --- media functions ---
-						$confirm_remove = __( 'Are you sure you want to remove this image?' );
+						$confirm_remove = __( 'Are you sure you want to remove this image?', 'text-domain' );
 						echo "jQuery(function(){
 
 							var mediaframe, parentdiv;
@@ -3462,52 +3520,14 @@ if ( !function_exists( 'stream_player_load_prefixed_functions' ) ) {
 
 
 // =========
-// STRUCTURE
-// =========
-//
-// === Loader Class ===
-// - Initialize Loader
-// - Setup Plugin
-// - Get Plugin Data
-// - Get Plugin Version
-// - Set Pro Namespace
-// === Plugin Settings ===
-// - Get Default Settings
-// - Add Settings
-// - Maybe Transfer Settings
-// - Get All Plugin Settings
-// - Get Plugin Setting
-// - Reset Plugin Settings
-// - Update Plugin Settings
-// - Validate Plugin Setting
-// === Plugin Loading ===
-// - Load Plugin Settings
-// - Add Actions
-// - Load Helper Libraries
-// - Maybe Load Thickbox
-// - Readme Viewer AJAX
-// === Freemius Loading ===
-// - Load Freemius
-// - Filter Freemius Connect
-// - Freemius Connect Message
-// - Connect Update Message
-// === Plugin Admin ===
-// - Add Settings Menu
-// - Plugin Page Links
-// - Message Box
-// - Notice Boxer
-// - Plugin Page Header
-// - Settings Page
-// - Settings Table
-// - Setting Row
-// - Settings Scripts
-// - Settings Styles
-// === Namespaced Functions ===
-
-
-// =========
 // CHANGELOG
 // =========
+
+// == 1.3.1 ==
+// - use prefixed markdown reader function
+// - when reading strip any license lines causing breakage
+// - update to color picker alpha library (3.0.4)
+// - added text domain to translation wrappers (for replacing)
 
 // == 1.3.0 ==
 // - fix for possible page/post options conflict
