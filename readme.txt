@@ -1,12 +1,12 @@
-=== Stream Player by netmix® ===
+=== Stream Player ===
 Contributors: tonyzeoli, majick
 Donate link: https://netmix.co/donate
 Tags: player, stream, audio, radio, broadcast
-Requires at least: 4.0
-Tested up to: 6.4.3
-Stable tag: 2.5.10
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Requires at least: 4.0
+Tested up to: 6.7
+Stable tag: 2.5.9.5
 
 Stream Player gives you the ultimate power: to stream a broadcast on your website!
 
@@ -43,7 +43,15 @@ Stream Player uses the Amplitude and jPlayer scripts to play audio. In the that 
 
 == Changelog ==
 
-= 2.5.10 =
+= 2.5.9.3 =
+* Updated: Freemius SDK (2.8.1)
+* Updated: reader.php with prefixed reader functions
+* Updated: Plugin Panel (1.3.1) with new reader function
+* Updated: Color Picker Alpha Library (3.0.4)
+* Updated: Howler Library (2.2.4)
+* Improved: use wp_kses on player widget output
+
+= 2.5.9.2 =
 * Updated: Freemius SDK (2.8.0)
 * Updated: reader.php with prefixed reader functions
 * Updated: Plugin Panel (1.3.1) with new reader function

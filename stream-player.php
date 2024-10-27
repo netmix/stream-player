@@ -6,12 +6,12 @@ Plugin Name: Stream Player
 Plugin URI: https://radiostation.pro/stream-player/
 Description: Adds an advanced Streaming Audio Player your site.
 Author: Tony Hayes, Tony Zeoli
-Version: 2.5.9.3
+Version: 2.5.9.5
+License: GPLv2 or later
 Requires at least: 4.0.0
 Text Domain: stream-player
 Domain Path: /languages
 Author URI: https://netmix.com/
-GitHub Plugin URI: netmix/stream-player
 
 */
 
@@ -74,7 +74,7 @@ define( 'STREAM_PLAYER_PRO_URL', 'https://radiostation.pro/stream-player-pro/' )
 // -----------------------
 if ( !defined( 'STREAM_PLAYER_DEBUG' ) ) {
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	$sp_debug = ( isset( $_REQUEST['sp-debug'] ) && ( '1' == sanitize_text_field( $_REQUEST['sp-debug'] ) ) ) ? true : false;
+	$sp_debug = ( isset( $_REQUEST['sp-debug'] ) && ( '1' == sanitize_text_field( wp_unslash( $_REQUEST['sp-debug'] ) ) ) ) ? true : false;
 	define( 'STREAM_PLAYER_DEBUG', $sp_debug );
 }
 
@@ -204,6 +204,18 @@ function stream_player_init() {
 	load_plugin_textdomain( 'stream-player', false, STREAM_PLAYER_DIR . '/languages' );
 }
 
+// -------------------------
+// Filter Freemius Load Path
+// -------------------------
+// 2.5.9.3: added for move of Freemius directory
+add_filter( 'freemius_load_path', 'stream_player_freemius_load_path', 10, 3 );
+function stream_player_freemius_load_path( $freemius_path, $namespace, $args ) {
+	if ( 'stream_player' == $namespace ) {
+		$freemius_path = dirname( __FILE__ ) . '/vendor/freemius/start.php';
+	}
+	return $freemius_path;
+}
+
 // --------------------------------
 // Filter Freemius Plugin Icon Path
 // --------------------------------
@@ -232,13 +244,14 @@ function stream_player_add_pricing_path_filter() {
 	}
 }
 
-// ------------------------
-// Pricing Page Path Filter
-// ------------------------
+// ---------------------------------
+// Filter Freemius Pricing Page Path
+// ---------------------------------
 // 2.5.0: added for Freemius Pricing Page v2
+// 2.5.9.3: added vendor subdirectory to Freemius pricing path
 function stream_player_pricing_page_path( $default_pricing_js_path ) {
 	$suffix = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) || STREAM_PLAYER_DEBUG ? '' : '.min';
-	return STREAM_PLAYER_DIR . '/freemius-pricing/freemius-pricing' . $suffix . '.js';
+	return STREAM_PLAYER_DIR . '/vendor/freemius-pricing/freemius-pricing' . $suffix . '.js';
 }
 
 

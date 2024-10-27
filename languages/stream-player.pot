@@ -1,0 +1,913 @@
+# Copyright (C) 2024 Stream Player
+# This file is distributed under the same license as the Stream Player package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Stream Player 2.5.9.5\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/stream-player\n"
+"POT-Creation-Date: 2024-10-27 04:49:20+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2024-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+
+#: loader.php:1443
+msgid "Plugin Name"
+msgstr ""
+
+#: loader.php:1445
+msgid "Requires at least"
+msgstr ""
+
+#: loader.php:1445 loader.php:1446
+msgid "WordPress"
+msgstr ""
+
+#: loader.php:1446
+msgid "Tested up to"
+msgstr ""
+
+#: loader.php:1448
+msgid "Stable Tag"
+msgstr ""
+
+#: loader.php:1450
+msgid "Contributors"
+msgstr ""
+
+#: loader.php:1476
+msgid "Extra Notes"
+msgstr ""
+
+#. Translators: plugin title, user name, site link, freemius link
+
+#: loader.php:1696
+msgid "If you want to more easily access support and feedback for this plugins features and functionality, %1$s can connect your user, %2$s at %3$s, to %4$s"
+msgstr ""
+
+#: loader.php:1780 stream-player-admin.php:144 stream-player-admin.php:147
+msgid "Settings"
+msgstr ""
+
+#: loader.php:1798
+msgid "Upgrade"
+msgstr ""
+
+#: loader.php:1806
+msgid "Pro Details"
+msgstr ""
+
+#: loader.php:1820
+msgid "Add Ons"
+msgstr ""
+
+#: loader.php:1888
+msgid "Notices"
+msgstr ""
+
+#: loader.php:2017
+msgid "by"
+msgstr ""
+
+#: loader.php:2027
+msgid "Plugin Homepage"
+msgstr ""
+
+#: loader.php:2027
+msgid "Home"
+msgstr ""
+
+#: loader.php:2031
+msgid "View Plugin"
+msgstr ""
+
+#: loader.php:2031
+msgid "Readme"
+msgstr ""
+
+#: loader.php:2034
+msgid "Plugin Documentation"
+msgstr ""
+
+#: loader.php:2034
+msgid "Docs"
+msgstr ""
+
+#: loader.php:2037
+msgid "Plugin Support"
+msgstr ""
+
+#: loader.php:2037
+msgid "Support"
+msgstr ""
+
+#: loader.php:2040
+msgid "Plugin Development"
+msgstr ""
+
+#: loader.php:2040
+msgid "Dev"
+msgstr ""
+
+#: loader.php:2088
+msgid "Rate on WordPress.Org"
+msgstr ""
+
+#: loader.php:2105 stream-player.php:129
+msgid "Share the Plugin Love"
+msgstr ""
+
+#: loader.php:2122 stream-player.php:131
+msgid "Support this Plugin"
+msgstr ""
+
+#: loader.php:2142
+msgid "Settings Updated."
+msgstr ""
+
+#: loader.php:2144
+msgid "Error! Settings NOT Updated."
+msgstr ""
+
+#: loader.php:2146
+msgid "Settings Reset!"
+msgstr ""
+
+#: loader.php:2323
+msgid "General"
+msgstr ""
+
+#: loader.php:2415
+msgid "Reset Settings"
+msgstr ""
+
+#: loader.php:2417
+msgid "Save Settings"
+msgstr ""
+
+#: loader.php:2604
+msgid "Use Ctrl and Click to Select"
+msgstr ""
+
+#: loader.php:2643
+msgid "Premium Feature."
+msgstr ""
+
+#: loader.php:2645
+msgid "Upgrade Now"
+msgstr ""
+
+#: loader.php:2654
+msgid "Details"
+msgstr ""
+
+#: loader.php:2657
+msgid "Coming soon in Pro version!"
+msgstr ""
+
+#: loader.php:2979
+msgid "Add Image"
+msgstr ""
+
+#: loader.php:2987
+msgid "Remove Image"
+msgstr ""
+
+#: loader.php:3067
+msgid "Are you sure you want to reset to default settings?"
+msgstr ""
+
+#: loader.php:3108
+msgid "Are you sure you want to remove this image?"
+msgstr ""
+
+#: options.php:24
+msgid "Streaming URL"
+msgstr ""
+
+#: options.php:26
+msgid "Enter the Streaming URL for your Stream."
+msgstr ""
+
+#: options.php:35
+msgid "Streaming Format"
+msgstr ""
+
+#: options.php:37
+msgid "Select streaming format for streaming URL."
+msgstr ""
+
+#: options.php:46
+msgid "Fallback Stream URL"
+msgstr ""
+
+#: options.php:48
+msgid "Enter an alternative Streaming URL for Player fallback."
+msgstr ""
+
+#: options.php:57
+msgid "Fallback Format"
+msgstr ""
+
+#: options.php:59
+msgid "Select streaming fallback for fallback URL."
+msgstr ""
+
+#: options.php:69
+msgid "Stream Title"
+msgstr ""
+
+#: options.php:71
+msgid "The name of your Stream."
+msgstr ""
+
+#: options.php:79
+msgid "Display Stream Title"
+msgstr ""
+
+#: options.php:82
+msgid "Display your Stream Title in Player by default."
+msgstr ""
+
+#: options.php:90
+msgid "Stream Image"
+msgstr ""
+
+#: options.php:92
+msgid "Add a logo image for your Stream. Please ensure image is square before uploading. Recommended size 256 x 256"
+msgstr ""
+
+#: options.php:100
+msgid "Display Stream Image"
+msgstr ""
+
+#: options.php:103
+msgid "Display your Stream Image in Player by default."
+msgstr ""
+
+#: options.php:118
+msgid "Player Defaults Note"
+msgstr ""
+
+#: options.php:119
+msgid "Note that you can override these defaults in specific Player Widgets."
+msgstr ""
+
+#: options.php:127
+msgid "Player Script"
+msgstr ""
+
+#: options.php:130 options.php:145 widgets/class-stream-player-widget.php:124
+msgid "jPlayer"
+msgstr ""
+
+#: options.php:131 options.php:146 widgets/class-stream-player-widget.php:123
+msgid "Howler"
+msgstr ""
+
+#: options.php:132 options.php:147 widgets/class-stream-player-widget.php:122
+msgid "Amplitude"
+msgstr ""
+
+#: options.php:134
+msgid "Default audio script to use for playback in the Player."
+msgstr ""
+
+#: options.php:142
+msgid "Fallback Scripts"
+msgstr ""
+
+#: options.php:149
+msgid "Enabled fallback audio scripts to try when the default Player script fails."
+msgstr ""
+
+#: options.php:157
+msgid "Default Player Theme"
+msgstr ""
+
+#: options.php:160 widgets/class-stream-player-widget.php:195
+msgid "Light"
+msgstr ""
+
+#: options.php:161 widgets/class-stream-player-widget.php:196
+msgid "Dark"
+msgstr ""
+
+#: options.php:163
+msgid "Default Player Controls theme style."
+msgstr ""
+
+#: options.php:171
+msgid "Default Player Buttons"
+msgstr ""
+
+#: options.php:174
+msgid "Circular Buttons"
+msgstr ""
+
+#: options.php:175
+msgid "Rounded Buttons"
+msgstr ""
+
+#: options.php:176
+msgid "Square Buttons"
+msgstr ""
+
+#: options.php:178
+msgid "Default Player Buttons shape style."
+msgstr ""
+
+#: options.php:186 widgets/class-stream-player-widget.php:146
+msgid "Volume Controls"
+msgstr ""
+
+#: options.php:189 player/radio-player.php:420
+msgid "Volume Slider"
+msgstr ""
+
+#: options.php:190
+msgid "Volume Plus / Minus"
+msgstr ""
+
+#: options.php:191
+msgid "Mute Volume Toggle"
+msgstr ""
+
+#: options.php:192
+msgid "Maximize Volume"
+msgstr ""
+
+#: options.php:194
+msgid "Which volume controls to display in the Player by default."
+msgstr ""
+
+#: options.php:202
+msgid "Player Debug Mode"
+msgstr ""
+
+#: options.php:205
+msgid "Output player debug information in browser javascript console."
+msgstr ""
+
+#: options.php:216
+msgid "Playing Icon Highlight Color"
+msgstr ""
+
+#: options.php:218
+msgid "Default highlight color to use for Play button icon when playing."
+msgstr ""
+
+#: options.php:227
+msgid "Control Icons Highlight Color"
+msgstr ""
+
+#: options.php:229
+msgid "Default highlight color to use for Control button icons when active."
+msgstr ""
+
+#: options.php:238
+msgid "Volume Knob Color"
+msgstr ""
+
+#: options.php:240
+msgid "Default Knob Color for Player Volume Slider."
+msgstr ""
+
+#: options.php:249
+msgid "Volume Track Color"
+msgstr ""
+
+#: options.php:251
+msgid "Default Track Color for Player Volume Slider."
+msgstr ""
+
+#: options.php:262 widgets/class-stream-player-widget.php:137
+msgid "Player Start Volume"
+msgstr ""
+
+#: options.php:267
+msgid "Initial volume for when the Player starts playback."
+msgstr ""
+
+#: options.php:275
+msgid "Single Player at Once"
+msgstr ""
+
+#: options.php:278
+msgid "Stop any existing Players on the page or in other windows or tabs when a Player is started."
+msgstr ""
+
+#: options.php:286
+msgid "Autoresume Playback"
+msgstr ""
+
+#: options.php:289
+msgid "Attempt to resume playback if visitor was playing. Only triggered when the user first interacts with the page."
+msgstr ""
+
+#: options.php:299
+msgid "Popup Player Button"
+msgstr ""
+
+#: options.php:302
+msgid "Add button to open Popup Player in separate window."
+msgstr ""
+
+#: options.php:318
+msgid "Bar Defaults Note"
+msgstr ""
+
+#: options.php:319
+msgid "The Bar Player uses the default configurations set above."
+msgstr ""
+
+#: options.php:320
+msgid "You can override these in specific Player Widgets."
+msgstr ""
+
+#: options.php:328
+msgid "Sitewide Player Bar"
+msgstr ""
+
+#: options.php:331
+msgid "No Player Bar"
+msgstr ""
+
+#: options.php:332
+msgid "Top Player Bar"
+msgstr ""
+
+#: options.php:333
+msgid "Bottom Player Bar"
+msgstr ""
+
+#: options.php:337
+msgid "Add a fixed position Player Bar which displays Sitewide."
+msgstr ""
+
+#: options.php:347
+msgid "Player Bar Height"
+msgstr ""
+
+#: options.php:351
+msgid "Set the height of the Sitewide Player Bar in pixels."
+msgstr ""
+
+#: options.php:358
+msgid "Fade In Player Bar"
+msgstr ""
+
+#: options.php:363
+msgid "Number of milliseconds after Page load over which to fade in Player Bar. Use 0 for instant display."
+msgstr ""
+
+#: options.php:372
+msgid "Bar Player Text Color"
+msgstr ""
+
+#: options.php:374
+msgid "Text color for the fixed position Sitewide Bar Player."
+msgstr ""
+
+#: options.php:383
+msgid "Bar Player Background Color"
+msgstr ""
+
+#: options.php:385
+msgid "Background color for the fixed position Sitewide Bar Player."
+msgstr ""
+
+#: options.php:396
+msgid "Continuous Playback"
+msgstr ""
+
+#: options.php:399
+msgid "Uninterrupted Sitewide Bar playback while user is navigating between pages! Pages are loaded in background and faded in while Player Bar persists."
+msgstr ""
+
+#: options.php:408
+msgid "Page Fade Time"
+msgstr ""
+
+#: options.php:413
+msgid "Number of milliseconds over which to fade in new Pages (when continuous playback is enabled.) Use 0 for instant display."
+msgstr ""
+
+#: options.php:422
+msgid "Page Load Timeout"
+msgstr ""
+
+#: options.php:427
+msgid "Number of milliseconds to wait for new Page to load before fading in anyway (when continuous playback is enabled.)"
+msgstr ""
+
+#: options.php:438
+msgid "Display Now Playing"
+msgstr ""
+
+#: options.php:443
+msgid "Display the currently playing song in the Player Bar, if a supported metadata format is available. (Icy Meta, Icecast, Shoutcast 1/2, Current Playlist)"
+msgstr ""
+
+#: options.php:451
+msgid "Metadata URL"
+msgstr ""
+
+#: options.php:455
+msgid "Now playing metadata is normally retrieved via the Stream URL. Use this setting if you need to provide an alternative metadata location."
+msgstr ""
+
+#: options.php:462
+msgid "Track Animation"
+msgstr ""
+
+#: options.php:465
+msgid "No Animation"
+msgstr ""
+
+#: options.php:466
+msgid "Left to Right Ticker"
+msgstr ""
+
+#: options.php:467
+msgid "Right to Left Ticker"
+msgstr ""
+
+#: options.php:468
+msgid "Back and Forth"
+msgstr ""
+
+#: options.php:472
+msgid "How to animate the currently playing track display."
+msgstr ""
+
+#: options.php:480
+msgid "Stream"
+msgstr ""
+
+#: options.php:481
+msgid "Player"
+msgstr ""
+
+#: options.php:482
+msgid "Bar"
+msgstr ""
+
+#: options.php:487
+msgid "Source"
+msgstr ""
+
+#: options.php:488
+msgid "Channel"
+msgstr ""
+
+#: options.php:489
+msgid "Basic Defaults"
+msgstr ""
+
+#: options.php:490
+msgid "Player Colors"
+msgstr ""
+
+#: options.php:491
+msgid "Advanced Defaults"
+msgstr ""
+
+#: options.php:492
+msgid "Bar Display"
+msgstr ""
+
+#: options.php:493
+msgid "Persistent Playback"
+msgstr ""
+
+#: options.php:494
+msgid "Metadata Display"
+msgstr ""
+
+#: player/radio-player.php:348
+msgid "Station Logo Image"
+msgstr ""
+
+#: player/radio-player.php:369
+msgid "Station Name"
+msgstr ""
+
+#: player/radio-player.php:401
+msgid "Play Radio Stream"
+msgstr ""
+
+#: player/radio-player.php:411 widgets/class-stream-player-widget.php:149
+msgid "Mute"
+msgstr ""
+
+#: player/radio-player.php:415
+msgid "Volume Down"
+msgstr ""
+
+#: player/radio-player.php:425
+msgid "Volume Up"
+msgstr ""
+
+#: player/radio-player.php:428 widgets/class-stream-player-widget.php:150
+msgid "Max"
+msgstr ""
+
+#: player/radio-player.php:452
+msgid "Show Title"
+msgstr ""
+
+#: player/radio-player.php:458
+msgid "Show Logo Image"
+msgstr ""
+
+#: stream-player-admin.php:125
+msgid "You do not have permissions to access that page."
+msgstr ""
+
+#: stream-player-admin.php:140 stream-player-admin.php:526
+#: stream-player-admin.php:611 stream-player-admin.php:1088
+#: stream-player.php:122
+msgid "Stream Player"
+msgstr ""
+
+#: stream-player-admin.php:150
+msgid "Documentation"
+msgstr ""
+
+#: stream-player-admin.php:150
+msgid "Help"
+msgstr ""
+
+#: stream-player-admin.php:265
+msgid "Back to Documentation Index"
+msgstr ""
+
+#: stream-player-admin.php:453 stream-player-admin.php:531
+msgid "Take a moment to Update for a better experience. In this update"
+msgstr ""
+
+#: stream-player-admin.php:458
+msgid "Read full update details."
+msgstr ""
+
+#: stream-player-admin.php:525
+msgid "A new version of"
+msgstr ""
+
+#: stream-player-admin.php:527
+msgid "is available."
+msgstr ""
+
+#: stream-player-admin.php:535
+msgid "Full update details."
+msgstr ""
+
+#: stream-player-admin.php:544
+msgid "Update Now"
+msgstr ""
+
+#: stream-player-admin.php:547 stream-player-admin.php:635
+msgid "Full Update Details"
+msgstr ""
+
+#: stream-player-admin.php:560 stream-player-admin.php:656
+#: stream-player-admin.php:996
+msgid "Dismiss this Notice"
+msgstr ""
+
+#: stream-player-admin.php:612
+msgid "Update Notice"
+msgstr ""
+
+#: stream-player-admin.php:618
+msgid "Thanks for Updating! You can enjoy these improvements now"
+msgstr ""
+
+#: stream-player-admin.php:643
+msgid "Plugin Settings"
+msgstr ""
+
+#: stream-player-admin.php:939
+msgid "STream Player Pro Launch Discount!"
+msgstr ""
+
+#: stream-player-admin.php:941
+msgid "We are thrilled to announce the upcoming launch of Radio Station PRO"
+msgstr ""
+
+#: stream-player-admin.php:942 stream-player-admin.php:950
+msgid "Jam-packed with new features to \"level up\" your Station's online presence."
+msgstr ""
+
+#: stream-player-admin.php:943
+msgid "During the launch"
+msgstr ""
+
+#: stream-player-admin.php:943 stream-player-admin.php:951
+msgid "we are offering 30% discount to existing Stream Player users!"
+msgstr ""
+
+#: stream-player-admin.php:944
+msgid "Sign up to the exclusive launch list to receive your discount code when we go LIVE."
+msgstr ""
+
+#: stream-player-admin.php:947
+msgid "Stream Player PRO Launch is LIVE!"
+msgstr ""
+
+#: stream-player-admin.php:949
+msgid "The long anticipated moment has arrived. The doors are open to get PRO"
+msgstr ""
+
+#: stream-player-admin.php:951
+msgid "Remember"
+msgstr ""
+
+#: stream-player-admin.php:953
+msgid "Sign up here to receive your exclusive launch discount code."
+msgstr ""
+
+#: stream-player-admin.php:969
+msgid "Yes, I'm in!"
+msgstr ""
+
+#: stream-player-admin.php:975
+msgid "Go PRO"
+msgstr ""
+
+#: stream-player-admin.php:982
+msgid "Thanks, already done."
+msgstr ""
+
+#: stream-player-admin.php:1090
+msgid "Stay tuned! Subscribe to Stream Player's"
+msgstr ""
+
+#: stream-player-admin.php:1092
+msgid "Plugin Updates and Announcements List"
+msgstr ""
+
+#: stream-player-admin.php:1093
+msgid "Your email address"
+msgstr ""
+
+#: stream-player.php:127
+msgid "Rate on WordPress.org"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:18
+msgid "Stream Player Stream Player."
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:20
+msgid "(Stream Player) Stream Player"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:64
+msgid "Player Content"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:69
+msgid "Widget Title"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:77
+msgid "Stream or File URL"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:80
+msgid "Leave blank to use default stream URL."
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:86
+msgid "Player Station Text"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:89
+msgid "Empty for default, 0 for none."
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:97
+#: widgets/class-stream-player-widget.php:101
+msgid "Display Station Image"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:100
+#: widgets/class-stream-player-widget.php:121
+#: widgets/class-stream-player-widget.php:194
+#: widgets/class-stream-player-widget.php:214
+msgid "Plugin Setting"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:102
+msgid "Do Not Display Image"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:113
+msgid "Player Options"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:118
+msgid "Default Player Script"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:147
+msgid "Slider"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:148
+msgid "Up/Down"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:158
+msgid "Use as the default Player instance."
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:164
+msgid "Popup Player button available in Pro."
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:165
+#: widgets/class-stream-player-widget.php:234
+#: widgets/class-stream-player-widget.php:244
+msgid "Upgrade to Pro"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:166
+#: widgets/class-stream-player-widget.php:235
+#: widgets/class-stream-player-widget.php:245
+msgid "More Details"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:170
+msgid "Player Styles"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:175
+msgid "Player Widget Layout"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:178
+msgid "Vertical (Stacked)"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:179
+msgid "Horizontal (Inline)"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:191
+msgid "Player Theme Style"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:211
+msgid "Buttons Style"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:215
+msgid "Circular"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:216
+msgid "Rounded"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:217
+msgid "Square"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:231
+msgid "[Pro] Color Options"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:233
+msgid "Color options available in Pro."
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:240
+msgid "[Pro] Advanced Options"
+msgstr ""
+
+#: widgets/class-stream-player-widget.php:242
+msgid "Advanced options available in Pro."
+msgstr ""
+#. Plugin Name of the plugin/theme
+msgid "Stream Player"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "https://radiostation.pro/stream-player/"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid "Adds an advanced Streaming Audio Player your site."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "Tony Hayes, Tony Zeoli"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "https://netmix.com/"
+msgstr ""

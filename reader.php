@@ -3460,7 +3460,8 @@ if ( !class_exists( 'stream_player_readme_parser' ) ) {
 		}
 
 		function sanitize_text( $text ) { // not fancy
-			$text = strip_tags( $text );
+			// $text = strip_tags( $text );
+			$text = wp_strip_all_tags( $text );
 			$text = esc_html( $text );
 			$text = trim( $text );
 			return $text;
