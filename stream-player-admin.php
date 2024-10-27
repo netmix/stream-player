@@ -55,7 +55,7 @@ function stream_player_enqueue_admin_scripts() {
 
 	// 2.5.0: maybe enqueue pricing page styles
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	if ( isset( $_REQUEST['page'] ) && ( 'stream-player-pricing' == sanitize_text_field( $_REQUEST['page'] ) ) ) {
+	if ( isset( $_REQUEST['page'] ) && ( 'stream-player-pricing' == sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ) ) ) {
 		$style_url = plugins_url( 'freemius-pricing/freemius-pricing.css', STREAM_PLAYER_FILE );
 		$style_path = STREAM_PLAYER_DIR . '/freemius-pricing/freemius-pricing.css';
 		$version = filemtime( $style_path );
@@ -119,7 +119,7 @@ function stream_player_plugin_page_links( $links, $file ) {
 add_action( 'admin_init', 'stream_player_settings_cap_check' );
 function stream_player_settings_cap_check() {
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	if ( isset( $_REQUEST['page'] ) && ( STREAM_PLAYER_SLUG == sanitize_text_field( $_REQUEST['page'] ) ) ) {
+	if ( isset( $_REQUEST['page'] ) && ( STREAM_PLAYER_SLUG == sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ) ) ) {
 		$settingscap = apply_filters( 'stream_player_settings_capability', 'manage_options' );
 		if ( !current_user_can( $settingscap ) ) {
 			wp_die( esc_html( __( 'You do not have permissions to access that page.', 'stream-player' ) ) );
@@ -161,12 +161,12 @@ function stream_player_settings_page_redirect() {
 
 	// --- bug out if not plugin settings page ---
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	if ( !isset( $_REQUEST['page'] ) || ( STREAM_PLAYER_SLUG != sanitize_text_field( $_REQUEST['page'] ) ) ) {
+	if ( !isset( $_REQUEST['page'] ) || ( STREAM_PLAYER_SLUG != sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ) ) ) {
 		return;
 	}
 
 	// --- check if link is for options-general.php ---
-	if ( strstr( sanitize_text_field( $_SERVER['REQUEST_URI'] ), '/options-general.php' ) ) {
+	if ( isset( $_SERVER['REQUEST_URI'] ) && strstr( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ), '/options-general.php' ) ) {
 
 		// --- redirect to plugin settings page (admin.php) ---
 		$url = add_query_arg( 'page', STREAM_PLAYER_SLUG, admin_url( 'admin.php' ) );
@@ -252,6 +252,7 @@ function stream_player_parse_doc( $id ) {
 	} else {
 		$path = STREAM_PLAYER_DIR . '/docs/' . $id . '.md';
 	}
+	// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 	$contents = file_get_contents( $path );
 
 	// --- strip top level heading to prevent duplicate title ---
@@ -469,7 +470,7 @@ add_action( 'admin_notices', 'stream_player_admin_update_notice' );
 function stream_player_admin_update_notice() {
 	// --- do not display on settings page ---
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	if ( isset( $_GET['page'] ) && ( STREAM_PLAYER_SLUG === sanitize_text_field( $_GET['page'] ) ) ) {
+	if ( isset( $_GET['page'] ) && ( STREAM_PLAYER_SLUG === sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) ) {
 		return;
 	}
 	stream_player_update_notice();
@@ -495,7 +496,7 @@ function stream_player_update_notice() {
 
 	// --- ignore if updating now ---
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	if ( isset( $_GET['action'] ) && ( 'upgrade-plugin' === sanitize_text_field( $_GET['action'] ) ) && isset( $_GET['plugin'] ) && ( $notice['plugin_file'] === sanitize_text_field( $_GET['plugin'] ) ) ) {
+	if ( isset( $_GET['action'] ) && ( 'upgrade-plugin' === sanitize_text_field( wp_unslash( $_GET['action'] ) ) ) && isset( $_GET['plugin'] ) && ( $notice['plugin_file'] === sanitize_text_field( wp_unslash( $_GET['plugin'] ) ) ) ) {
 		return;
 	}
 
@@ -637,7 +638,7 @@ function stream_player_notice() {
 
 				// --- link to settings page ---
 				// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				if ( !isset( $_REQUEST['page'] ) || ( STREAM_PLAYER_SLUG !== sanitize_text_field( $_REQUEST['page'] ) ) ) {
+				if ( !isset( $_REQUEST['page'] ) || ( STREAM_PLAYER_SLUG !== sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ) ) ) {
 					$settings_url = add_query_arg( 'page', STREAM_PLAYER_SLUG, admin_url( 'admin.php' ) );
 					echo '<a class="button button-primary" href="' . esc_url( $settings_url ) . '">' . esc_html( __( 'Plugin Settings', 'stream-player' ) ) . '</a>' . "\n";
 				}
@@ -679,6 +680,7 @@ function stream_player_get_notices() {
 	if ( file_exists( $parser ) && file_exists( $readme ) ) {
 
 		// --- get readme contents ---
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$contents = file_get_contents( $readme );
 
 		// --- fix to parser failing on license lines ---
@@ -732,12 +734,13 @@ function stream_player_get_notices() {
 // ---------------------
 add_action( 'wp_ajax_stream_player_notice_dismiss', 'stream_player_notice_dismiss' );
 function stream_player_notice_dismiss() {
+	$success = '0';
 	if ( current_user_can( 'manage_options' ) || current_user_can( 'update_plugins' ) ) {
-		if ( wp_verify_nonce( sanitize_text_field( $_REQUEST['nonce'] ), 'stream_player_notice' ) ) {
+		if ( isset( $_REQUEST['nonce']) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['nonce'] ) ), 'stream_player_notice' ) ) {
 		
 			if ( isset( $_GET['notice'] ) ) {
 
-				$notice = absint( $_GET['notice'] );
+				$notice = absint( wp_unslash( $_GET['notice'] ) );
 				if ( $notice < 0 ) {
 					return;
 				}
@@ -749,9 +752,11 @@ function stream_player_notice_dismiss() {
 				update_option( 'stream_player_read_notices', $notices );
 				// echo "<script>parent.document.getElementById('stream-player-notice-" . esc_js( $notice ) . "').style.display = 'none';</script>" . "\n";
 
+				$success = '1';
+
 			} elseif ( isset( $_GET['upgrade'] ) ) {
 
-				$upgrade = absint( $_GET['upgrade'] );
+				$upgrade = absint( wp_unslash( $_GET['upgrade'] ) );
 				if ( $upgrade < 0 ) {
 					return;
 				}
@@ -762,14 +767,15 @@ function stream_player_notice_dismiss() {
 				$upgrades[$upgrade] = '1';
 				update_option( 'stream_player_read_upgrades', $upgrades );
 				// echo "<script>parent.document.getElementById('stream-player-update-" . esc_js( $upgrade ) . "').style.display = 'none';</script>" . "\n";
-
+				
+				$success = '1';
 			}
 		}
 	}
 
 	// --- send success data ---
-	$success = array( 'success' => '1' );
-	wp_send_json( $success , 200 );
+	$response = array( 'success' => $success );
+	wp_send_json( $response, 200 );
 }
 
 
@@ -934,7 +940,7 @@ function stream_player_launch_offer_content( $dismissable = true, $prelaunch = f
 			echo '<p style="font-size: 16px; line-height: 24px; margin-top: 0;">' . "\n";
 				echo esc_html( __( 'We are thrilled to announce the upcoming launch of Radio Station PRO', 'stream-player' ) ) . ' !!!<br>' . "\n";
 				echo esc_html( __( 'Jam-packed with new features to "level up" your Station\'s online presence.', 'stream-player' ) ) . '<br>' . "\n";
-				echo esc_html( __( 'During the launch,' ) ) . ' <b>' . esc_html( __( 'we are offering 30% discount to existing Stream Player users!', 'stream-player' ) ) . '</b><br>' . "\n";
+				echo esc_html( __( 'During the launch', 'stream-player' ) ) . ', <b>' . esc_html( __( 'we are offering 30% discount to existing Stream Player users!', 'stream-player' ) ) . '</b><br>' . "\n";
 				echo esc_html( __( 'Sign up to the exclusive launch list to receive your discount code when we go LIVE.', 'stream-player' ) ) . "\n";
 			echo '</p>' . "\n";
 		} else {
@@ -942,7 +948,7 @@ function stream_player_launch_offer_content( $dismissable = true, $prelaunch = f
 			echo '<p style="font-size: 16px; line-height: 24px; margin-top: 0;">' . "\n";
 				echo esc_html( __( 'The long anticipated moment has arrived. The doors are open to get PRO', 'stream-player' ) ) . ' !!!<br>' . "\n";
 				echo esc_html( __( 'Jam-packed with new features to "level up" your Station\'s online presence.', 'stream-player' ) ) . '<br>' . "\n";
-				echo esc_html( __( 'Remember,' ) ) . ' <b>' . esc_html( __( 'we are offering 30% discount to existing Stream Player users!', 'stream-player' ) ) . '</b><br>' . "\n";
+				echo esc_html( __( 'Remember', 'stream-player' ) ) . ', <b>' . esc_html( __( 'we are offering 30% discount to existing Stream Player users!', 'stream-player' ) ) . '</b><br>' . "\n";
 				echo '<a href="' . esc_url( STREAM_PLAYER_PRO_URL ) . 'plugin-launch-discount/" target="_blank">' . "\n";
 					echo esc_html( __( 'Sign up here to receive your exclusive launch discount code.', 'stream-player' ) ) . "\n";
 				echo '</a>' . "\n";
@@ -1005,7 +1011,7 @@ function stream_player_launch_offer_dismiss() {
 		exit;
 	}
 
-	if ( !wp_verify_nonce( sanitize_text_field( $_REQUEST['nonce'] ), 'stream_player_notice' ) ) {
+	if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['nonce'] ) ), 'stream_player_notice' ) ) {
 		exit;
 	}
 
@@ -1023,7 +1029,7 @@ function stream_player_launch_offer_dismiss() {
 
 	// --- maybe set option for accepted ---
 	$accepted = 0;
-	if ( isset( $_REQUEST['accept'] ) && ( '1' == sanitize_text_field( $_REQUEST['accepted'] ) ) ) {
+	if ( isset( $_REQUEST['accepted'] ) && ( '1' == sanitize_text_field( wp_unslash( $_REQUEST['accepted'] ) ) ) ) {
 		$accepted = 1;
 		$user_ids = get_option( 'stream_player_launch_offer_accepted' );
 		if ( !$user_ids || !is_array( $user_ids ) ) {
@@ -1101,12 +1107,14 @@ function stream_player_mailchimp_form() {
 	// 2.3.0: added to record subscribers
 	// 2.5.7: modified to use AJAX via jquery instead of iframe
 	// 2.5.10: added nonce field to submit URL
+	$admin_ajax = admin_url( 'admin-ajax.php' );
+	$nonce = wp_create_nonce( 'stream_player_subscribe' );
 	echo "<script>
 	jQuery(document).ready(function() {
-		var sp_sub_nonce = '" . esc_js( wp_create_nonce( 'stream_player_subscribe' ) ) . "';
+		var sp_sub_nonce = '" . esc_js( $nonce ) . "';
 		jQuery('#mc-embedded-button').on('click', function(e) {
 			email = document.getElementById('mce-EMAIL').value;
-			url = '" . esc_url( admin_url( 'admin-ajax.php' ) ) . "&action=stream_player_record_subscribe&nonce='+sp_sub_nonce+'&email='+encodeURIComponent(email);
+			url = '" . esc_url( $admin_ajax ) . "&action=stream_player_record_subscribe&nonce='+sp_sub_nonce+'&email='+encodeURIComponent(email);
 			jQuery.get(url, function(data) {
 				console.log('Subscribe Response:'); console.log(data);
 				if (data.success) {jQuery('#mc-embedded-subscribe-form').submit();}
@@ -1123,27 +1131,32 @@ add_action( 'wp_ajax_stream_player_record_subscribe', 'stream_player_record_subs
 function stream_player_record_subscribe() {
 
 	// 2.5.11: add sanitize_text_field to request nonce
-	if ( !wp_verify_nonce( sanitize_text_field( $_REQUEST['nonce'] ), 'stream_player_subscribe' ) ) {
-		$response = array( 'success' => '0' );
+	if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['nonce'] ) ), 'stream_player_subscribe' ) ) {
+		$success = '0';
 	} else {
 
-		$email = sanitize_email( $_GET['email'] );
-		$subscribed = get_option( 'stream_player_subscribed' );
-		if ( !$subscribed || !is_array( $subscribed ) ) {
-			add_option( 'stream_player_subscribed', array( $email ) );
-		} else {
-			$subscribed[] = $email;
-			update_option( 'stream_player_subscribed', $subscribed );
-		}
+		$email = isset( $_GET['email'] ) ? sanitize_email( wp_unslash( $_GET['email'] ) ) : false;
+		if ( $email ) {
+			$subscribed = get_option( 'stream_player_subscribed' );
+			if ( !$subscribed || !is_array( $subscribed ) ) {
+				add_option( 'stream_player_subscribed', array( $email ) );
+			} else {
+				$subscribed[] = $email;
+				update_option( 'stream_player_subscribed', $subscribed );
+			}
 
-		// --- submit form in parent window ---
-		// echo "<script>console.log('Subscription Recorded');";
-		// echo "parent.jQuery('#mc-embedded-subscribe-form').submit();</script>" . "\n";
-		// exit;
-		// 2.6.7: just return success JSON data
-		$response = array( 'success' => '1' );
+			// --- submit form in parent window ---
+			// echo "<script>console.log('Subscription Recorded');";
+			// echo "parent.jQuery('#mc-embedded-subscribe-form').submit();</script>" . "\n";
+			// exit;
+			// 2.5.9: just return success JSON data
+			$success = '1';
+		} else {
+			$success = '0';
+		}
 	}
 
+	$response = array( 'success' => $success );
 	wp_send_json( $response, 200 );
 }
 
@@ -1161,7 +1174,7 @@ function stream_player_clear_plugin_options() {
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	if ( isset( $_GET['option'] ) ) {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$option = sanitize_text_field( $_GET['option'] );
+		$option = sanitize_text_field( wp_unslash( $_GET['option'] ) );
 		if ( 'subscribed' == $option ) {
 			delete_option( 'stream_player_subscribed' );
 		} elseif ( 'notices' == $option ) {

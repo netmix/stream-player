@@ -296,10 +296,10 @@ $options = array(
 	// 2.5.0: enabled popup player button
 	'player_popup' => array(
 		'type'    => 'checkbox',
-		'label'   => __( 'Popup Player Button', 'radio-station' ),
+		'label'   => __( 'Popup Player Button', 'stream-player' ),
 		'default' => '',
 		'value'   => 'yes',
-		'helper'  => __( 'Add button to open Popup Player in separate window.', 'radio-station' ),
+		'helper'  => __( 'Add button to open Popup Player in separate window.', 'stream-player' ),
 		'tab'     => 'player',
 		'section' => 'advanced',
 		'pro'     => true,
@@ -419,7 +419,7 @@ $options = array(
 	// --- [Pro/Player] Page Load Timeout ---
 	'player_bar_timeout' => array(
 		'type'    => 'number',
-		'label'   => __( 'Page Load Timeout', 'teleporter' ),
+		'label'   => __( 'Page Load Timeout', 'stream-player' ),
 		'default' => 7000,
 		'min'     => 0,
 		'step'    => 500,
