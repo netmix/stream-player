@@ -140,7 +140,7 @@ function stream_player_block_editor_assets() {
 
 	// 2.5.0: added for script loading
 	// $js = "var stream_ajax_url = " . admin_url( 'admin-ajax.php' ) . "'; ";
-	$js = "var stream_player_script = " . plugins_url( '/player/js/radio-player.js', STREAM_PLAYER_FILE ) . "';";
+	$js = "var stream_player_script = " . esc_js( plugins_url( '/player/js/radio-player.js', STREAM_PLAYER_FILE ) ) . "';";
 	wp_add_inline_script( 'stream-blockedit-js', $js, 'before' );
 
 	// --- add block control style fix inline ---
@@ -163,8 +163,8 @@ function stream_player_block_editor_assets() {
 		wp_enqueue_style( 'radio-player', $style_url, array(), $version, 'all' );
 
 		// --- enqueue player control styles inline ---
-		// note: this player library function is correct
-		$control_styles = radio_station_player_control_styles( false );
+		// $control_styles = radio_station_player_control_styles( false );
+		stream_player_control_styles( false );
 		wp_add_inline_style( 'radio-player', $control_styles );
 	}
 }

@@ -3,7 +3,7 @@
 /*
 
 Plugin Name: Stream Player
-Plugin URI: https://radiostation.pro/stream-player/
+Plugin URI: https://streamplayer.pro
 Description: Adds an advanced Streaming Audio Player your site.
 Author: Tony Hayes, Tony Zeoli
 Version: 2.5.9.5
@@ -11,7 +11,7 @@ License: GPLv2 or later
 Requires at least: 4.0.0
 Text Domain: stream-player
 Domain Path: /languages
-Author URI: https://netmix.com/
+Author URI: https://netmix.com
 
 */
 
@@ -225,8 +225,9 @@ function stream_player_freemius_plugin_url_path( $default_path ) {
 	if ( file_exists( $icon_path ) ) {
 		return $icon_path;
 	}
+	// 2.5.10: fix to mismatched variable default_path
 	$icon_path = STREAM_PLAYER_DIR . '/images/' . STREAM_PLAYER_SLUG . '.png';
-	if ( file_exists( $default_path ) ) {
+	if ( file_exists( $icon_path ) ) {
 		return $icon_path;
 	}
 	return $default_path;
@@ -368,7 +369,7 @@ function stream_player_enqueue_color_picker() {
 
 	// --- init color picker fields ---
 	$js = "jQuery(document).ready(function() {";
-	$js .= "if (jQuery('.color-picker').length) {jQuery('.color-picker').wpColorPicker();}";
+		$js .= "if (jQuery('.color-picker').length) {jQuery('.color-picker').wpColorPicker();}";
 	$js .= "});" . "\n";
 	stream_player_add_inline_script( 'wp-color-picker-a', $js );
 }

@@ -5,7 +5,7 @@
 // =================================
 
 // -------------
-// Loader v1.3.2
+// Loader v1.3.3
 // -------------
 // Note: Changelog at end of file.
 
@@ -546,6 +546,10 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 			// $noncecheck = wp_verify_nonce( sanitize_text_field( $_POST['_wpnonce'] ), $args['slug'] . '_update_settings' );
 			check_admin_referer( $args['slug'] . '_update_settings' );
 
+			// --- debug posted values ---
+			// 	1.3.?: move debug output to after check_admin_referer
+			$this->debug_posted( $settings );
+
 			// --- get plugin options and default settings ---
 			// 1.0.9: allow filtering of plugin options (eg. for Pro/Add Ons)
 			$options = $this->options;
@@ -1026,6 +1030,34 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 
 		}
 
+		// --------------------------
+		// Debug Output Posted Values
+		// --------------------------
+		function debug_posted( $settings ) {
+			if ( $this->debug ) {
+				echo '<br><b>Current Settings:</b><br>';
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions
+				echo esc_html( print_r( $settings, true ) );
+				echo '<br><br>' . "\n";
+
+				echo '<br><b>Plugin Options:</b><br>';
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions
+				echo esc_html( print_r( $this->options, true ) );
+				echo '<br><br>' . "\n";
+
+				// phpcs:ignore WordPress.Security.NonceVerification.Missing
+				if ( isset( $_POST ) ) {
+					echo '<br><b>Posted Values:</b><br>';
+					// phpcs:ignore WordPress.Security.NonceVerification.Missing
+					$posted = array_map( 'sanitize_text_field', $_POST );
+					foreach ( $posted as $key => $value ) {
+						// phpcs:ignore WordPress.PHP.DevelopmentFunctions
+						echo esc_html( $key ) . ': ' . esc_html( print_r( $value, true ) ) . '<br>' . "\n";
+					}
+				}
+			}
+		}
+			
 		// -----------------------
 		// Validate Plugin Setting
 		// -----------------------
@@ -1922,30 +1954,6 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 			$args = $this->args;
 			$namespace = $this->namespace;
 			$settings = $GLOBALS[$namespace];
-
-			// --- output debug values ---
-			if ( $this->debug ) {
-				echo '<br><b>Current Settings:</b><br>';
-				// phpcs:ignore WordPress.PHP.DevelopmentFunctions
-				echo esc_html( print_r( $settings, true ) );
-				echo '<br><br>' . "\n";
-
-				echo '<br><b>Plugin Options:</b><br>';
-				// phpcs:ignore WordPress.PHP.DevelopmentFunctions
-				echo esc_html( print_r( $this->options, true ) );
-				echo '<br><br>' . "\n";
-
-				// phpcs:ignore WordPress.Security.NonceVerification.Missing
-				if ( isset( $_POST ) ) {
-					echo '<br><b>Posted Values:</b><br>';
-					// phpcs:ignore WordPress.Security.NonceVerification.Missing
-					$posted = array_map( 'sanitize_text_field', $_POST );
-					foreach ( $posted as $key => $value ) {
-						// phpcs:ignore WordPress.PHP.DevelopmentFunctions
-						echo esc_html( $key ) . ': ' . esc_html( print_r( $value, true ) ) . '<br>' . "\n";
-					}
-				}
-			}
 
 			// --- check for animated gif icon with fallback to normal icon ---
 			// 1.0.9: fix to check if PNG file exists
@@ -3524,6 +3532,9 @@ if ( !function_exists( 'stream_player_load_prefixed_functions' ) ) {
 // =========
 // CHANGELOG
 // =========
+
+// == 1.3.3 ==
+// - move post debug output to after check_admin_referer
 
 // == 1.3.2 ==
 // - added isset and wp_unslash to $_REQUEST inputs
