@@ -3078,37 +3078,37 @@ function stream_player_control_styles( $instance ) {
 	// --- Player Colors ---
 	// 2.5.0: added for main color styling override
 	if ( isset( $colors['text'] ) && ( '' != $colors['text'] ) ) {
-		$css .= $container . " {color: " . $colors['text'] . ";}" . "\n";
+		$css .= esc_attr( $container ) . " {color: " . esc_attr( $colors['text'] ) . ";}" . "\n";
 	}
 	if ( isset( $colors['background'] ) && ( '' != $colors['background'] ) ) {
-		$css .= $container . " {background-color: " . $colors['background'] . ";}" . "\n";
+		$css .= esc_attr( $container ) . " {background-color: " . esc_attr( $colors['background'] ) . ";}" . "\n";
 	}
 
 	// --- Play Button ---
 	// 2.4.0.2: fix to glowingloading animation reference
 	$css .= "/* Playing Button */
-" . $container . ".loaded .rp-play-pause-button-bg {background-color: " . $colors['buttons'] . ";}
-" . $container . ".playing .rp-play-pause-button-bg {background-color: " . $colors['playing'] . ";}
-" . $container . ".error .rp-play-pause-button-bg {background-color: #CC0000;}
-" . $container . ".loading .rp-play-pause-button-bg {animation: glowingloading 1s infinite alternate;}
-" . $container . ".playing .rp-play-pause-button-bg, 
-" . $container . ".playing.loaded .rp-play-pause-button-bg {animation: glowingplaying 1s infinite alternate;}
+" . esc_attr( $container ) . ".loaded .rp-play-pause-button-bg {background-color: " . esc_attr( $colors['buttons'] ) . ";}
+" . esc_attr( $container ) . ".playing .rp-play-pause-button-bg {background-color: " . esc_attr( $colors['playing'] ) . ";}
+" . esc_attr( $container ) . ".error .rp-play-pause-button-bg {background-color: #CC0000;}
+" . esc_attr( $container ) . ".loading .rp-play-pause-button-bg {animation: glowingloading 1s infinite alternate;}
+" . esc_attr( $container ) . ".playing .rp-play-pause-button-bg, 
+" . esc_attr( $container ) . ".playing.loaded .rp-play-pause-button-bg {animation: glowingplaying 1s infinite alternate;}
 @keyframes glowingloading {
-	from {background-color: " . $colors['buttons'] . ";} to {background-color: " . $colors['buttons'] . "80;}
+	from {background-color: " . esc_attr( $colors['buttons'] ) . ";} to {background-color: " . esc_attr( $colors['buttons'] ) . "80;}
 }
 @keyframes glowingplaying {
-	from {background-color: " . $colors['playing'] . ";} to {background-color: " . $colors['playing'] . "C0;}
+	from {background-color: " . esc_attr( $colors['playing'] ) . ";} to {background-color: " . esc_attr( $colors['playing'] ) . "C0;}
 }" . "\n";
 
 	// --- Active Volume Buttons Color ---
 	// 2.5.0: added popup player button selector
 	$css .= "/* Volume Buttons */
-" . $container . " .rp-mute:hover, " . $container . ".muted .rp-mute, " . $container . ".muted .rp-mute:hover,
-" . $container . " .rp-volume-max:focus, " . $container . " .rp-volume-max:hover, " . $container . ".maxed .rp-volume-max,
-" . $container . " .rp-volume-up:focus, " . $container . " .rp-volume-up:hover,
-" . $container . " .rp-volume-down:focus, " . $container . " .rp-volume-down:hover,
-" . $container . " .rp-popup-button:focus, " . $container . " .rp-popup-button:hover {
-	background-color: " . $colors['buttons'] . ";
+" . esc_attr( $container ) . " .rp-mute:hover, " . esc_attr( $container ) . ".muted .rp-mute, " . esc_attr( $container ) . ".muted .rp-mute:hover,
+" . esc_attr( $container ) . " .rp-volume-max:focus, " . esc_attr( $container ) . " .rp-volume-max:hover, " . esc_attr( $container ) . ".maxed .rp-volume-max,
+" . esc_attr( $container ) . " .rp-volume-up:focus, " . esc_attr( $container ) . " .rp-volume-up:hover,
+" . esc_attr( $container ) . " .rp-volume-down:focus, " . esc_attr( $container ) . " .rp-volume-down:hover,
+" . esc_attr( $container ) . " .rp-popup-button:focus, " . esc_attr( $container ) . " .rp-popup-button:hover {
+	background-color: " . esc_attr( $colors['buttons'] ) . ";
 }" . "\n";
 
 	// --- Volume Range Input and Container ---
@@ -3117,60 +3117,60 @@ function stream_player_control_styles( $instance ) {
 	// 2.4.0.4: added no border style to range input (border added on some themes)
 	// 2.5.0: added input height 100% to fix vertical slider alignment
 	$css .= "/* Range Input */
-" . $container . " .rp-volume-controls input[type=range] {";
+" . esc_attr( $container ) . " .rp-volume-controls input[type=range] {";
 	$css .= "height: 100%; margin: 0; background-color: transparent; vertical-align: middle; -webkit-appearance: none; border: none;}
-" . $container . " .rp-volume-controls input[type=range]:focus {outline: none; box-shadow: none;}
-" . $container . " .rp-volume-controls input[type=range]::-moz-focus-inner,
-" . $container . " .rp-volume-controls input[type=range]::-moz-focus-outer {outline: none; box-shadow: none;}" . "\n";
+" . esc_attr( $container ) . " .rp-volume-controls input[type=range]:focus {outline: none; box-shadow: none;}
+" . esc_attr( $container ) . " .rp-volume-controls input[type=range]::-moz-focus-inner,
+" . esc_attr( $container ) . " .rp-volume-controls input[type=range]::-moz-focus-outer {outline: none; box-shadow: none;}" . "\n";
 
 	// --- Range Track (synced Background Div) ---
 	// 2.4.0.3: add position absolute/top on slider background (cross-browser display fix)
 	// 2.6.0: set top bottom and height to 10px for consistent display
 	$css .= "/* Range Track */
-" . $container . " .rp-volume-controls .rp-volume-slider-bg {
+" . esc_attr( $container ) . " .rp-volume-controls .rp-volume-slider-bg {
 	position: absolute; top: 10px; bottom: 10px; overflow: hidden; height: 10px; margin-left: 9px; z-index: -1; border: 1px solid rgba(128, 128, 128, 0.5); border-radius: 3px; background: rgba(128, 128, 128, 0.5);
 }
-" . $container . ".playing .rp-volume-controls .rp-volume-slider-bg {background: " . $colors['track'] . ";}
-" . $container . ".playing.muted .rp-volume-controls .rp-volume-slider-bg {background: rgba(128, 128, 128, 0.5);}" . "\n";
+" . esc_attr( $container ) . ".playing .rp-volume-controls .rp-volume-slider-bg {background: " . esc_attr( $colors['track'] ) . ";}
+" . esc_attr( $container ) . ".playing.muted .rp-volume-controls .rp-volume-slider-bg {background: rgba(128, 128, 128, 0.5);}" . "\n";
 
 	// --- Slider Range Track (Clickable Transparent) ---
 	$css .= "/* Range Track */
-" . $container . " .rp-volume-controls input[type=range]::-webkit-slider-runnable-track {height: 9px; background: transparent; -webkit-appearance: none; color: transparent}
-" . $container . " .rp-volume-controls input[type=range]::-moz-range-track {height: 9px; background: transparent; color: transparent;}
-" . $container . " .rp-volume-controls input[type=range]::-ms-track {height: 9px; color: transparent; background: transparent; border-color: transparent;}" . "\n";
+" . esc_attr( $container ) . " .rp-volume-controls input[type=range]::-webkit-slider-runnable-track {height: 9px; background: transparent; -webkit-appearance: none; color: transparent}
+" . esc_attr( $container ) . " .rp-volume-controls input[type=range]::-moz-range-track {height: 9px; background: transparent; color: transparent;}
+" . esc_attr( $container ) . " .rp-volume-controls input[type=range]::-ms-track {height: 9px; color: transparent; background: transparent; border-color: transparent;}" . "\n";
 // 2.4.0.3: remove float on range input (cross-browser display fix)
 // " . $container . " .rp-volume-controls input[type=range] {float: left; margin-top: -9px;}
 
 	// --- Slider Range Thumb ---
 	$thumb_radius = '9px';
 	$css .= "/* Range Thumb */
-" . $container . " .rp-volume-controls input[type=range]::-webkit-slider-thumb {
+" . esc_attr( $container ) . " .rp-volume-controls input[type=range]::-webkit-slider-thumb {
 	width: 18px; height: 18px; cursor: pointer; background: rgba(128, 128, 128, 1);
 	border: 1px solid rgba(128, 128, 128, 0.5); border-radius: ' . $thumb_radius . ';
 	margin-top: -4.5px; -webkit-appearance: none;
 }
-" . $container . " .rp-volume-controls input[type=range]::-moz-range-thumb {
+" . esc_attr( $container ) . " .rp-volume-controls input[type=range]::-moz-range-thumb {
 	width: 18px; height: 18px; cursor: pointer; background: rgba(128, 128, 128, 1);
 	border: 1px solid rgba(128, 128, 128, 0.5); border-radius: ' . $thumb_radius;
 }
-" . $container . " .rp-volume-controls input[type=range]::-ms-thumb {
+" . esc_attr( $container ) . " .rp-volume-controls input[type=range]::-ms-thumb {
 	width: 18px; height: 18px; cursor: pointer; background: rgba(128, 128, 128, 1);
 	border: 1px solid rgba(128, 128, 128, 0.5); border-radius: ' . $thumb_radius . '; margin-top: 0px;
 }
-" . $container . ".rounded .rp-volume-controls input[type=range]::-webkit-slider-thumb {border-radius: 5px !important;}
-" . $container . ".square .rp-volume-controls input[type=range]::-webkit-slider-thumb {border-radius: 0px !important;}
-" . $container . ".playing .rp-volume-controls input[type=range]::-webkit-slider-thumb {background: " . $colors['thumb'] . "};
-" . $container . ".playing .rp-volume-controls input[type=range]::-moz-range-thumb {background: " . $colors['thumb'] . "};
-" . $container . ".playing .rp-volume-controls input[type=range]::-ms-thumb {background: " . $colors['thumb'] . "};
-" . $container . " input[type=range]::-ms-tooltip {display: none;}
+" . esc_attr( $container ) . ".rounded .rp-volume-controls input[type=range]::-webkit-slider-thumb {border-radius: 5px !important;}
+" . esc_attr( $container ) . ".square .rp-volume-controls input[type=range]::-webkit-slider-thumb {border-radius: 0px !important;}
+" . esc_attr( $container ) . ".playing .rp-volume-controls input[type=range]::-webkit-slider-thumb {background: " . esc_attr( $colors['thumb'] ) . "};
+" . esc_attr( $container ) . ".playing .rp-volume-controls input[type=range]::-moz-range-thumb {background: " . esc_attr( $colors['thumb'] ) . "};
+" . esc_attr( $container ) . ".playing .rp-volume-controls input[type=range]::-ms-thumb {background: " . esc_attr( $colors['thumb'] ) . "};
+" . esc_attr( $container ) . " input[type=range]::-ms-tooltip {display: none;}
 @supports (-ms-ime-align:auto) {
-  " . $container . " .rp-volume-controls input[type=range] {margin: 0;}
+  " . esc_attr( $container ) . " .rp-volume-controls input[type=range] {margin: 0;}
 }" . "\n";
 
 	// --- dummy element style for thumb width ---
 	// note: since *actual* range input thumb width is hard/impossible to get with jQuery,
 	// if changing the thumb width style, override this style also for volume background to match!
-	$css .= $container . " .rp-volume-thumb {display: none; width: 18px;}" . "\n";
+	$css .= esc_attr( $container ) . " .rp-volume-thumb {display: none; width: 18px;}" . "\n";
 
 	// --- get volume control display settings ---
 	// 2.4.1.4: added volume control visibility options filter
@@ -3182,16 +3182,16 @@ function stream_player_control_styles( $instance ) {
 
 	// --- volume display styles ---
 	if ( !in_array( 'slider', $volume_controls ) ) {
-		$css .= "\n" . $container . " .rp-volume-slider-container {display: none;}" . "\n";
+		$css .= "\n" . esc_attr(  $container ) . " .rp-volume-slider-container {display: none;}" . "\n";
 	}
 	if ( !in_array( 'updown', $volume_controls ) ) {
-		$css .= "\n" . $container . " .rp-volume-up, " . $container . " .rp-volume-down {display: none;}" . "\n";
+		$css .= "\n" . esc_attr( $container ) . " .rp-volume-up, " . esc_attr( $container ) . " .rp-volume-down {display: none;}" . "\n";
 	}
 	if ( !in_array( 'mute', $volume_controls ) ) {
-		$css .= "\n" . $container . " .rp-mute {display: none;}" . "\n";
+		$css .= "\n" . esc_attr( $container ) . " .rp-mute {display: none;}" . "\n";
 	}
 	if ( !in_array( 'max', $volume_controls ) ) {
-		$css .= "\n" . $container . " .rp-volume-max {display: none;}" . "\n";
+		$css .= "\n" . esc_attr( $container ) . " .rp-volume-max {display: none;}" . "\n";
 	}
 
 	// --- filter and return ---

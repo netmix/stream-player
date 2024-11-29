@@ -1,12 +1,12 @@
 === Stream Player ===
 Contributors: tonyzeoli, majick
-Donate link: https://netmix.co/donate
+Donate link: https://netmix.org
 Tags: player, stream, audio, radio, broadcast
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 4.0
-Tested up to: 6.7
-Stable tag: 2.5.9.5
+Tested up to: 6.7.1
+Stable tag: 2.5.9.6
 
 Stream Player gives you the ultimate power: to stream a broadcast on your website!
 
@@ -42,6 +42,10 @@ Stream Player uses the Amplitude and jPlayer scripts to play audio. In the that 
 == Screenshots ==
 
 == Changelog ==
+
+= 2.5.9.6 = 
+* Updated: Freemius SDK (2.9.0)
+* Fixed: Freemius optin image URL path
 
 = 2.5.9.3 =
 * Updated: Freemius SDK (2.8.1)

@@ -53,6 +53,13 @@ function stream_player_enqueue_admin_scripts() {
 	$deps = array( 'jquery' );
 	wp_enqueue_script( 'stream-player-admin', $script_url, $deps, $version, true );
 
+	// --- register admin styles ---
+	// 2.5.10: added empty file to add styles to
+	$style_url = plugins_url( 'js/stream-player-admin.css', STREAM_PLAYER_FILE );
+	$style_path = STREAM_PLAYER_DIR . '/js/stream-player-admin.css';
+	$version = filemtime( $style_path );
+	wp_register_style( 'stream-player-admin', $style_url, array(), $version, 'all' );
+
 	// 2.5.0: maybe enqueue pricing page styles
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	if ( isset( $_REQUEST['page'] ) && ( 'stream-player-pricing' == sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ) ) ) {
@@ -61,7 +68,6 @@ function stream_player_enqueue_admin_scripts() {
 		$version = filemtime( $style_path );
 		wp_enqueue_style( 'freemius-pricing', $style_url, array(), $version, 'all' );
 	}
-
 }
 
 // -----------------
@@ -79,7 +85,9 @@ function stream_player_admin_styles() {
 
 	// --- output admin styles ---
 	// 2.5.6: use wp_kses_post instead of wp_strip_all_tags
-	echo '<style>' . wp_kses_post( $css ) . '</style>' . "\n";
+	// echo '<style>' . wp_kses_post( $css ) . '</style>' . "\n";
+	// 2.5.10: use wp_add_inline_style
+	wp_add_inline_style( 'stream-player-admin', $css );
 
 }
 
@@ -206,7 +214,7 @@ function stream_player_plugin_docs_page() {
 	}
 
 	// 2.5.6: added jquery onclick functions to replace onclick attributes
-	echo "<script>jQuery('.doc-link').on('click',function(){ref = jQuery(this).attr('id').replace('-doc-link',''); stream_load_doc(ref);});
+	$js = "jQuery('.doc-link').on('click',function(){ref = jQuery(this).attr('id').replace('-doc-link',''); stream_load_doc(ref);});
 	function stream_load_doc(id) {
 		pages = document.getElementsByClassName('doc-page');
 		for (i = 0; i < pages.length; i++) {pages[i].style.display = 'none';}
@@ -221,9 +229,11 @@ function stream_player_plugin_docs_page() {
 			atop = anchor.offsetTop; /* do not use 'top'! */
 			window.scrollTo(0, (atop-20));
 		}
-	}</script>";
+	}";
+	// 2.5.10: use wp_add_inline_script
+	wp_add_inline_script( 'stream-player-admin', $js );
 
-	echo '<style>.doc-page {padding: 20px 40px 20px 10px;}
+	$css = '<style>.doc-page {padding: 20px 40px 20px 10px;}
 	.doc-page, .doc-page p {font-size: 14px;}
 	.doc-page table {padding: 10px; background-color: #F9F9F9; border: 1px solid #CCC; border-radius: 10px;}
 	.doc-page th {text-align: left; padding: 7px 14px;}
@@ -233,8 +243,11 @@ function stream_player_plugin_docs_page() {
 	h1.docs-heading {font-size: 1.65em; margin-bottom: 1.65em;}
 	h2.docs-heading {font-size: 1.5em; margin-top: 1.5em;}
 	h3.docs-heading {font-size: 1.3em;}
-	h4.docs-heading {font-size: 1.1em;}
-	</style>';
+	h4.docs-heading {font-size: 1.1em;}';
+
+	// 2.5.10: modified to use wp_add_inline_style
+	wp_enqueue_style( 'stream-player-admin' );
+	wp_add_inline_style( 'stream-player-admin', $css );
 
 	// --- output announcement content ---
 	// stream_player_announcement_content( false );
@@ -810,7 +823,7 @@ function stream_player_dismiss_notice_javascript() {
 	// --- dismiss notices javascript function ---
 	$ajax_url = admin_url( 'admin-ajax.php' );
 	$nonce = wp_create_nonce( 'stream_player_notice' );
-	echo "<script>var stream_player_notice_nonce = '" . esc_js( $nonce ) . "';
+	$css = "var stream_player_notice_nonce = '" . esc_js( $nonce ) . "';
 	function stream_display_notice_dismiss(context,id) {
 		if (context == 'offer') {
 			url = '" . esc_url( $ajax_url ) . "?action=stream_player_launch_offer_dismiss&accept='+id+'&nonce='+stream_player_notice_nonce;
@@ -830,7 +843,11 @@ function stream_player_dismiss_notice_javascript() {
 				document.getElementById('stream-player-update-'+result.id+').style.display = 'none';
 			}
 		}
-	}</script>" . "\n";
+	}" . "\n";
+
+	// 2.5.10: use wp_add_inline_script
+	wp_enqueue_script( 'stream-player-admin' );
+	wp_add_inline_script( 'stream-player-admin', $css );
 }
 
 // ------------------------
@@ -1109,7 +1126,7 @@ function stream_player_mailchimp_form() {
 	// 2.5.10: added nonce field to submit URL
 	$admin_ajax = admin_url( 'admin-ajax.php' );
 	$nonce = wp_create_nonce( 'stream_player_subscribe' );
-	echo "<script>
+	$js = "
 	jQuery(document).ready(function() {
 		var sp_sub_nonce = '" . esc_js( $nonce ) . "';
 		jQuery('#mc-embedded-button').on('click', function(e) {
@@ -1120,7 +1137,10 @@ function stream_player_mailchimp_form() {
 				if (data.success) {jQuery('#mc-embedded-subscribe-form').submit();}
 			}
 		});
-	});</script>" . "\n";
+	});";
+	
+	// 2.5.10: use wp_add_inline_script
+	wp_add_inline_script( 'stream-player-admin', $css );
 
 }
 
