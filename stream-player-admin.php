@@ -85,7 +85,6 @@ function stream_player_admin_styles() {
 
 	// --- output admin styles ---
 	// 2.5.6: use wp_kses_post instead of wp_strip_all_tags
-	// echo '<style>' . wp_kses_post( $css ) . '</style>' . "\n";
 	// 2.5.10: use wp_add_inline_style
 	wp_add_inline_style( 'stream-player-admin', $css );
 
@@ -233,7 +232,7 @@ function stream_player_plugin_docs_page() {
 	// 2.5.10: use wp_add_inline_script
 	wp_add_inline_script( 'stream-player-admin', $js );
 
-	$css = '<style>.doc-page {padding: 20px 40px 20px 10px;}
+	$css = '.doc-page {padding: 20px 40px 20px 10px;}
 	.doc-page, .doc-page p {font-size: 14px;}
 	.doc-page table {padding: 10px; background-color: #F9F9F9; border: 1px solid #CCC; border-radius: 10px;}
 	.doc-page th {text-align: left; padding: 7px 14px;}
@@ -763,8 +762,6 @@ function stream_player_notice_dismiss() {
 				}
 				$notices[$notice] = '1';
 				update_option( 'stream_player_read_notices', $notices );
-				// echo "<script>parent.document.getElementById('stream-player-notice-" . esc_js( $notice ) . "').style.display = 'none';</script>" . "\n";
-
 				$success = '1';
 
 			} elseif ( isset( $_GET['upgrade'] ) ) {
@@ -779,8 +776,6 @@ function stream_player_notice_dismiss() {
 				}
 				$upgrades[$upgrade] = '1';
 				update_option( 'stream_player_read_upgrades', $upgrades );
-				// echo "<script>parent.document.getElementById('stream-player-update-" . esc_js( $upgrade ) . "').style.display = 'none';</script>" . "\n";
-				
 				$success = '1';
 			}
 		}
@@ -1057,10 +1052,6 @@ function stream_player_launch_offer_dismiss() {
 		update_option( 'stream_player_launch_offer_accepted', $user_ids );
 	}
 
-	// --- hide the announcement in parent frame ---
-	// echo "<script>parent.document.getElementById('stream-player-launch-offer-notice').style.display = 'none';</script>" . "\n";
-	// exit;
-
 	// --- send success data ---
 	$success = array( 'success' => '1', 'accepted' => $accepted );
 	wp_send_json( $success , 200 );
@@ -1164,11 +1155,6 @@ function stream_player_record_subscribe() {
 				$subscribed[] = $email;
 				update_option( 'stream_player_subscribed', $subscribed );
 			}
-
-			// --- submit form in parent window ---
-			// echo "<script>console.log('Subscription Recorded');";
-			// echo "parent.jQuery('#mc-embedded-subscribe-form').submit();</script>" . "\n";
-			// exit;
 			// 2.5.9: just return success JSON data
 			$success = '1';
 		} else {
