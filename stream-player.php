@@ -6,7 +6,11 @@ Plugin Name: Stream Player
 Plugin URI: https://streamplayer.pro
 Description: Adds an advanced Streaming Audio Player your site.
 Author: Tony Hayes, Tony Zeoli
+<<<<<<< HEAD
 Version: 2.5.9.6
+=======
+Version: 2.5.9.7
+>>>>>>> release/2.5.9.7
 License: GPLv2 or later
 Requires at least: 4.0.0
 Text Domain: stream-player
@@ -286,24 +290,20 @@ function stream_player_get_now() {
 function stream_player_add_inline_script( $handle, $js, $position = 'after' ) {
 
 	// --- add check if script is already done ---
-	if ( !wp_script_is( $handle, 'done' ) ) {
+	if ( wp_script_is( $handle, 'registered' ) && !wp_script_is( $handle, 'done' ) ) {
+
 		// --- handle javascript normally ---
 		wp_add_inline_script( $handle, $js, $position );
+
 	} else {
-		// --- store extra javascript for later output ---
-		/* global $stream_player_scripts;
-		if ( !isset( $stream_player_scripts[$handle] ) ) {
-			$stream_player_scripts[$handle] = '';
-		}
-		$stream_player_scripts[$handle] .= $js;
-		add_action( 'wp_print_footer_scripts', 'stream_player_print_footer_scripts', 20 ); */
 
 		// 2.5.7: enqueue dummy javascript file to output in footer
-		if ( !wp_script_is( 'sp-footer', 'registered' ) ) {
-			$script_url = plugins_url( '/js/sp-footer.js', STREAM_PLAYER_FILE );
-			wp_register_script( 'sp-footer', $script_url, array(), '1.0.0', true );
+		if ( !wp_script_is( 'stream-player-footer', 'registered' ) ) {
+			$version = functIon_exists( 'stream_player_plugin_version' ) ? stream_player_plugin_version() : '2.5.0';
+			wp_register_script( 'stream-player-footer', null, array( 'jquery' ), $version, true );
+			wp_enqueue_script( 'stream-player-footer' );
 		}
-		wp_add_inline_script( 'sp-footer', $js, $position );
+		wp_add_inline_script( 'stream-player-footer', $js, $position );
 	}
 }
 
@@ -326,35 +326,33 @@ function stream_player_add_inline_script( $handle, $js, $position = 'after' ) {
 // Add Inline Styles
 // -----------------
 // 2.5.0: added for missed inline styles (via shortcodes)
-/* function stream_player_add_inline_style( $handle, $css ) {
+function stream_player_add_inline_style( $handle, $css ) {
 
 	// --- add check if style is already done ---
-	if ( !wp_style_is( $handle, 'done' ) ) {
+	if ( wp_style_is( $handle, 'registered' ) && !wp_style_is( $handle, 'done' ) ) {
+
 		// --- handle style normally ---
 		wp_add_inline_style( $handle, $css );
+
 	} else {
 		// --- store extra styles for later output ---
-		global $stream_player_styles;
+		/* global $stream_player_styles;
 		if ( !isset( $stream_player_styles[$handle] ) ) {
 			$stream_player_styles[$handle] = '';
 		}
 		$stream_player_styles[$handle] .= $css;
-		add_action( 'wp_print_footer_scripts', 'stream_player_print_footer_styles', 20 );
-	}
-} */
+		add_action( 'wp_print_footer_scripts', 'stream_player_print_footer_styles', 20 ); */
 
-// -------------------
-// Print Footer Styles
-// -------------------
-// 2.5.0: added for missed inline styles
-/* function stream_player_print_footer_styles() {
-	global $stream_player_styles;
-	if ( is_array( $stream_player_styles ) && ( count( $stream_player_styles ) > 0 ) ) {
-		foreach ( $stream_player_styles as $handle => $css ) {
-			echo '<style>' . wp_kses_post( $css ) . '</style>';
+		if ( !wp_style_is( 'stream-player-footer', 'registered' ) ) {
+			$version = function_exists( 'stream_player_plugin_version' ) ? stream_player_plugin_version() : '2.5.0';
+			wp_register_style( 'stream-player-footer', null, array(), $version, 'all' );
+			wp_enqueue_style( 'stream-player-footer' );
 		}
+		wp_add_inline_style( 'stream-player-footer', $css );
+
 	}
-} */
+}
+
 
 // ---------------------------
 // Enqueue Widget Color Picker
@@ -393,15 +391,13 @@ function stream_player_check_plan_options() {
 	// --- check for deactivated pro plugin ---
 	$plugins = wp_cache_get( 'plugins' );
 	if ( !$plugins ) {
-		if ( function_exists( 'get_plugins' ) ) {
-			$plugins = get_plugins();
-		} else {
-			$plugin_path = ABSPATH . 'wp-admin/includes/plugin.php';
-			if ( file_exists( $plugin_path ) ) {
-				include $plugin_path;
-				$plugins = get_plugins();
+		if ( !function_exists( 'get_plugins' ) ) {
+			$admin_plugins = ABSPATH . 'wp-admin/includes/plugin.php';
+			if ( file_exists( $admin_plugins ) ) {
+				include_once $admin_plugins;
 			}
 		}
+		$plugins = get_plugins();
 	}
 	if ( $plugins && is_array( $plugins ) && ( count( $plugins ) > 0 ) ) {
 		foreach ( $plugins as $slug => $plugin ) {
