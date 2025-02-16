@@ -7,7 +7,7 @@ Plugin URI: https://streamplayer.pro
 Description: Adds an advanced Streaming Audio Player your site.
 Author: Tony Hayes, Tony Zeoli
 <<<<<<< HEAD
-Version: 2.5.9.6
+Version: 2.5.9.7
 =======
 Version: 2.5.9.7
 >>>>>>> release/2.5.9.7
