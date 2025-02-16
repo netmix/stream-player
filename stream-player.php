@@ -6,11 +6,7 @@ Plugin Name: Stream Player
 Plugin URI: https://streamplayer.pro
 Description: Adds an advanced Streaming Audio Player your site.
 Author: Tony Hayes, Tony Zeoli
-<<<<<<< HEAD
 Version: 2.5.9.7
-=======
-Version: 2.5.9.7
->>>>>>> release/2.5.9.7
 License: GPLv2 or later
 Requires at least: 4.0.0
 Text Domain: stream-player
