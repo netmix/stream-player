@@ -6,9 +6,9 @@ Plugin Name: Stream Player
 Plugin URI: https://streamplayer.pro
 Description: Adds an advanced Streaming Audio Player your site.
 Author: Tony Hayes, Tony Zeoli
-Version: 2.5.9.7
+Version: 2.5.9.8
 License: GPLv2 or later
-Requires at least: 4.0.0
+Requires at least: 4.0
 Text Domain: stream-player
 Domain Path: /languages
 Author URI: https://netmix.com
@@ -199,7 +199,7 @@ $instance = new stream_player_loader( $settings );
 // -----------------------
 // Load Plugin Text Domain
 // -----------------------
-add_action( 'plugins_loaded', 'stream_player_init' );
+add_action( 'init', 'stream_player_init' );
 function stream_player_init() {
 	load_plugin_textdomain( 'stream-player', false, STREAM_PLAYER_DIR . '/languages' );
 }
