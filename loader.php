@@ -1051,6 +1051,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 					// phpcs:ignore WordPress.Security.NonceVerification.Missing
 					$post_keys = array_keys( $_POST );
 					foreach ( $post_keys as $post_key ) {
+						$post_key = sanitize_text_field( $post_key );
 						$value = sanitize_text_field( $_POST[$post_key] );
 						// phpcs:ignore WordPress.PHP.DevelopmentFunctions
 						echo esc_html( $post_key ) . ': ' . esc_html( print_r( $value, true ) ) . '<br>' . "\n";
