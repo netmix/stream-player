@@ -1265,13 +1265,12 @@ function stream_player_sanitize_values( $keys ) {
 	}
 
 	// --- set HTML attributes ---
-	// TODO: replace stream_player_validate_boolean ?
 	// TODO: replace and store player ID ?
 	$html_atts = array(
 		'class'    => $atts['class'],
 		'id'       => sprintf( 'audio-%d-%d', $post_id, $instance ),
-		'loop'     => stream_player_validate_boolean( $atts['loop'] ),
-		'autoplay' => stream_player_validate_boolean( $atts['autoplay'] ),
+		'loop'     => (bool) $atts['loop'],
+		'autoplay' => (bool) $atts['autoplay']),
 		'preload'  => $atts['preload'],
 		'style'    => $atts['style'],
 	);
@@ -2832,7 +2831,7 @@ function stream_player_enqueue_styles( $script = false, $skin = false ) {
 			if ( defined( 'RADIO_PLAYER_URL' ) ) {
 				$url = RADIO_PLAYER_URL . $url;
 			}
-			stream_player_style_tag( 'radio-player', $url, $version );
+			radio_player_style_tag( 'radio-player', $url, $version );
 			
 			// 2.5.0: added missing non-WP control style output
 			$control_styles = stream_player_control_styles( false );
@@ -2875,7 +2874,7 @@ function stream_player_enqueue_styles( $script = false, $skin = false ) {
 			// --- output style tag directly ---
 			// $url = 'css/jplayer' . $suffix . '.css';
 			// if ( defined( 'RADIO_PLAYER_URL' ) ) {$url = RADIO_PLAYER_URL . $url;}
-			// stream_player_style_tag( 'rp-jplayer', $url, $version );
+			// radio_player_style_tag( 'rp-jplayer', $url, $version );
 		}
 
 		// --- debug skin path / URL ---
@@ -2915,7 +2914,7 @@ function stream_player_enqueue_styles( $script = false, $skin = false ) {
 				// --- output style tag directly ---
 				// $url = 'css/jplayer' . $skin_ref . $suffix . '.css';
 				// if ( defined( 'RADIO_PLAYER_URL' ) ) {$url = RADIO_PLAYER_URL . $url;}
-				// stream_player_style_tag( 'rp-jplayer-skin', $url, $version );
+				// radio_player_style_tag( 'rp-jplayer-skin', $url, $version );
 			}
 
 			// --- debug skin path / URL ---
@@ -2957,7 +2956,7 @@ function stream_player_enqueue_styles( $script = false, $skin = false ) {
 				// --- output style tag directly ---
 				// $url = 'css/rp-mediaelement.css';
 				// if ( defined( 'RADIO_PLAYER_URL' ) ) {$url = RADIO_PLAYER_URL . $url;}
-				// stream_player_style_tag( 'rp-mediaelement', $url, $version );
+				// radio_player_style_tag( 'rp-mediaelement', $url, $version );
 			}
 
 		} elseif ( 'minimal' == $skin ) {
@@ -2983,7 +2982,7 @@ function stream_player_enqueue_styles( $script = false, $skin = false ) {
 				// --- output style tag directly ---
 				// $url = 'css/mediaelement.css';
 				// if ( defined( 'RADIO_PLAYER_URL' ) ) {$url = RADIO_PLAYER_URL . $url;}
-				// stream_player_style_tag( 'rp-mediaelement', $url, $version );
+				// radio_player_style_tag( 'rp-mediaelement', $url, $version );
 			}
 		}
 		return;
@@ -3223,48 +3222,3 @@ function stream_player_control_styles( $instance ) {
 //	return $tag;
 // }
 
-
-// ------------------------------------------
-// === Standalone Compatibility Functions ===
-// ------------------------------------------
-// (for player use outside WordPress context)
-
-// -----------------
-// Output Script Tag
-// -----------------
-// 2.5.10: deprecated (standalone version could replace wp_enqueue_script)
-// 2.5.7: echo instead of return script tag
-// function stream_player_script_tag( $url, $version ) {
-	// 2.5.10: use esc_url not esc_url_raw
-	// echo '<script type="text/javascript" src="' . esc_url( $url . '?' . $version ) . '"></script>';
-// }
-
-// ----------------
-// Output Style Tag
-// ----------------
-// 2.5.10: deprecated (standalone version could replace wp_enqueue_style)
-// 2.5.7: echo instead of return style tag
-// function stream_player_style_tag( $id, $url, $version ) {
-	// 2.5.10: use esc_url not esc_url_raw
-	// echo '<link id="' . esc_attr( $id ) . '-css" href="' . esc_url( $url . '?' . $version ) . '" rel="stylesheet" type="text/css" media="all">';
-// }
-
-// ----------------
-// Validate Boolean
-// ----------------
-// copy of wp_validate_boolean
-function stream_player_validate_boolean( $var ) {
-	if ( is_bool( $var ) ) {
-		return $var;
-	}
-
-	if ( is_string( $var ) ) {
-		if ( 'false' === strtolower( $var ) ) {
-			return false;
-		} elseif ( 'true' === strtolower( $var ) ) {
-			return true;
-		}
-	}
-
-	return (bool) $var;
-}

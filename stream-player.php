@@ -196,14 +196,6 @@ require STREAM_PLAYER_DIR . '/loader.php';
 $instance = new stream_player_loader( $settings );
 
 
-// -----------------------
-// Load Plugin Text Domain
-// -----------------------
-add_action( 'init', 'stream_player_init' );
-function stream_player_init() {
-	load_plugin_textdomain( 'stream-player', false, STREAM_PLAYER_DIR . '/languages' );
-}
-
 // -------------------------
 // Filter Freemius Load Path
 // -------------------------

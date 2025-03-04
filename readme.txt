@@ -6,7 +6,7 @@ License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 4.0
 Tested up to: 6.7
-Stable tag: 2.5.9.9
+Stable tag: 2.5.9.10
 
 Stream Player gives you the ultimate power: to stream a broadcast on your website!
 
@@ -43,8 +43,17 @@ Stream Player uses the Amplitude and jPlayer scripts to play audio. In the that 
 
 == Changelog ==
 
+= 2.5.9.9 =
+* Removed: load_plugin_textdomain function call
+* Removed: radio_player_validate_boolean function
+* Removed: standalone player script/style tag output
+
+= 2.5.9.9 =
+* Fixed: settings page script enqueueing
+
 = 2.5.9.8 =
 * Updated: Freemius SDK (2.11.0)
+* Updated: plugin review update changes
 
 = 2.5.9.7 =
 * Updated: Plugin Panel (1.3.4)
