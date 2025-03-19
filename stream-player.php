@@ -4,9 +4,9 @@
 
 Plugin Name: Stream Player
 Plugin URI: https://streamplayer.pro
-Description: Adds an advanced Streaming Audio Player your site.
+Description: Free, open source streaming audio player plugin by netmix®. Works with Icecast, Shoutcast, and Live 365 streams.
 Author: Tony Hayes, Tony Zeoli
-Version: 2.5.9.10
+Version: 2.5.9.11
 License: GPLv2 or later
 Requires at least: 4.0
 Text Domain: stream-player
@@ -65,9 +65,9 @@ define( 'STREAM_PLAYER_SLUG', 'stream-player' );
 define( 'STREAM_PLAYER_FILE', __FILE__ );
 define( 'STREAM_PLAYER_DIR', dirname( __FILE__ ) );
 define( 'STREAM_PLAYER_BASENAME', plugin_basename( __FILE__ ) );
-define( 'STREAM_PLAYER_HOME_URL', 'https://radiostation.pro/stream-player/' );
-define( 'STREAM_PLAYER_DOCS_URL', 'https://radiostation.pro/docs/player/' );
-define( 'STREAM_PLAYER_PRO_URL', 'https://radiostation.pro/stream-player-pro/' );
+define( 'STREAM_PLAYER_HOME_URL', 'https://streamplayer.pro/stream-player/' );
+define( 'STREAM_PLAYER_DOCS_URL', 'https://streamplayer.pro/docs/' );
+define( 'STREAM_PLAYER_PRO_URL', 'https://streamplayer.pro/' );
 
 // -----------------------
 // Set Debug Mode Constant
@@ -295,26 +295,12 @@ function stream_player_add_inline_script( $handle, $js, $position = 'after' ) {
 	}
 }
 
-// --------------------
-// Print Footer Scripts
-// --------------------
-// 2.5.0: added for missed inline scripts
-// 2.5.7: deprecated in favour of adding inline to dummy script
-/* function stream_player_print_footer_scripts() {
-	global $stream_player_scripts;
-	if ( is_array( $stream_player_scripts ) && ( count( $stream_player_scripts ) > 0 ) ) {
-		foreach ( $stream_player_scripts as $handle => $js ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo '<script id="' . esc_attr( $handle ) . '-js-after">' . $js . '</script>';
-		}
-	}
-} */
-
 // -----------------
 // Add Inline Styles
 // -----------------
 // 2.5.0: added for missed inline styles (via shortcodes)
-function stream_player_add_inline_style( $handle, $css ) {
+// 2.5.10: deprecated: duplicated function in radio player
+/* function stream_player_add_inline_style( $handle, $css ) {
 
 	// --- add check if style is already done ---
 	if ( wp_style_is( $handle, 'registered' ) && !wp_style_is( $handle, 'done' ) ) {
@@ -323,14 +309,7 @@ function stream_player_add_inline_style( $handle, $css ) {
 		wp_add_inline_style( $handle, $css );
 
 	} else {
-		// --- store extra styles for later output ---
-		/* global $stream_player_styles;
-		if ( !isset( $stream_player_styles[$handle] ) ) {
-			$stream_player_styles[$handle] = '';
-		}
-		$stream_player_styles[$handle] .= $css;
-		add_action( 'wp_print_footer_scripts', 'stream_player_print_footer_styles', 20 ); */
-
+		
 		if ( !wp_style_is( 'stream-player-footer', 'registered' ) ) {
 			$version = function_exists( 'stream_player_plugin_version' ) ? stream_player_plugin_version() : '2.5.0';
 			wp_register_style( 'stream-player-footer', null, array(), $version, 'all' );
@@ -339,7 +318,7 @@ function stream_player_add_inline_style( $handle, $css ) {
 		wp_add_inline_style( 'stream-player-footer', $css );
 
 	}
-}
+} */
 
 
 // ---------------------------
@@ -359,13 +338,6 @@ function stream_player_enqueue_color_picker() {
 	$js .= "});" . "\n";
 	stream_player_add_inline_script( 'wp-color-picker-a', $js );
 }
-
-// -----------------------
-// Stream Player Shortcode
-// -----------------------
-// function stream_player_shortcode( $settings = array() ) {
-//	return radio_player_shortcode( $settings );
-// }
 
 // ------------------
 // Check Plan Options
