@@ -1,4 +1,4 @@
-=== Stream Player ===
+=== Stream Player by netmix® - Streaming audio for WordPress! ===
 Contributors: tonyzeoli, majick
 Donate link: https://netmix.org
 Tags: player, stream, audio, radio, broadcast
@@ -6,13 +6,15 @@ License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 4.0
 Tested up to: 6.7
-Stable tag: 2.5.9.10
+Stable tag: 2.5.9.11
 
-Stream Player gives you the ultimate power: to stream a broadcast on your website!
+Free, open source streaming audio player plugin by netmix®. Works with Icecast, Shoutcast, and Live 365 streams. For additional features, upgrade to Stream Player PRO.
 
 == Description ==
 
 #### STREAM PLAYER by netmix®† - the best streaming audio plugin for WordPress
+
+
 
 Stream Player PRO by netmix® is a powerful streaming audio player solution that gives your listeners the same persistent streaming audio playback experience employed by sites like Spotify, MixCloud, Soundcloud, Mixlr, Beatport, Traxsource, and many others. With Stream Player by netmix®, your listeners can enjoy an uninterrupted audio playback experience while navigating your WordPress website. [Upgrade to Stream Player Pro](https://streamplayer.pro/pricing/)
 
@@ -26,13 +28,13 @@ Stream Player PRO by netmix® is a powerful streaming audio player solution that
 
 == Frequently Asked Questions ==
 
-= Where can I find the full Radio Station documentation (Free or PRO)? =
+= Where can I find the full Stream Player documentation (Free or PRO)? =
 
 The latest documentation [can be found online here](https://streamplayer.pro/docs/). Documentation is also included with the currently installed version via the Stream Player Help menu item located under the Stream Player admin menu. You can find the Markdown-formatted files in the `/docs` folder of the [GitHub Repository](https://github.com/netmix/stream-player/docs/) and in the `/docs` folder of the plugin directory. 
 
-= How do I get support for Radio Station (Free or PRO)? =
+= How do I get support for Stream Player (Free or PRO)? =
 
-For Radio Station customers using the free, open-source version of our plugin, you can contact us via [our support channel in the WordPress support forums here](https://wordpress.org/plugins/support/stream-player). If you have any bug reports or feature suggestions please [open an issue on our Github repository](https://github.com/netmix/stream-player/) For Stream Player PRO subscribers, you can email us at support@radiostation.pro and someone will respond to your inquiry within 12 to 124 hours. All support inquiries will be handled in the order they are received. Before contacting support or opening an issue, make sure you check for conflicts by disabling all of your plugins and re-enabling them one at a time to ascertain which plugin is conflicting with Stream Player. Note that Stream Player PRO works as an addon to Stream Player, so deactivating it will disable the PRO features until you reactivate it.
+For Stream Player customers using the free, open-source version of our plugin, you can contact us via [our support channel in the WordPress support forums here](https://wordpress.org/plugins/support/stream-player). If you have any bug reports or feature suggestions please [open an issue on our Github repository](https://github.com/netmix/stream-player/) For Stream Player PRO subscribers, you can email us at support@radiostation.pro and someone will respond to your inquiry within 12 to 24 hours. All support inquiries will be handled in the order they are received. Before contacting support or opening an issue, make sure you check for conflicts by disabling all of your plugins and re-enabling them one at a time to ascertain which plugin is conflicting with Stream Player. Note that Stream Player PRO works as an addon to Stream Player, so deactivating it will disable the PRO features until you reactivate it.
 
 = Does this plugin use any 3rd party services? =
 
@@ -43,7 +45,10 @@ Stream Player uses the Amplitude and jPlayer scripts to play audio. In the that 
 
 == Changelog ==
 
-= 2.5.9.9 =
+= 2.5.9.11 =
+* Fixed: duplicate function conflict stream_player_add_inline_script
+
+= 2.5.9.10 =
 * Removed: load_plugin_textdomain function call
 * Removed: radio_player_validate_boolean function
 * Removed: standalone player script/style tag output
