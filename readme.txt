@@ -14,10 +14,24 @@ Free, open source streaming audio player plugin by netmix®. Works with Icecast,
 
 #### STREAM PLAYER by netmix®† - the best streaming audio plugin for WordPress
 
+[Live Demo](https://demo.streamplayer.pro/) |
+[Documentation](https://radiostation.pro/docs/) | [Support](https://wordpress.org/support/plugin/stream-player/) | [**Upgrade to Stream Player PRO**!](https://radiostation.pro/pricing/)
 
+This plugin can be downloaded for free without any paid subscription from the [official WordPress repository](https://wordpress.org/plugins/stream-player/).
 
-Stream Player PRO by netmix® is a powerful streaming audio player solution that gives your listeners the same persistent streaming audio playback experience employed by sites like Spotify, MixCloud, Soundcloud, Mixlr, Beatport, Traxsource, and many others. With Stream Player by netmix®, your listeners can enjoy an uninterrupted audio playback experience while navigating your WordPress website. [Upgrade to Stream Player Pro](https://streamplayer.pro/pricing/)
+**Stream Player** *by netmix®* is a simple, powerful livestream audio player plugin that can be used by radio stations, broadcasters, social audio moderators, news organizations, or anyone who wants to broadcast their live audio stream on a WordPress website.  [Upgrade to Stream Player Pro](https://streamplayer.pro/pricing/)
 
+#### STREAM PLAYER BY netmix® FEATURES
+
+- Works with virtually any Stream source
+- Compatible with Shoutcast, Icecast, Live365, and Radio.co
+- 3 In-built Audio Scripts: Howler, Amplitude, jPlayer
+- 7 Streaming Formats Support: MP3, AAC/M4A, OGG, OGA, WebM, RTMPA, OPUS
+- Source and Fallback Streaming URLs
+- Volume Controls: Volume Slider, Volume +/-, Mute Volume Toggle, Maximize Volume, Player Start Volume
+- Single Player at Once: Stop any existing Players on the page or in other windows or tabs when a Player is started.
+- Stream Title and Image
+- Added via Shortcode, Widget or Block
 
 == Installation ==
 
@@ -38,10 +52,17 @@ For Stream Player customers using the free, open-source version of our plugin, y
 
 = Does this plugin use any 3rd party services? =
 
-Stream Player uses the Amplitude and jPlayer scripts to play audio. In the that case you are connecting the player to a Soundcloud stream URL, Amplitude may load the latest Soundcloud SDK automatically via connect.soundcloud.com ... Soundcloud's terms of service are available at https://soundcloud.com/terms-of-use
+Stream Player uses the Amplitude and jPlayer scripts to play audio. In the that case you are connecting the player to a Soundcloud stream URL, Amplitude may load the latest Soundcloud SDK automatically via connect.soundcloud.com ... Soundcloud's terms of service are available at [here](https://soundcloud.com/terms-of-use).
 
 
 == Screenshots ==
+
+1. Settings: Stream
+[assets/Stream Player Settings - Stream Admin Panel.png]
+2. Settings: Player
+[assets/Stream Player Settings - Player Admin Panel.png]
+3. Settings: Bar
+[assets/Stream Player Settings - Bar Admin Panel]
 
 == Changelog ==
 
