@@ -6,7 +6,7 @@ Plugin Name: Stream Player
 Plugin URI: https://streamplayer.pro
 Description: Free, open source livestreaming audio player plugin by netmix®. Works with Icecast, Shoutcast, and Live 365 streams.
 Author: Tony Zeoli, Tony Hayes
-Version: 2.5.9.12
+Version: 2.5.9.13
 License: GPLv2 or later
 Requires at least: 4.0
 Text Domain: stream-player

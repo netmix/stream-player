@@ -6,7 +6,7 @@ License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 4.0
 Tested up to: 6.7
-Stable tag: 2.5.9.12
+Stable tag: 2.5.9.13
 
 Free, open source streaming audio player plugin by netmix®. Works with Icecast, Shoutcast, and Live 365 streams. For additional features, upgrade to Stream Player PRO.
 
@@ -21,6 +21,8 @@ This plugin can be downloaded for free without any paid subscription from the [o
 
 **Stream Player** *by netmix®* is a simple, powerful livestream audio player plugin that can be used by radio stations, broadcasters, social audio moderators, news organizations, or anyone who wants to broadcast their live audio stream on a WordPress website.  [Upgrade to Stream Player Pro](https://streamplayer.pro/pricing/)
 
+Stream Player by netmix® is included in our free, open-source [WordPress plugin, Radio Station](https://wordpress.org/plugins/radio-station/).
+
 #### STREAM PLAYER BY netmix® FEATURES
 
 - Works with virtually any Stream source
@@ -32,6 +34,26 @@ This plugin can be downloaded for free without any paid subscription from the [o
 - Single Player at Once: Stop any existing Players on the page or in other windows or tabs when a Player is started.
 - Stream Title and Image
 - Added via Shortcode, Widget or Block
+
+#### Upgrade to STREAM PLAYER PRO BY netmix®
+
+**Stream Player PRO** *by netmix* is our persistent ("sticky") audio player bar, which gives you uninterrupted streaming like you see on Spotify, Soundcloud, Mixcloud, and other streaming services and radio networks. The player bar can be affixed to the header or footer of your website and listeners can enjoy uninterrupted streaming.
+
+We broke out Stream Player PRO by netmix® from its parent plugin, **Radio Station PRO** *by netmix®*, our flagship WordPress plugin to manage and publish your streaming station's show schedule to a WordPress website. Stream Player PRO by netmix® is included in Radio Station PRO to give stations and streamers a full suite of tools to both broadcast and manage content related to Shows, Episodes, Hosts and Producers, Guests, and Playlists. You can also associate blog posts with specific Shows.
+
+#### STREAM PLAYER PRO BY netmix® FEATURES
+
+- Persistent Player Bar
+- Smoother Page Transitions
+- Supports Shoutcast, Icecast, Live 365, and more
+- Animated Track Meta Data
+- Color Themes and Styling Options
+- Single Broadcast Point Source
+- Wide audio format support, including MP3, M4A, OGG, FLAC, WAV, and more
+- Stream Title and Image
+- Added via Shortcode, Widget or Block
+
+[Upgrade to Stream Player Pro](https://radiostation.pro/pricing/)
 
 == Installation ==
 
@@ -63,6 +85,9 @@ Stream Player uses the Amplitude and jPlayer scripts to play audio. In the that 
 4. Player Block/Widget
 
 == Changelog ==
+
+= 2.5.9.13 =
+* Updated: admin icon
 
 = 2.5.9.12 =
 * Updated: readme.txt
