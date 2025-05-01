@@ -62,7 +62,7 @@ Stream Player uses the Amplitude and jPlayer scripts to play audio. In the that 
 2. Settings: Player
 [assets/Stream Player Settings - Player Admin Panel.png]
 3. Settings: Bar
-[assets/Stream Player Settings - Bar Admin Panel]
+[assets/Stream Player Settings - Bar Admin Panel.png]
 
 == Changelog ==
 
