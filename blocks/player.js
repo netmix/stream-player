@@ -4,24 +4,24 @@
 (() => {
 
 	/* --- Import Modules/Components --- */
-	const rs_el = window.wp.element.createElement;
+	const sp_el = window.wp.element.createElement;
+	const sp__ = window.wp.i18n.__;
 	const { serverSideRender: ServerSideRender } = window.wp;
 	const { registerBlockType } = window.wp.blocks;
 	const { getBlockType } = window.wp.blocks;
 	const { InspectorControls } = window.wp.blockEditor;
 	const { Fragment } = window.wp.element;
 	const { BaseControl, TextControl, SelectControl, RadioControl, RangeControl, ToggleControl, ColorPicker, Dropdown, Button, Panel, PanelBody, PanelRow } = window.wp.components;
-	const { __ } = window.wp.i18n;
 	
 	/* --- Register Block --- */
 	if ( !getBlockType('radio-station/player' ) ) {
 	 registerBlockType( 'radio-station/player', {
 
 		/* --- Block Settings --- */
-		title: rs__( 'Stream Player', 'stream-player' ),
-		description: rs__( 'Audio stream player block.', 'stream-player' ),
+		title: sp__( 'Stream Player', 'stream-player' ),
+		description: sp__( 'Audio stream player block.', 'stream-player' ),
 		icon: 'controls-volumeon',
-		category: 'stream-player',
+		category: 'media',
 		example: {},
 		attributes: {
 			/* --- Player Content --- */
@@ -48,17 +48,17 @@
 		edit: (props) => {
 			const atts = props.attributes;
 			return (
-				rs_el( Fragment, {},
-					rs_el( ServerSideRender, { block: 'radio-station/player', className: 'radio-player-block', attributes: atts } ),
-					rs_el( InspectorControls, {},
-						rs_el( Panel, {},
+				sp_el( Fragment, {},
+					sp_el( ServerSideRender, { block: 'radio-station/player', className: 'radio-player-block', attributes: atts } ),
+					sp_el( InspectorControls, {},
+						sp_el( Panel, {},
 							/* === Player Content === */
-							rs_el( PanelBody, { title: rs__( 'Player Content', 'stream-player' ), className: 'stream-block-controls', initialOpen: true },
+							sp_el( PanelBody, { title: sp__( 'Player Content', 'stream-player' ), className: 'stream-block-controls', initialOpen: true },
 								/* --- Stream URL --- */
-								rs_el( PanelRow, {},
-									rs_el( TextControl, {
-										label: rs__( 'Stream URL', 'stream-player' ),
-										help: rs__( 'Leave blank to use default stream.', 'stream-player' ),
+								sp_el( PanelRow, {},
+									sp_el( TextControl, {
+										label: sp__( 'Stream URL', 'stream-player' ),
+										help: sp__( 'Leave blank to use default stream.', 'stream-player' ),
 										onChange: ( value ) => {
 											props.setAttributes( { url: value } );
 										},
@@ -66,10 +66,10 @@
 									})
 								),
 								/* --- Player Title Text --- */
-								rs_el( PanelRow, {},
-									rs_el( TextControl, {
-										label: rs__( 'Player Title Text', 'stream-player' ),
-										help: rs__( 'Empty for default, 0 for none.', 'stream-player' ),
+								sp_el( PanelRow, {},
+									sp_el( TextControl, {
+										label: sp__( 'Player Title Text', 'stream-player' ),
+										help: sp__( 'Empty for default, 0 for none.', 'stream-player' ),
 										onChange: ( value ) => {
 											props.setAttributes( { title: value } );
 										},
@@ -77,14 +77,14 @@
 									})
 								),
 								/* --- Image --- */
-								rs_el( PanelRow, {},
-									rs_el( SelectControl, {
-										label: rs__( 'Player Image', 'stream-player' ),
+								sp_el( PanelRow, {},
+									sp_el( SelectControl, {
+										label: sp__( 'Player Image', 'stream-player' ),
 										options : [
-											{ label: rs__( 'Plugin Setting', 'stream-player' ), value: 'default' },
-											{ label: rs__( 'Display Station Image', 'stream-player' ), value: '1' },
-											{ label: rs__( 'Do Not Display Station Image', 'stream-player' ), value: '0' },
-											/* { label: rs__( 'Display Custom Image', 'stream-player' ), value: 'custom' }, */
+											{ label: sp__( 'Plugin Setting', 'stream-player' ), value: 'default' },
+											{ label: sp__( 'Display Station Image', 'stream-player' ), value: '1' },
+											{ label: sp__( 'Do Not Display Station Image', 'stream-player' ), value: '0' },
+											/* { label: sp__( 'Display Custom Image', 'stream-player' ), value: 'custom' }, */
 										],
 										onChange: ( value ) => {
 											props.setAttributes( { image: value } );
@@ -95,16 +95,16 @@
 							),
 
 							/* === Player Options === */
-							rs_el( PanelBody, { title: rs__( 'Player Options', 'stream-player' ), className: 'stream-block-controls', initialOpen: true },
+							sp_el( PanelBody, { title: sp__( 'Player Options', 'stream-player' ), className: 'stream-block-controls', initialOpen: true },
 								/* --- Script --- */
-								rs_el( PanelRow, {},
-									rs_el( SelectControl, {
-										label: rs__( 'Player Script', 'stream-player' ),
+								sp_el( PanelRow, {},
+									sp_el( SelectControl, {
+										label: sp__( 'Player Script', 'stream-player' ),
 										options : [
-											{ label: rs__( 'Plugin Setting', 'stream-player' ), value: 'default' },
-											{ label: rs__( 'Amplitude', 'stream-player' ), value: 'amplitude' },
-											{ label: rs__( 'Howler', 'stream-player' ), value: 'howler' },
-											{ label: rs__( 'jPlayer', 'stream-player' ), value: 'jplayer' },
+											{ label: sp__( 'Plugin Setting', 'stream-player' ), value: 'default' },
+											{ label: sp__( 'Amplitude', 'stream-player' ), value: 'amplitude' },
+											{ label: sp__( 'Howler', 'stream-player' ), value: 'howler' },
+											{ label: sp__( 'jPlayer', 'stream-player' ), value: 'jplayer' },
 										],
 										onChange: ( value ) => {
 											props.setAttributes( { script: value } );
@@ -113,9 +113,9 @@
 									})
 								),
 								/* --- Volume --- */
-								rs_el( PanelRow, {},
-									rs_el( RangeControl, {
-										label: rs__( 'Initial Volume', 'stream-player' ),
+								sp_el( PanelRow, {},
+									sp_el( RangeControl, {
+										label: sp__( 'Initial Volume', 'stream-player' ),
 										min: 0,
 										max: 100,
 										onChange: ( value ) => {
@@ -125,16 +125,16 @@
 									})
 								),
 								/* --- Volume controls --- */
-								rs_el( PanelRow, {},
-									rs_el( SelectControl, {
+								sp_el( PanelRow, {},
+									sp_el( SelectControl, {
 										multiple: true,
-										label: rs__( 'Volume Controls', 'stream-player' ),
-										help: rs__( 'Ctrl-Click to select multiple controls.', 'stream-player' ),
+										label: sp__( 'Volume Controls', 'stream-player' ),
+										help: sp__( 'Ctrl-Click to select multiple controls.', 'stream-player' ),
 										options: [
-											{ label: rs__( 'Volume Slider', 'stream-player' ), value: 'slider' },
-											{ label: rs__( 'Up and Down Buttons', 'stream-player' ), value: 'updown' },
-											{ label: rs__( 'Mute Button', 'stream-player' ), value: 'mute' },
-											{ label: rs__( 'Maximize Button', 'stream-player' ), value: 'max' },
+											{ label: sp__( 'Volume Slider', 'stream-player' ), value: 'slider' },
+											{ label: sp__( 'Up and Down Buttons', 'stream-player' ), value: 'updown' },
+											{ label: sp__( 'Mute Button', 'stream-player' ), value: 'mute' },
+											{ label: sp__( 'Maximize Button', 'stream-player' ), value: 'max' },
 										],
 										onChange: ( value ) => {
 											props.setAttributes( { volumes: value } );
@@ -143,10 +143,10 @@
 									})
 								),
 								/* --- Default Player --- */
-								rs_el( PanelRow, {},
-									rs_el( ToggleControl, {
-										label: rs__( 'Use as Default Player', 'stream-player' ),
-										help: rs__( 'Make this the default player on this page.', 'stream-player' ),
+								sp_el( PanelRow, {},
+									sp_el( ToggleControl, {
+										label: sp__( 'Use as Default Player', 'stream-player' ),
+										help: sp__( 'Make this the default player on this page.', 'stream-player' ),
 										onChange: ( value ) => {
 											props.setAttributes( { default: value } );
 										},
@@ -154,15 +154,15 @@
 									})
 								),
 								/* --- Popup Player Button --- */
-								rs_el( PanelRow, {},
+								sp_el( PanelRow, {},
 									( ( atts.pro ) && 
-										rs_el( SelectControl, {
-											label: rs__( 'Popup Player', 'stream-player' ),
-											help: rs__( 'Enables button to open Player in separate window.', 'stream-player' ),
+										sp_el( SelectControl, {
+											label: sp__( 'Popup Player', 'stream-player' ),
+											help: sp__( 'Enables button to open Player in separate window.', 'stream-player' ),
 											options : [
-												{ label: rs__( 'Plugin Setting', 'stream-player' ), value: 'default' },
-												{ label: rs__( 'On', 'stream-player' ), value: 'on' },
-												{ label: rs__( 'Off', 'stream-player' ), value: 'off' },
+												{ label: sp__( 'Plugin Setting', 'stream-player' ), value: 'default' },
+												{ label: sp__( 'On', 'stream-player' ), value: 'on' },
+												{ label: sp__( 'Off', 'stream-player' ), value: 'off' },
 											],
 											onChange: ( value ) => {
 												props.setAttributes( { popup: value } );
@@ -170,23 +170,23 @@
 											value: atts.popup
 										})
 									), ( ( !atts.pro ) &&
-										rs_el( BaseControl, {
-											label: rs__( 'Popup Player', 'stream-player' ),
-											help: rs__( 'Popup Player Button available in Pro.', 'stream-player' ),
+										sp_el( BaseControl, {
+											label: sp__( 'Popup Player', 'stream-player' ),
+											help: sp__( 'Popup Player Button available in Pro.', 'stream-player' ),
 										})
 									)
 								),
 							),
 
 							/* === Player Styles === */
-							rs_el( PanelBody, { title: rs__( 'Player Design', 'stream-player' ), className: 'stream-block-controls', initialOpen: true },
+							sp_el( PanelBody, { title: sp__( 'Player Design', 'stream-player' ), className: 'stream-block-controls', initialOpen: true },
 								/* --- Player Layout --- */
-								rs_el( PanelRow, {},
-									rs_el( RadioControl, {
-										label: rs__( 'Player Layout', 'stream-player' ),
+								sp_el( PanelRow, {},
+									sp_el( RadioControl, {
+										label: sp__( 'Player Layout', 'stream-player' ),
 										options : [
-											{ label: rs__( 'Vertical (Stacked)', 'stream-player' ), value: 'vertical' },
-											{ label: rs__( 'Horizontal (Inline)', 'stream-player' ), value: 'horizontal' },
+											{ label: sp__( 'Vertical (Stacked)', 'stream-player' ), value: 'vertical' },
+											{ label: sp__( 'Horizontal (Inline)', 'stream-player' ), value: 'horizontal' },
 										],
 										onChange: ( value ) => {
 											props.setAttributes( { layout: value } );
@@ -196,13 +196,13 @@
 								),
 								/* --- Player Theme --- */
 								( ( !atts.pro ) &&
-									rs_el( PanelRow, {},
-										rs_el( SelectControl, {
-											label: rs__( 'Player Theme', 'stream-player' ),
+									sp_el( PanelRow, {},
+										sp_el( SelectControl, {
+											label: sp__( 'Player Theme', 'stream-player' ),
 											options : [
-												{ label: rs__( 'Plugin Setting', 'stream-player' ), value: 'default' },
-												{ label: rs__( 'Light', 'stream-player' ), value: 'light' },
-												{ label: rs__( 'Dark', 'stream-player' ), value: 'dark' },
+												{ label: sp__( 'Plugin Setting', 'stream-player' ), value: 'default' },
+												{ label: sp__( 'Light', 'stream-player' ), value: 'light' },
+												{ label: sp__( 'Dark', 'stream-player' ), value: 'dark' },
 											],
 											onChange: ( value ) => {
 												props.setAttributes( { theme: value } );
@@ -213,23 +213,23 @@
 								),
 								/* [Pro] Extra Theme Color Options */
 								( ( atts.pro ) &&
-									rs_el( PanelRow, {},
-										rs_el( SelectControl, {
-											label: rs__( 'Player Theme', 'stream-player' ),
+									sp_el( PanelRow, {},
+										sp_el( SelectControl, {
+											label: sp__( 'Player Theme', 'stream-player' ),
 											options : [
-												{ label: rs__( 'Plugin Setting', 'stream-player' ), value: 'default' },
-												{ label: rs__( 'Light', 'stream-player' ), value: 'light' },
-												{ label: rs__( 'Dark', 'stream-player' ), value: 'dark' },
-												{ label: rs__( 'Red', 'stream-player' ), value: 'red' },
-												{ label: rs__( 'Orange', 'stream-player' ), value: 'orange' },
-												{ label: rs__( 'Yellow', 'stream-player' ), value: 'yellow' },
-												{ label: rs__( 'Light Green', 'stream-player' ), value: 'light-green' },
-												{ label: rs__( 'Green', 'stream-player' ), value: 'green' },
-												{ label: rs__( 'Cyan', 'stream-player' ), value: 'cyan' },
-												{ label: rs__( 'Light Blue', 'stream-player' ), value: 'light-blue' },
-												{ label: rs__( 'Blue', 'stream-player' ), value: 'blue' },
-												{ label: rs__( 'Purple', 'stream-player' ), value: 'purple' },
-												{ label: rs__( 'Magenta', 'stream-player' ), value: 'magenta' },
+												{ label: sp__( 'Plugin Setting', 'stream-player' ), value: 'default' },
+												{ label: sp__( 'Light', 'stream-player' ), value: 'light' },
+												{ label: sp__( 'Dark', 'stream-player' ), value: 'dark' },
+												{ label: sp__( 'Red', 'stream-player' ), value: 'red' },
+												{ label: sp__( 'Orange', 'stream-player' ), value: 'orange' },
+												{ label: sp__( 'Yellow', 'stream-player' ), value: 'yellow' },
+												{ label: sp__( 'Light Green', 'stream-player' ), value: 'light-green' },
+												{ label: sp__( 'Green', 'stream-player' ), value: 'green' },
+												{ label: sp__( 'Cyan', 'stream-player' ), value: 'cyan' },
+												{ label: sp__( 'Light Blue', 'stream-player' ), value: 'light-blue' },
+												{ label: sp__( 'Blue', 'stream-player' ), value: 'blue' },
+												{ label: sp__( 'Purple', 'stream-player' ), value: 'purple' },
+												{ label: sp__( 'Magenta', 'stream-player' ), value: 'magenta' },
 											],
 											onChange: ( value ) => {
 												props.setAttributes( { theme: value } );
@@ -239,14 +239,14 @@
 									)
 								),
 								/* --- Player Buttons --- */
-								rs_el( PanelRow, {},
-									rs_el( SelectControl, {
-										label: rs__( 'Player Buttons', 'stream-player' ),
+								sp_el( PanelRow, {},
+									sp_el( SelectControl, {
+										label: sp__( 'Player Buttons', 'stream-player' ),
 										options : [
-											{ label: rs__( 'Plugin Setting', 'stream-player' ), value: 'default' },
-											{ label: rs__( 'Circular', 'stream-player' ), value: 'circular' },
-											{ label: rs__( 'Rounded', 'stream-player' ), value: 'rounded' },
-											{ label: rs__( 'Square', 'stream-player' ), value: 'square' },
+											{ label: sp__( 'Plugin Setting', 'stream-player' ), value: 'default' },
+											{ label: sp__( 'Circular', 'stream-player' ), value: 'circular' },
+											{ label: sp__( 'Rounded', 'stream-player' ), value: 'rounded' },
+											{ label: sp__( 'Square', 'stream-player' ), value: 'square' },
 										],
 										onChange: ( value ) => {
 											props.setAttributes( { buttons: value } );
@@ -258,17 +258,17 @@
 							
 							/* === [Pro] Player Colors === */
 							( ( atts.pro ) &&
-								rs_el( PanelBody, { title: rs__( 'Player Colors', 'stream-player' ), className: 'stream-block-controls', initialOpen: true },
+								sp_el( PanelBody, { title: sp__( 'Player Colors', 'stream-player' ), className: 'stream-block-controls', initialOpen: true },
 								
 									/* --- Text Color --- */
-									rs_el( PanelRow, {},
-										rs_el( BaseControl, {
-											label: rs__( 'Text Color', 'stream-player' ),
+									sp_el( PanelRow, {},
+										sp_el( BaseControl, {
+											label: sp__( 'Text Color', 'stream-player' ),
 											className: 'color-dropdown-control'
 										},
-											rs_el( Dropdown, {
+											sp_el( Dropdown, {
 												renderContent: () => (
-													rs_el( ColorPicker, {
+													sp_el( ColorPicker, {
 														disableAlpha: true,
 														defaultValue: '',
 														onChangeComplete: color => {
@@ -278,30 +278,30 @@
 													})
 												),
 												renderToggle: (args) => (
-													rs_el( 'div', {className: 'color-dropdown-buttons'},
-														el ( Button, {
+													sp_el( 'div', {className: 'color-dropdown-buttons'},
+														sp_el( Button, {
 															className: 'color-dropdown-text_color',
 															onClick: args.onToggle,
 															variant: 'secondary',
 															'aria-expanded': args.isOpen,
 															'aria-haspopup': 'true',
-															'aria-label': rs__( 'Select Text Color', 'stream-player' )
+															'aria-label': sp__( 'Select Text Color', 'stream-player' )
 														},
-														( ('' != atts.text_color) ? atts.text_color : rs__( 'Select', 'stream-player' ) )
+														( ('' != atts.text_color) ? atts.text_color : sp__( 'Select', 'stream-player' ) )
 														),
-														rs_el( Button, {
+														sp_el( Button, {
 															onClick: () => {
 																props.setAttributes( {text_color: ''} );
 																args.onClose();
 															},
 															isSmall: true,
 															variant: 'tertiary',
-															'aria-label': rs__( 'Clear Text Color Selection', 'stream-player' )
+															'aria-label': sp__( 'Clear Text Color Selection', 'stream-player' )
 														},
-														rs__( 'Clear', 'stream-player' )
+														sp__( 'Clear', 'stream-player' )
 														),
 														( ( '' != atts.text_color ) &&
-															rs_el( 'style', {}, '.components-button.is-secondary.color-dropdown-text_color {background-color:'+atts.text_color+'}' )
+															sp_el( 'style', {}, '.components-button.is-secondary.color-dropdown-text_color {background-color:'+atts.text_color+'}' )
 														)
 													)
 												)
@@ -310,14 +310,14 @@
 									),
 
 									/* --- Background Color --- */
-									rs_el( PanelRow, {},
-										rs_el( BaseControl, {
-											label: rs__( 'Background Color', 'stream-player' ),
+									sp_el( PanelRow, {},
+										sp_el( BaseControl, {
+											label: sp__( 'Background Color', 'stream-player' ),
 											className: 'color-dropdown-control'
 										},
-											rs_el( Dropdown, {
+											sp_el( Dropdown, {
 												renderContent: () => (
-													rs_el( ColorPicker, {
+													sp_el( ColorPicker, {
 														defaultValue: '',
 														onChangeComplete: color => {
 															props.setAttributes( {background_color: color.hex} );
@@ -326,30 +326,30 @@
 													})
 												),
 												renderToggle: (args) => (
-													rs_el( 'div', {className: 'color-dropdown-buttons'},
-														el ( Button, {
+													sp_el( 'div', {className: 'color-dropdown-buttons'},
+														sp_el( Button, {
 															className: 'color-dropdown-background_color',
 															onClick: args.onToggle,
 															variant: 'secondary',
 															'aria-expanded': args.isOpen,
 															'aria-haspopup': 'true',
-															'aria-label': rs__( 'Select Background Color', 'stream-player' )
+															'aria-label': sp__( 'Select Background Color', 'stream-player' )
 														},
-														( ('' != atts.background_color) ? atts.background_color : rs__( 'Select', 'stream-player' ) )
+														( ('' != atts.background_color) ? atts.background_color : sp__( 'Select', 'stream-player' ) )
 														),
-														rs_el( Button, {
+														sp_el( Button, {
 															onClick: () => {
 																props.setAttributes( {background_color: ''} );
 																args.onClose();
 															},
 															isSmall: true,
 															variant: 'tertiary',
-															'aria-label': rs__( 'Clear Background Color Selection', 'stream-player' )
+															'aria-label': sp__( 'Clear Background Color Selection', 'stream-player' )
 														},
-														rs__( 'Clear', 'stream-player' )
+														sp__( 'Clear', 'stream-player' )
 														),
 														( ( '' != atts.background_color ) &&
-															rs_el( 'style', {}, '.components-button.is-secondary.color-dropdown-background_color {background-color:'+atts.background_color+'}' )
+															sp_el( 'style', {}, '.components-button.is-secondary.color-dropdown-background_color {background-color:'+atts.background_color+'}' )
 														)
 													)
 												)
@@ -358,14 +358,14 @@
 									),
 									
 									/* --- Playing Color --- */
-									rs_el( PanelRow, {},
-										rs_el( BaseControl, {
-											label: rs__( 'Playing Highlight', 'stream-player' ),
+									sp_el( PanelRow, {},
+										sp_el( BaseControl, {
+											label: sp__( 'Playing Highlight', 'stream-player' ),
 											className: 'color-dropdown-control'
 										},
-											rs_el( Dropdown, {
+											sp_el( Dropdown, {
 												renderContent: () => (
-													rs_el( ColorPicker, {
+													sp_el( ColorPicker, {
 														defaultValue: '',
 														onChangeComplete: color => {
 															props.setAttributes( {playing_color: color.hex} );
@@ -374,30 +374,30 @@
 													})
 												),
 												renderToggle: (args) => (
-													rs_el( 'div', {className: 'color-dropdown-buttons'},
-														el ( Button, {
+													sp_el( 'div', {className: 'color-dropdown-buttons'},
+														sp_el( Button, {
 															className: 'color-dropdown-playing_color',
 															onClick: args.onToggle,
 															variant: 'secondary',
 															'aria-expanded': args.isOpen,
 															'aria-haspopup': 'true',
-															'aria-label': rs__( 'Select Playing Highlight Color', 'stream-player' )
+															'aria-label': sp__( 'Select Playing Highlight Color', 'stream-player' )
 														},
-														( ('' != atts.playing_color) ? atts.playing_color : rs__( 'Select', 'stream-player' ) )
+														( ('' != atts.playing_color) ? atts.playing_color : sp__( 'Select', 'stream-player' ) )
 														),
-														rs_el( Button, {
+														sp_el( Button, {
 															onClick: () => {
 																props.setAttributes( {playing_color: ''} );
 																args.onClose();
 															},
 															isSmall: true,
 															variant: 'tertiary',
-															'aria-label': rs__( 'Clear Playing Color Selection', 'stream-player' )
+															'aria-label': sp__( 'Clear Playing Color Selection', 'stream-player' )
 														},
-														rs__( 'Clear', 'stream-player' )
+														sp__( 'Clear', 'stream-player' )
 														),
 														( ( '' != atts.playing_color ) &&
-															rs_el( 'style', {}, '.components-button.is-secondary.color-dropdown-playing_color {background-color:'+atts.playing_color+'}' )
+															sp_el( 'style', {}, '.components-button.is-secondary.color-dropdown-playing_color {background-color:'+atts.playing_color+'}' )
 														)
 													)
 												)
@@ -406,14 +406,14 @@
 									),
 									
 									/* --- Buttons Color --- */
-									rs_el( PanelRow, {},
-										rs_el( BaseControl, {
-											label: rs__( 'Buttons Highlight', 'stream-player' ),
+									sp_el( PanelRow, {},
+										sp_el( BaseControl, {
+											label: sp__( 'Buttons Highlight', 'stream-player' ),
 											className: 'color-dropdown-control'
 										},
-											rs_el( Dropdown, {
+											sp_el( Dropdown, {
 												renderContent: () => (
-													rs_el( ColorPicker, {
+													sp_el( ColorPicker, {
 														defaultValue: '',
 														onChangeComplete: color => {
 															props.setAttributes( {buttons_color: color.hex} );
@@ -422,30 +422,30 @@
 													})
 												),
 												renderToggle: (args) => (
-													rs_el( 'div', {className: 'color-dropdown-buttons'},
-														el ( Button, {
+													sp_el( 'div', {className: 'color-dropdown-buttons'},
+														sp_el( Button, {
 															className: 'color-dropdown-buttons_color',
 															onClick: args.onToggle,
 															variant: 'secondary',
 															'aria-expanded': args.isOpen,
 															'aria-haspopup': 'true',
-															'aria-label': rs__( 'Select Button Highlight Color', 'stream-player' )
+															'aria-label': sp__( 'Select Button Highlight Color', 'stream-player' )
 														},
-														( ('' != atts.buttons_color) ? atts.buttons_color : rs__( 'Select', 'stream-player' ) )
+														( ('' != atts.buttons_color) ? atts.buttons_color : sp__( 'Select', 'stream-player' ) )
 														),
-														rs_el( Button, {
+														sp_el( Button, {
 															onClick: () => {
 																props.setAttributes( {buttons_color: ''} );
 																args.onClose();
 															},
 															isSmall: true,
 															variant: 'tertiary',
-															'aria-label': rs__( 'Clear Button Highlight Color Selection', 'stream-player' )
+															'aria-label': sp__( 'Clear Button Highlight Color Selection', 'stream-player' )
 														},
-														rs__( 'Clear', 'stream-player' )
+														sp__( 'Clear', 'stream-player' )
 														),
 														( ( '' != atts.buttons_color ) &&
-															rs_el( 'style', {}, '.components-button.is-secondary.color-dropdown-buttons_color {background-color:'+atts.buttons_color+'}' )
+															sp_el( 'style', {}, '.components-button.is-secondary.color-dropdown-buttons_color {background-color:'+atts.buttons_color+'}' )
 														)
 													)
 												)
@@ -454,14 +454,14 @@
 									),
 									
 									/* --- Track Color --- */
-									rs_el( PanelRow, {},
-										rs_el( BaseControl, {
-											label: rs__( 'Volume Track', 'stream-player' ),
+									sp_el( PanelRow, {},
+										sp_el( BaseControl, {
+											label: sp__( 'Volume Track', 'stream-player' ),
 											className: 'color-dropdown-control'
 										},
-											rs_el( Dropdown, {
+											sp_el( Dropdown, {
 												renderContent: () => (
-													rs_el( ColorPicker, {
+													sp_el( ColorPicker, {
 														defaultValue: '',
 														onChangeComplete: color => {
 															props.setAttributes( {track_color: color.hex} );
@@ -470,30 +470,30 @@
 													})
 												),
 												renderToggle: (args) => (
-													rs_el( 'div', {className: 'color-dropdown-buttons'},
-														el ( Button, {
+													sp_el( 'div', {className: 'color-dropdown-buttons'},
+														sp_el( Button, {
 															className: 'color-dropdown-track_color',
 															onClick: args.onToggle,
 															variant: 'secondary',
 															'aria-expanded': args.isOpen,
 															'aria-haspopup': 'true',
-															'aria-label': rs__( 'Select Volume Track Color', 'stream-player' )
+															'aria-label': sp__( 'Select Volume Track Color', 'stream-player' )
 														},
-														( ('' != atts.track_color) ? atts.track_color : rs__( 'Select', 'stream-player' ) )
+														( ('' != atts.track_color) ? atts.track_color : sp__( 'Select', 'stream-player' ) )
 														),
-														rs_el( Button, {
+														sp_el( Button, {
 															onClick: () => {
 																props.setAttributes( {track_color: ''} );
 																args.onClose();
 															},
 															isSmall: true,
 															variant: 'tertiary',
-															'aria-label': rs__( 'Clear Volume Track Color Selection', 'stream-player' )
+															'aria-label': sp__( 'Clear Volume Track Color Selection', 'stream-player' )
 														},
-														rs__( 'Clear', 'stream-player' )
+														sp__( 'Clear', 'stream-player' )
 														),
 														( ( '' != atts.track_color ) &&
-															rs_el( 'style', {}, '.components-button.is-secondary.color-dropdown-track_color {background-color:'+atts.track_color+'}' )
+															sp_el( 'style', {}, '.components-button.is-secondary.color-dropdown-track_color {background-color:'+atts.track_color+'}' )
 														)
 													)
 												)
@@ -502,14 +502,14 @@
 									),
 									
 									/* --- Thumb Color --- */
-									rs_el( PanelRow, {},
-										rs_el( BaseControl, {
-											label: rs__( 'Volume Thumb', 'stream-player' ),
+									sp_el( PanelRow, {},
+										sp_el( BaseControl, {
+											label: sp__( 'Volume Thumb', 'stream-player' ),
 											className: 'color-dropdown-control'
 										},
-											rs_el( Dropdown, {
+											sp_el( Dropdown, {
 												renderContent: () => (
-													rs_el( ColorPicker, {
+													sp_el( ColorPicker, {
 														defaultValue: '',
 														onChangeComplete: color => {
 															props.setAttributes( {thumb_color: color.hex} );
@@ -518,30 +518,30 @@
 													})
 												),
 												renderToggle: (args) => (
-													rs_el( 'div', {className: 'color-dropdown-buttons'},
-														el ( Button, {
+													sp_el( 'div', {className: 'color-dropdown-buttons'},
+														sp_el( Button, {
 															className: 'color-dropdown-thumb_color',
 															onClick: args.onToggle,
 															variant: 'secondary',
 															'aria-expanded': args.isOpen,
 															'aria-haspopup': 'true',
-															'aria-label': rs__( 'Select Volume Thumb Color', 'stream-player' )
+															'aria-label': sp__( 'Select Volume Thumb Color', 'stream-player' )
 														},
-														( ('' != atts.thumb_color) ? atts.thumb_color : rs__( 'Select', 'stream-player' ) )
+														( ('' != atts.thumb_color) ? atts.thumb_color : sp__( 'Select', 'stream-player' ) )
 														),
-														rs_el( Button, {
+														sp_el( Button, {
 															onClick: () => {
 																props.setAttributes( {thumb_color: ''} );
 																args.onClose();
 															},
 															isSmall: true,
 															variant: 'tertiary',
-															'aria-label': rs__( 'Clear Volume Thumb Color Selection', 'stream-player' )
+															'aria-label': sp__( 'Clear Volume Thumb Color Selection', 'stream-player' )
 														},
-														rs__( 'Clear', 'stream-player' )
+														sp__( 'Clear', 'stream-player' )
 														),
 														( ( '' != atts.thumb_color ) &&
-															rs_el( 'style', {}, '.components-button.is-secondary.color-dropdown-thumb_color {background-color:'+atts.thumb_color+'}' )
+															sp_el( 'style', {}, '.components-button.is-secondary.color-dropdown-thumb_color {background-color:'+atts.thumb_color+'}' )
 														)
 													)
 												)
@@ -554,15 +554,15 @@
 
 							/* === Advanced Options === */
 							( ( atts.pro ) &&
-								rs_el( PanelBody, { title: rs__( 'Advanced Options', 'stream-player' ), className: 'stream-block-controls', initialOpen: true },
+								sp_el( PanelBody, { title: sp__( 'Advanced Options', 'stream-player' ), className: 'stream-block-controls', initialOpen: true },
 									/* --- Current Show Display --- */
-									rs_el( PanelRow, {},
-										rs_el( SelectControl, {
-											label: rs__( 'Current Show Display', 'stream-player' ),
+									sp_el( PanelRow, {},
+										sp_el( SelectControl, {
+											label: sp__( 'Current Show Display', 'stream-player' ),
 											options : [
-												{ label: rs__( 'Plugin Setting', 'stream-player' ), value: 'default' },
-												{ label: rs__( 'On', 'stream-player' ), value: 'on' },
-												{ label: rs__( 'Off', 'stream-player' ), value: 'off' },
+												{ label: sp__( 'Plugin Setting', 'stream-player' ), value: 'default' },
+												{ label: sp__( 'On', 'stream-player' ), value: 'on' },
+												{ label: sp__( 'Off', 'stream-player' ), value: 'off' },
 											],
 											onChange: ( value ) => {
 												props.setAttributes( { currentshow: value } );
@@ -571,13 +571,13 @@
 										})
 									),
 									/* ---Now Playing Display --- */
-									rs_el( PanelRow, {},
-										rs_el( SelectControl, {
-											label: rs__( 'Now Playing Track Display', 'stream-player' ),
+									sp_el( PanelRow, {},
+										sp_el( SelectControl, {
+											label: sp__( 'Now Playing Track Display', 'stream-player' ),
 											options : [
-												{ label: rs__( 'Plugin Setting', 'stream-player' ), value: 'default' },
-												{ label: rs__( 'On', 'stream-player' ), value: 'on' },
-												{ label: rs__( 'Off', 'stream-player' ), value: 'off' },
+												{ label: sp__( 'Plugin Setting', 'stream-player' ), value: 'default' },
+												{ label: sp__( 'On', 'stream-player' ), value: 'on' },
+												{ label: sp__( 'Off', 'stream-player' ), value: 'off' },
 											],
 											onChange: ( value ) => {
 												props.setAttributes( { nowplaying: value } );
@@ -586,16 +586,16 @@
 										})
 									),
 									/* --- Track Animation --- */
-									rs_el( PanelRow, {},
-										rs_el( SelectControl, {
-											label: rs__( 'Track Animation', 'stream-player' ),
+									sp_el( PanelRow, {},
+										sp_el( SelectControl, {
+											label: sp__( 'Track Animation', 'stream-player' ),
 											options : [
-												{ label: rs__( 'Plugin Setting', 'stream-player' ), value: 'default' },
-												{ label: rs__( 'No Animation', 'stream-player' ), value: 'none' },
-												{ label: rs__( 'Left to Right Ticker', 'stream-player' ), value: 'lefttoright' },
-												{ label: rs__( 'Right to Left Ticker', 'stream-player' ), value: 'righttoleft' },
-												{ label: rs__( 'Back and Forth', 'stream-player' ), value: 'backandforth' },
-												{ label: rs__( '', 'stream-player' ), value: 'off' },
+												{ label: sp__( 'Plugin Setting', 'stream-player' ), value: 'default' },
+												{ label: sp__( 'No Animation', 'stream-player' ), value: 'none' },
+												{ label: sp__( 'Left to Right Ticker', 'stream-player' ), value: 'lefttoright' },
+												{ label: sp__( 'Right to Left Ticker', 'stream-player' ), value: 'righttoleft' },
+												{ label: sp__( 'Back and Forth', 'stream-player' ), value: 'backandforth' },
+												{ label: sp__( '', 'stream-player' ), value: 'off' },
 											],
 											onChange: ( value ) => {
 												props.setAttributes( { animation: value } );
@@ -604,10 +604,10 @@
 										})
 									),
 									/* --- Metadata URL --- */
-									rs_el( PanelRow, {},
-										rs_el( TextControl, {
-											label: rs__( 'Metadata Source URL', 'stream-player' ),
-											help: rs__( 'Defaults to Stream URL.', 'stream-player' ),
+									sp_el( PanelRow, {},
+										sp_el( TextControl, {
+											label: sp__( 'Metadata Source URL', 'stream-player' ),
+											help: sp__( 'Defaults to Stream URL.', 'stream-player' ),
 											onChange: ( value ) => {
 												props.setAttributes( { metadata: value } );
 											},

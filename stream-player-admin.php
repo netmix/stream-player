@@ -1166,30 +1166,3 @@ function stream_player_record_subscribe() {
 	wp_send_json( $response, 200 );
 }
 
-// ------------------
-// AJAX Clear Notices
-// ------------------
-// (for manual use in development testing)
-add_action( 'wp_ajax_stream_player_clear_option', 'stream_player_clear_plugin_options' );
-function stream_player_clear_plugin_options() {
-
-	if ( !current_user_can( 'manage_options' ) ) {
-		return;
-	}
-
-	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	if ( isset( $_GET['option'] ) ) {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$option = sanitize_text_field( wp_unslash( $_GET['option'] ) );
-		if ( 'subscribed' == $option ) {
-			delete_option( 'stream_player_subscribed' );
-		} elseif ( 'notices' == $option ) {
-			delete_option( 'stream_player_read_notices' );
-		} elseif ( 'upgrades' == $option ) {
-			delete_option( 'stream_player_read_upgrades' );
-		}
-	}
-
-	exit;
-}
-

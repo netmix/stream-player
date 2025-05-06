@@ -26,8 +26,8 @@ if ( !defined( 'ABSPATH' ) ) exit;
 function stream_player_get_block_callbacks() {
 
 	// --- set block names and related callbacks ---
-	// note: this player library function is correct
-	$callbacks = array( 'player' => 'stream_player_player_shortcode' );
+	// 2.5.12: fix to mismatched stream player shortcode function name
+	$callbacks = array( 'player' => 'stream_player_shortcode' );
 
 	// --- filter and return ---
 	$callbacks = apply_filters( 'stream_player_block_callbacks', $callbacks );
@@ -49,12 +49,15 @@ function stream_player_get_block_attributes() {
 			// ---- Player Options ---
 			'script' => array( 'type' => 'string', 'default' => 'default' ),
 			'volume' => array( 'type' => 'number', 'default' => 77 ),
+			// 2.5.14: added missing volumes attribute
+			'volumes' => array( 'type' => 'array', 'default' => array( 'slider' ) ),			
 			'default' => array( 'type' => 'boolean', 'default' => false ),
 			// --- Player Styles ---
 			'layout' => array( 'type' => 'string', 'default' => 'horizontal' ),
 			'theme' => array( 'type' => 'string', 'default' => 'default' ),
 			'buttons' => array( 'type' => 'string', 'default' => 'default' ),
 		),
+		// 'jukebox' => ...
 	);
 
 	// --- add default switches to each block ---
@@ -81,7 +84,9 @@ function stream_player_register_blocks() {
 
 	// --- loop block names to register blocks ---
 	foreach ( $callbacks as $block_slug => $callback ) {
-		$block_key = 'stream-player/' . $block_slug;
+		// 2.5.14: sync block prefix with radio station plugin
+		// (to allow for changing plugins without affecting blocks)
+		$block_key = 'radio-station/' . $block_slug;
 		$args = array(
 			'render_callback' => $callback,
 			'attributes'      => $attributes[$block_slug],
@@ -134,13 +139,16 @@ function stream_player_block_editor_assets() {
 
 	// --- block editor support for conditional loading ---
 	$script_url = plugins_url( '/blocks/editor.js', STREAM_PLAYER_FILE );
-	$script_path = STREAM_PLAYER_DIR . 'blocks/editor.js';
+	// 2.5.12: fix to add missing / in script path
+	$script_path = STREAM_PLAYER_DIR . '/blocks/editor.js';
 	$version = filemtime( $script_path );
 	wp_enqueue_script( 'stream-blockedit-js', $script_url, $deps, $version, true );
 
 	// 2.5.0: added for script loading
 	// $js = "var stream_ajax_url = " . admin_url( 'admin-ajax.php' ) . "'; ";
-	$js = "var stream_player_script = " . esc_js( plugins_url( '/player/js/radio-player.js', STREAM_PLAYER_FILE ) ) . "';";
+	$js = "var stream_player_script = '" . esc_js( plugins_url( '/player/js/radio-player.js', STREAM_PLAYER_FILE ) ) . "';";
+	// 2.5.12: add stream player settings
+	$js .= stream_player_get_player_settings();
 	wp_add_inline_script( 'stream-blockedit-js', $js, 'before' );
 
 	// --- add block control style fix inline ---
@@ -163,8 +171,7 @@ function stream_player_block_editor_assets() {
 		wp_enqueue_style( 'radio-player', $style_url, array(), $version, 'all' );
 
 		// --- enqueue player control styles inline ---
-		// $control_styles = radio_station_player_control_styles( false );
-		stream_player_control_styles( false );
+		$control_styles = stream_player_control_styles( false );
 		wp_add_inline_style( 'radio-player', $control_styles );
 	}
 }
