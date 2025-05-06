@@ -1027,13 +1027,14 @@ function stream_player_ajax() {
 	// 2.5.10: set document title with javascript
 	if ( isset( $atts['title'] ) && $atts['title'] && ( '' != $atts['title'] ) ) {
 		$js = "document.title = '" . esc_js( $atts['title'] ) . "';" . "\n";
-		radio_player_add_inline_script( $js );
+		// 2.5.10.1: fix to incorrect function name
+		stream_player_inline_script( $js );
 	}
 
 	// --- open HTML and head ---
+	// 2.5.10: set title with javascript instead to avoid output buffering entirely
 	// 2.5.0: buffer head content to maybe replace window title tag
 	// note: do not remove these span tags, they magically "fix" broken output buffering!?
-	// 2.5.10: set title with javascript instead to avoid output buffering entirely
 	echo '<html><head>' . "\n";
 	// echo '<span></span>';
 	// ob_start();
@@ -1572,7 +1573,7 @@ function stream_player_enqueue_script( $script ) {
 
 	// --- output script tag ---
 	if ( '' != $js ) {
-		stream_player_inline_script( $js, 'after' );
+		stream_player_inline_script( $js );
 	}
 	
 	// --- set specific script as enqueued ---
@@ -1777,10 +1778,10 @@ function stream_player_get_player_settings( $echo = false ) {
 
 	global $radio_player;
 	
-	if ( isset( $radio_player['localized-script'] ) ) {
+	/* if ( isset( $radio_player['localized-script'] ) ) {
 		return '';
 	}
-	$radio_player['localized-script'] = true;
+	$radio_player['localized-script'] = true; */
 	
 	$js = '';
 
@@ -2075,13 +2076,13 @@ function stream_player_get_player_settings( $echo = false ) {
 	}, 1000);" . "\n";
 
 	// --- periodic save to user meta ---
-	echo "rp_save_interval = radio_player.settings.saveinterval * 1000;
+	echo "radio_player_save_interval = radio_player.settings.saveinterval * 1000;
 	var stream_player_state_saver = setInterval(function() {
 		if (typeof radio_player_data.state != 'undefined') {
 			if (!radio_player_data.state.loggedin) {clearInterval(stream_player_state_saver); return;}
 			radio_player_save_user_state();
 		}
-	}, rp_save_interval);" . "\n";
+	}, radio_player_save_interval);" . "\n";
 
 	// 2.5.7: maybe return output buffer if not echoing
 	if ( !$echo ) {

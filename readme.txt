@@ -6,7 +6,7 @@ License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 4.0
 Tested up to: 6.7
-Stable tag: 2.5.9.13
+Stable tag: 2.5.12
 
 Free, open source streaming audio player plugin by netmix®. Works with Icecast, Shoutcast, and Live 365 streams. For additional features, upgrade to Stream Player PRO.
 
@@ -85,6 +85,9 @@ Stream Player uses the Amplitude and jPlayer scripts to play audio. In the that 
 4. Player Block/Widget
 
 == Changelog ==
+
+= 2.5.12 =
+* Fixed: Player Block rendering function
 
 = 2.5.9.13 =
 * Updated: admin icon

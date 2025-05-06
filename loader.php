@@ -2545,7 +2545,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 		// 1.2.4: added missing public visibility declaration
 		public function settings_resources( $media = true, $color_picker = true ) {
 
-			// 1.3.5
+			// 1.3.5: set default scripts to enqueue
 			$this->scripts = array( 'notice_boxer', 'tab_switcher', 'settings_reset' );
 
 			// --- number input step script ---

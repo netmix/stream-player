@@ -143,8 +143,8 @@ $options = array(
 		'default' => array( 'amplitude', 'howler', 'jplayer' ),
 		'options' => array(
 			'jplayer'   => __( 'jPlayer', 'stream-player' ),
-			'howler'    => __( 'Howler', 'stream-player' ),
 			'amplitude' => __( 'Amplitude', 'stream-player' ),
+			// 'howler'    => __( 'Howler', 'stream-player' ),
 		),
 		'helper'  => __( 'Enabled fallback audio scripts to try when the default Player script fails.', 'stream-player' ),
 		'tab'     => 'player',
