@@ -5,8 +5,8 @@ Tags: player, stream, audio, radio, broadcast
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 4.0
-Tested up to: 6.7
-Stable tag: 2.5.12
+Tested up to: 6.8.2
+Stable tag: 2.5.14
 
 Free, open source streaming audio player plugin by netmix®. Works with Icecast, Shoutcast, and Live 365 streams. For additional features, upgrade to Stream Player PRO.
 
@@ -85,6 +85,14 @@ Stream Player uses the Amplitude and jPlayer scripts to play audio. In the that 
 4. Player Block/Widget
 
 == Changelog ==
+
+= 2.5.14 =
+* Fixed: Player resume (play/pause/play) glitch for Amplitude
+* Fixed: jPlayer change old fallback SWF path to empty string
+
+= 2.5.13 =
+* Updated: Freemius SDK (2.12.0)
+* Fixed: load text domain too early notice
 
 = 2.5.12 =
 * Fixed: Player Block rendering function

@@ -208,6 +208,14 @@ function stream_player_freemius_load_path( $freemius_path, $namespace, $args ) {
 	return $freemius_path;
 }
 
+// -----------------------
+// Load Plugin Text Domain
+// -----------------------
+// add_action( 'init', 'stream_player_init' );
+function stream_player_init() {
+	load_plugin_textdomain( 'stream-player', false, STREAM_PLAYER_DIR . '/languages' );
+}
+
 // --------------------------------
 // Filter Freemius Plugin Icon Path
 // --------------------------------
@@ -643,6 +651,19 @@ function stream_player_widget_player_allowed_html( $allowed, $type, $context ) {
 		'max'         => array(),
 		'min'         => array(),
 		'aria-label'  => array(),
+	);
+
+	// --- select ---
+	// 2.5.13: add select tag
+	$allowed['select'] = array(
+		'id'          => array(),
+		'class'       => array(),
+		'name'        => array(),
+		'value'       => array(),
+		'type'        => array(),
+		'multiselect' => array(),
+		'style'       => array(),
+		'onchange'    => array(),
 	);
 
 	// --- styles ---
