@@ -61,6 +61,23 @@ $options = array(
 		'section' => 'source',
 	),
 
+	// --- [Player] Stream GeoBlocking ---
+	'stream_geo_blocking' => array(
+		'label'		=> __( 'GeoIP Stream Blocking', 'radio-station' ),
+		'type'		=> 'select',
+		'options' => array(
+			''			=> __( 'No GeoIP Blocking', 'radio-station' ),
+			'live365'	=> __( 'Live365 (only US, UK, Canada, Mexico)', 'radio-station' ),
+			// 'blacklist' => __( 'Custom Country Blacklist', 'radio-station' ),
+			// 'whitelist' => __( 'Custom Country Whitelist', 'radio-station' ),
+		),
+		'default' => '',
+		'helper'  => __( 'Block streaming according to country, detected by user IP address.', 'radio-station' ),
+		'tab'     => 'stream',
+		'section' => 'source',
+		'pro'     => true,
+	),
+
 	// === Channel ===
 
 	// --- [Player] Station Title ---
