@@ -97,14 +97,7 @@ Stream Player uses the Amplitude and jPlayer scripts to play audio. In the that 
 = 2.5.12 =
 * Fixed: Player Block rendering function
 
-= 2.5.9.13 =
-* Updated: admin icon
-
-= 2.5.9.12 =
-* Updated: readme.txt
-* Added: plugin page screenshots
-
-= 2.5.9.11 =
+= 2.5.11 =
 * Fixed: duplicate function conflict stream_player_add_inline_script
 
 = 2.5.9.10 =
