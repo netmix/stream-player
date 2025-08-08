@@ -299,12 +299,13 @@ $options = array(
 
 	// --- [Pro/Player] Player Autoresume ---
 	// 2.5.15: change autoresume value to require manual activation
+	// 2.5.16: updated helper text
 	'player_autoresume' => array(
 		'type'    => 'checkbox',
 		'label'   => __( 'Autoresume Playback', 'stream-player' ),
 		'default' => '',
 		'value'   => 'on',
-		'helper'  => __( 'Attempt to resume playback if visitor was playing. Only triggered when the user first interacts with the page.', 'stream-player' ),
+		'helper'  => __( 'On return to site or page reload, ask the user to resume stream playback if they were playing the stream previously, using a popup a modal dialogue box.', 'stream-player' ),
 		'tab'     => 'player',
 		'section' => 'advanced',
 		'pro'     => true,

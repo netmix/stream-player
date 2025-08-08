@@ -27,7 +27,7 @@ function stream_player_get_block_callbacks() {
 
 	// --- set block names and related callbacks ---
 	// 2.5.12: fix to mismatched stream player shortcode function name
-	$callbacks = array( 'player' => 'stream_player_shortcode' );
+	$callbacks = array( 'player' => 'stream_player_block_shortcode' );
 
 	// --- filter and return ---
 	$callbacks = apply_filters( 'stream_player_block_callbacks', $callbacks );
