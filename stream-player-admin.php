@@ -63,8 +63,9 @@ function stream_player_enqueue_admin_scripts() {
 	// 2.5.0: maybe enqueue pricing page styles
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	if ( isset( $_REQUEST['page'] ) && ( 'stream-player-pricing' == sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ) ) ) {
-		$style_url = plugins_url( 'freemius-pricing/freemius-pricing.css', STREAM_PLAYER_FILE );
-		$style_path = STREAM_PLAYER_DIR . '/freemius-pricing/freemius-pricing.css';
+		// 2.5.18: fix to Freemius pricing stylesheet paths
+		$style_url = plugins_url( 'vendor/freemius-pricing/freemius-pricing.css', STREAM_PLAYER_FILE );
+		$style_path = STREAM_PLAYER_DIR . '/vendor/freemius-pricing/freemius-pricing.css';
 		$version = filemtime( $style_path );
 		wp_enqueue_style( 'freemius-pricing', $style_url, array(), $version, 'all' );
 	}
@@ -140,8 +141,7 @@ function stream_player_settings_cap_check() {
 add_action( 'admin_menu', 'stream_player_add_admin_menus' );
 function stream_player_add_admin_menus() {
 
-	// TODO: create stream player icon
-	$icon = plugins_url( 'images/stream-player-icon.png', STREAM_PLAYER_FILE );
+	$icon = plugins_url( 'images/stream-player-icon.png?v=2', STREAM_PLAYER_FILE );
 	$position = apply_filters( 'stream_player_menu_position', 5 );
 	$settingscap = apply_filters( 'stream_player_manage_options_capability', 'manage_options' );
 	$sp = __( 'Stream Player', 'stream-player' );

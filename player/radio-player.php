@@ -15,25 +15,28 @@ if ( !defined( 'ABSPATH' ) ) exit;
 // - Player Shortcode
 // - AJAX: Player Display
 // - Add Inline Styles
-// - Print Footer Styles
+// - Enqueue Footer Styles
 // - Sanitize Shortcode Values
 // - Sanitize Values
 // - Media Elements Interface
 // === Player Scripts ===
 // - Enqueue Player Javasscripts
 // - Enqueue Player Script
+// - Add Inline Script
+// - Enqueue Footer Scripts
 // - Lazy Load Audio Script Fallbacks
 // - Enqueue Amplitude Javascript
 // - Enqueue JPlayer Javascript
+// - Enqueue Audio5 Javascript
 // - Enqueue Howler Javascript
 // * Enqueue Media Element Javascript
 // - Dynamic Load Script via AJAX
 // - Get Player Settings
 // - User State Iframe
 // - AJAX: Update User State
-// - Load Amplitude Function
-// - Load JPlayer Function
-// - Load Howler Function
+// x Load Amplitude Function
+// x Load JPlayer Function
+// x Load Howler Function
 // * Load Media Element Function
 // - Get Default Player Script
 // - Enqueue Player Styles
@@ -85,9 +88,10 @@ if ( !defined( 'ABSPATH' ) ) exit;
 // ----------------------
 //
 // --- player resource URL ---
-// STREAM_PLAYER_URL - define player URL path for standalone compatible version
+// 2.5.18: change constant name from STREAM_PLAYER_URL to avoid conflict
+// STREAM_PLAYER_DIR_URL - define player URL path for standalone compatible version
 // (note: should have a trailing slash!) eg. to use as a WordPress mu-plugins dropin:
-// define( 'STREAM_PLAYER_URL', 'https://example.com/wp-content/mu-plugins/player/');
+// define( 'STREAM_PLAYER_DIR_URL', 'https://example.com/wp-content/mu-plugins/player/');
 // (then include /mu-plugins/player/radio-player.php from a file in /mu-plugins/)
 
 // --- player script and skin ---
@@ -178,9 +182,14 @@ function stream_player_set_debug_mode() {
 	if ( function_exists( 'stream_player_get_setting' ) ) {
 		$debug = stream_player_get_setting( 'player_debug' );
 	} 
+	// 2.5.18: allow for querystring to disable player debug setting
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	if ( isset( $_REQUEST['player-debug'] ) && ( '1' === sanitize_text_field( wp_unslash( $_REQUEST['player-debug'] ) ) ) ) {
-		$debug = true;
+	if ( isset( $_REQUEST['player-debug'] ) ) {
+		if ( '1' === sanitize_text_field( wp_unslash( $_REQUEST['player-debug'] ) ) ) {
+			$debug = true;
+		} elseif ( '0' === sanitize_text_field( wp_unslash( $_REQUEST['player-debug'] ) ) ) {
+			$debug = false;
+		}
 	}
 	if ( function_exists( 'apply_filters' ) ) {
 		$debug = apply_filters( 'radio_station_player_debug', $debug );
@@ -201,7 +210,7 @@ function stream_player_set_debug_mode() {
 // Array Key | Accepts
 // 'title'   | [String]: Player/Station Title - 0 for none
 // 'image'   | [URL]: Player/Station Image  (eg. Logo) - recommended size 256x256
-// 'script'  | 'amplitude' (default), 'jplayer', 'howler', // 'mediaelements'
+// 'script'  | 'amplitude' (default), 'jplayer', 'howler', 'audio5' // , 'mediaelements'
 // 'layout'  | 'horizontal', 'vertical'
 // 'theme'   | 'light', 'dark'
 // 'buttons' | 'circular', 'rounded', 'square'
@@ -289,7 +298,8 @@ function stream_player_output( $args = array(), $echo = false ) {
 	$container_id = 'radio_container_' . $instance;
 
 	// --- set Player div ---
-	$classes = array( 'radio-player', 'rp-player', 'script-' . $args['script'] );
+	// 2.5.18: add stream-player class for cross-compatibility
+	$classes = array( 'stream-player', 'radio-player', 'rp-player', 'script-' . $args['script'] );
 	if ( $args['default'] ) {
 		$classes[] = 'default-player';
 	}
@@ -337,7 +347,8 @@ function stream_player_output( $args = array(), $echo = false ) {
 		// 2.5.10: use esc_url not esc_url_raw
 		$html['player_open'] .= ' data-meta="' . esc_url( $args['metadata'] ) . '"';
 	}
-	$html['player_open'] .= '>' . "\n" . '	<div class="rp-type-single">' . "\n";
+	$html['player_open'] .= '>' . "\n";
+	$html['player_open'] .= '<div class="rp-type-single">' . "\n";
     $html['player_close'] = '</div></div>' . "\n";
 
 	// --- set interface wrapper ---
@@ -366,7 +377,7 @@ function stream_player_output( $args = array(), $echo = false ) {
 			$classes[] = 'no-image';
 		}
 		$class_list = implode( ' ', $classes );
-		$html['station'] .= '	<div id="rp-station-image-' . esc_attr( $instance ) . '" class="' . esc_attr( $class_list ) . '">';
+		$html['station'] .= '<div id="rp-station-image-' . esc_attr( $instance ) . '" class="' . esc_attr( $class_list ) . '">';
 		$html['station'] .= $image . '</div>' . "\n";
 
 		// --- station text display ---
@@ -380,13 +391,13 @@ function stream_player_output( $args = array(), $echo = false ) {
 			$title_display = apply_filters( 'radio_player_station_display', $title_display, $args, $instance );
 			$station_text_html = '<div class="rp-station-title" aria-label="' . esc_attr( __( 'Station Name', 'stream-player' ) ) . '">' . wp_kses( $title_display, $allowed ) . '</div>' . "\n";
 
+			// 2.5.18: add tagline display
+			$tagline_display = isset( $args['tagline'] ) ? $args['tagline'] : '';
+			$tagline_display = apply_filters( 'radio_player_tagline_display', $tagline_display, $args, $instance );
+			$station_text_html .= '<div class="rp-station-tagline">' . wp_kses( $tagline_display, $allowed ) . '</div>' . "\n";
+
 			// --- station timezone / location / frequency ---
 			// 2.5.0: add filters for timezone / frequency / location display
-			// TODO: add timezone / frequency / location attributes ?
-			$timezone_display = isset( $args['timezone'] ) ? $args['timezone'] : '';
-			$timezone_display = apply_filters( 'radio_player_timezone_display', $timezone_display, $args, $instance );
-			$station_text_html .= '<div class="rp-station-timezone">' . wp_kses( $timezone_display, $allowed ) . '</div>' . "\n";
-
 			$frequency_display = isset( $args['frequency'] ) ? $args['frequency'] : '';
 			$frequency_display = apply_filters( 'radio_player_frequency_display', $frequency_display, $args, $instance );
 			$station_text_html .= '<div class="rp-station-frequency">' . wp_kses( $frequency_display, $allowed ) . '</div>' . "\n";
@@ -395,6 +406,10 @@ function stream_player_output( $args = array(), $echo = false ) {
 			$location_display = isset( $args['location'] ) ? $args['location'] : '';
 			$location_display = apply_filters( 'radio_player_location_display', $location_display, $args, $instance );
 			$station_text_html .= '<div class="rp-station-location">' . wp_kses( $location_display, $allowed ) . '</div>' . "\n";
+
+			$timezone_display = isset( $args['timezone'] ) ? $args['timezone'] : '';
+			$timezone_display = apply_filters( 'radio_player_timezone_display', $timezone_display, $args, $instance );
+			$station_text_html .= '<div class="rp-station-timezone">' . wp_kses( $timezone_display, $allowed ) . '</div>' . "\n";
 			
 			$html['station'] .= $station_text_html;
 
@@ -410,6 +425,13 @@ function stream_player_output( $args = array(), $echo = false ) {
 			$html['controls'] .= '</div>' . "\n";
 			// $html['controls'] .= '		<button class="rp-stop" role="button" tabindex="0">' . esc_html( __( 'Stop', 'stream-player' ) ) . '</button>' . "\n";
 		$html['controls'] .= '	</div>' . "\n";
+
+		// 2.5.18: preload the pause icon to prevent display glitch on play
+		$theme = stream_player_get_setting( 'player_theme' );
+		$buttons = stream_player_get_setting( 'player_buttons' );
+		$pause_icon_url = plugins_url( '/player/images/pause-' . $theme . '-' . $buttons . '.png', STREAM_PLAYER_FILE );
+		$html['controls'] .= '<img style="display:none !important; height: 0; width: 0;" src="' . $pause_icon_url . '?v=2">' . "\n";
+
 	$html['controls'] .= '</div>' . "\n";
 
 	// --- Volume Controls ---
@@ -441,8 +463,8 @@ function stream_player_output( $args = array(), $echo = false ) {
 	if ( STREAM_PLAYER_DEBUG ) {
 		$html['switcher'] = '<div class="rp-script-switcher">' . "\n";
 			$html['switcher'] .= '<div class="rp-show-switcher" onclick="radio_player_show_switcher(' . esc_js( $instance ) . ');">*</div>';
-			$html['switcher'] .= '<select class="rp-script-select" name="rp-script-select" style="display:none;">' . "\n";
-			$scripts = array( 'amplitude' => 'Amplitude', 'jplayer' => 'jPlayer', 'howler' => 'Howler' );
+			$html['switcher'] .= '<select class="rp-script-select" name="rp-script-select">' . "\n";
+			$scripts = array( 'amplitude' => 'Amplitude', 'jplayer' => 'jPlayer', 'audio5' => 'Audio5', 'howler' => 'Howler' );
 			foreach ( $scripts as $script => $label ) {
 				$html['switcher'] .= '<option value="' . esc_attr( $script ) . '"';
 				if ( $script == $args['script'] ) {
@@ -463,7 +485,11 @@ function stream_player_output( $args = array(), $echo = false ) {
 		$show_text_html .= '<div class="rp-show-shift"></div>' . "\n";
 		$show_text_html .= '<div class="rp-show-remaining"></div>' . "\n";
 	$show_text_html .= '</div>' . "\n";
-	$show_text_html .= '<div id="rp-show-image-' . esc_attr( $instance ) . '" class="rp-show-image no-image" aria-label="' . esc_attr( __( 'Show Logo Image', 'stream-player' ) ) . '"></div>' . "\n";
+
+	// 2.5.18: make show logo clickable
+	$show_text_html .= '<a href="javascript:void(0);" class="rp-show-image-link">' . "\n";
+		$show_text_html .= '<div id="rp-show-image-' . esc_attr( $instance ) . '" class="rp-show-image no-image" aria-label="' . esc_attr( __( 'Show Logo Image', 'stream-player' ) ) . '"></div>' . "\n";
+	$show_text_html .= '</a>' . "\n";
 
 	$html['show'] = '<div class="rp-show-info">' . "\n";
 		$html['show'] .= $show_text_html;
@@ -542,7 +568,8 @@ function stream_player_output( $args = array(), $echo = false ) {
 		$station_text_alt = apply_filters( 'radio_station_player_station_text_alt', $station_text_alt, $args, $instance );
 		$station_text_alt = apply_filters( 'radio_player_station_text_alt', $station_text_alt, $args, $instance );
 	}
-	$show_text_alt = '<div class="rp-station-text-alt">' . $show_text_html . '</div>' . "\n";
+	// 2.5.18: fix class from rp-station-text-alt
+	$show_text_alt = '<div class="rp-show-text-alt">' . $show_text_html . '</div>' . "\n";
 	if ( function_exists( 'apply_filters' ) ) {
 		$show_text_alt = apply_filters( 'radio_station_player_show_text_alt', $show_text_alt, $args, $instance );
 		$show_text_alt = apply_filters( 'radio_player_show_text_alt', $show_text_alt, $args, $instance );
@@ -686,7 +713,7 @@ function stream_player_block_shortcode( $atts, $content ) {
 				}
 			});
 		});";
-		stream_player_inline_script( $js );
+		stream_player_add_inline_script( $js );
 		$radio_player['control_styles_script'] = true;
 	}
 
@@ -708,6 +735,7 @@ function stream_player_shortcode( $atts, $echo = false ) {
 
 	// --- set base defaults ---
 	$title = $image = $image_url = '';
+	$meta = array();
 	$script = 'amplitude';
 	$layout = 'horizontal';
 	$theme = 'light';
@@ -736,9 +764,23 @@ function stream_player_shortcode( $atts, $echo = false ) {
 		$image = apply_filters( 'radio_player_default_image_display', $image );
 	}
 
+	// 2.5.18: player meta display
+	if ( defined( 'STREAM_PLAYER_META_DISPLAY' ) ) {
+		$meta = STREAM_PLAYER_META_DISPLAY;
+		if ( is_string( $meta ) ) {
+			$meta = explode( ',', $meta );
+		}
+	} elseif ( function_exists( 'stream_player_get_setting' ) ) {
+		$meta = stream_player_get_setting( 'player_meta' );
+	} elseif ( function_exists( 'apply_filters' ) ) {
+		$meta = apply_filters( 'radio_station_player_default_meta_display', $meta );
+		$meta = apply_filters( 'radio_player_default_meta_display', $meta );
+	}
+
 	// --- set default player script ---
-	// 2.5.7: disable howler script
-	$scripts = array( 'amplitude', 'jplayer' ); // 'howler', 'mediaelements'
+	// 2.5.7: disable howler script for default usage
+	// 2.5.18: added audio5 test support
+	$scripts = array( 'amplitude', 'jplayer', 'audio5' ); // 'howler', 'mediaelements'
 	if ( defined( 'STREAM_PLAYER_SCRIPT' ) && in_array( STREAM_PLAYER_SCRIPT, $scripts ) ) {
 		$script = STREAM_PLAYER_SCRIPT;
 	} elseif ( function_exists( 'stream_player_get_setting' ) ) {
@@ -824,6 +866,7 @@ function stream_player_shortcode( $atts, $echo = false ) {
 		'fformat'   => '',
 		'title'	    => $title,
 		'image'	    => $image,
+		'meta'      => $meta,
 		// --- player options ---
 		'script'    => $script,
 		'layout'    => $layout,
@@ -857,7 +900,9 @@ function stream_player_shortcode( $atts, $echo = false ) {
 
 	// --- merge attribute values ---
 	if ( function_exists( 'shortcode_atts' ) ) {
+		// 2.5.18: add stream-player context for cross-compatibility
 		$atts = shortcode_atts( $defaults, $atts, 'radio-player' );
+		$atts = shortcode_atts( $defaults, $atts, 'stream-player' );
 	}
 	foreach ( $defaults as $key => $value ) {
 		if ( !isset( $atts[$key] ) ) {
@@ -909,6 +954,18 @@ function stream_player_shortcode( $atts, $echo = false ) {
 				$atts['image'] = apply_filters( 'radio_player_default_image', $atts['image'] );
 			}
 		}
+	}
+	
+	// 2.5.18: get default station meta display values
+	if ( function_exists( 'stream_player_get_setting' ) ) {
+		$atts['tagline'] = stream_player_get_setting( 'station_tagline' );
+		$atts['frequency'] = stream_player_get_setting( 'station_frequency' );
+		$band = stream_player_get_setting( 'station_band' );
+		if ( '' != $band ) {
+			$atts['frequency'] .= ' ' . $band;
+		}
+		$atts['location'] = stream_player_get_setting( 'station_location' );
+		$atts['timezone'] = stream_player_get_setting( 'station_timezone' );
 	}
 
 	// DEV TEMP: allow default script override via querystring
@@ -1011,6 +1068,19 @@ function stream_player_default_colors( $atts ) {
 	return $atts;
 }
 
+// -----------------
+// AJAX: Player Init
+// -----------------
+add_action( 'plugins_loaded', 'stream_player_ajax_init', 999 );
+function stream_player_ajax_init() {
+	if ( isset( $_REQUEST['action'] ) && ( 'radio_player' == sanitize_text_field( wp_unslash( $_REQUEST['action'] ) ) ) ) {
+		// 2.5.18: signal this is not actually admin
+		if ( !defined( 'WP_ADMIN' ) ) {
+			define( 'WP_ADMIN', false );
+		}
+	}
+}
+
 // --------------------
 // AJAX: Player Display
 // --------------------
@@ -1020,6 +1090,12 @@ function stream_player_ajax() {
 
 	// --- sanitize shortcode attributes ---
 	$atts = stream_player_sanitize_shortcode_values();
+	
+	// 2.5.18: conflict fix for theme key
+	if ( isset( $atts['ptheme'] ) ) {
+		$atts['theme'] = $atts['ptheme'];
+		unset( $atts['ptheme'] );
+	}
 
 	// 2.5.0: anti-conflict with WP theme querystring overrides
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -1076,17 +1152,21 @@ function stream_player_ajax() {
 		$background_color = apply_filters( 'radio_player_background_color', $background_color, false );
 	}
 
+	// 2.5.18: added filter for AJAX player atts
+	$atts = apply_filters( 'stream_player_ajax_atts', $atts );
+
 	// --- maybe add text color ---
 	// 2.5.0: added for matching with background color
 	// 2.5.6: fix for undefined variable css
 	// 2.5.10: moved up so that inline style can be in header
 	// 2.5.14: add body prefix to selector
-	$css = '';
+	// 2.5.18: reset body margins (from theme styles)
+	$css = 'body {margin: 0 !important; padding: 10px !important;}';
 	if ( '' != $text_color ) {
 		if ( ( 'rgb' != substr( $text_color, 0, 3 ) ) && ( '#' != substr( $text_color, 0, 1 ) ) ) {
 			$text_color = '#' . $text_color;
 		}
-		$css .= 'body #player-contents {color: ' . esc_attr( $text_color ) . ';}' . "\n";
+		$css .= 'body #player-contents {color: ' . esc_attr( $text_color ) . ' !important;}' . "\n";
 	}
 
 	// --- maybe add background color ---
@@ -1095,14 +1175,14 @@ function stream_player_ajax() {
 		if ( ( 'rgb' != substr( $background_color, 0, 3 ) ) && ( '#' != substr( $background_color, 0, 1 ) ) ) {
 			$background_color = '#' . $background_color;
 		}
-		$css .= 'body, body #player-contents {background-color: ' . esc_attr( $background_color ) . ';}' . "\n";
+		$css .= 'body, body #player-contents {background-color: ' . esc_attr( $background_color ) . ' !important;}' . "\n";
 	}
 
 	// 2.5.10: set document title with javascript
 	if ( isset( $atts['title'] ) && $atts['title'] && ( '' != $atts['title'] ) ) {
 		$js = "document.title = '" . esc_js( $atts['title'] ) . "';" . "\n";
 		// 2.5.10.1: fix to incorrect function name
-		stream_player_inline_script( $js );
+		stream_player_add_inline_script( $js );
 	}
 
 	// --- open HTML and head ---
@@ -1191,36 +1271,39 @@ function stream_player_ajax() {
 // 2.5.6: added for possible missed inline styles (via shortcodes)
 function stream_player_add_inline_style( $css ) {
 
-	// TODO: find a way to fix this? it does NOT enqueue inline
 	// --- add check if style is already done ---
-	if ( wp_style_is( 'radio-player', 'registered' ) && !wp_style_is( 'radio-player', 'done' ) ) {
+	// 2.5.18: change radio-player style handle to stream-player
+	if ( wp_style_is( 'stream-player', 'registered' ) && !wp_style_is( 'stream-player', 'done' ) ) {
 
 		// --- add styles as normal ---
-		wp_add_inline_style( 'radio-player', $css );
+		wp_add_inline_style( 'stream-player', $css );
 		
 	} else {
 
-		$version = function_exists( 'radio_station_plugin_version' ) ? radio_station_plugin_version() : '2.5.0';
-		wp_register_style( 'radio-player-footer', null, array(), $version, 'all' );
-		wp_enqueue_style( 'radio-player-footer' );
-		wp_add_inline_style( 'radio-player-footer', $css );
+		// 2.5.18: only register to allow for multiple additions
+		if ( !wp_style_is( 'stream-player-footer', 'registered' ) ) {
+			$version = function_exists( 'radio_station_plugin_version' ) ? radio_station_plugin_version() : '2.5.0';
+			wp_register_style( 'stream-player-footer', null, array(), $version, 'all' );
+			// wp_enqueue_style( 'stream-player-footer' );
+		}
+		wp_add_inline_style( 'stream-player-footer', $css );
 
-		// --- fallback: store extra styles for later output ---
-		// global $radio_player_styles;
-		// add_action( 'wp_print_footer_scripts', 'radio_player_print_footer_styles', 20 );
-		// if ( !isset( $radio_player_styles ) ) {
-		//	$radio_player_styles = '';
-		// }
-		// $radio_player_styles .= $css;
-
+		// 2.5.18: enqueue late to allow for in-between additions
+		if ( !has_action( 'wp_footer', 'stream_player_enqueue_footer_styles', 9 ) ) {
+			add_action( 'wp_footer', 'stream_player_enqueue_footer_styles', 9 );
+		}
 	}
 }
 
-// -------------------
-// Print Footer Styles
-// -------------------
+// ---------------------
+// Enqueue Footer Styles
+// ---------------------
 // 2.5.6: added for possible missed inline styles (via shortcode)
 // 2.5.10: removed in favour of enqueueing inline style to dummy
+// 2.5.18: change to add enqueueing late to catch player bar control styles
+function stream_player_enqueue_footer_styles() {
+	wp_enqueue_style( 'stream-player-footer' );	
+}
 
 // -------------------------
 // Sanitize Shortcode Values
@@ -1230,13 +1313,16 @@ function stream_player_sanitize_shortcode_values() {
 	// --- current show attribute keys ---
 	// 2.5.0: added alternative text attribute
 	// 2.5.0: added block attribute
+	// 2.5.18: added audio5 script option
+	// 2.5.18: added ptheme key for conflict fix
 	$keys = array(
 		'url'        => 'url',
 		'title'	     => 'text',
 		'image'	     => 'url',
-		'script'     => 'howler/amplitude/jplayer',
+		'script'     => 'amplitude/jplayer/audio5/howler',
 		'layout'     => 'text',
 		'theme'      => 'text',
+		'ptheme'     => 'text',
 		'buttons'    => 'text',
 		'volume'     => 'integer',
 		'default'    => 'boolean',
@@ -1414,8 +1500,8 @@ function stream_player_core_scripts() {
 	if ( function_exists( 'wp_enqueue_script' ) ) {
 
 		// --- enqueue player script ---
-		if ( defined( 'STREAM_PLAYER_URL' ) ) {
-			$url = STREAM_PLAYER_URL . 'js/sysend.js';
+		if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {
+			$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . 'js/sysend.js';
 		} elseif ( defined( 'STREAM_PLAYER_FILE' ) ) {
 			$url = plugins_url( 'player/js/sysend.js', STREAM_PLAYER_FILE );
 		} else {
@@ -1427,8 +1513,8 @@ function stream_player_core_scripts() {
 
 		// --- output script tag directly ---
 		$url = 'js/sysend.js';
-		if ( defined( 'STREAM_PLAYER_URL' ) ) {
-			$url = STREAM_PLAYER_URL . $url;
+		if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {
+			$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . $url;
 		}
 		stream_player_script_tag( $url, $version );
 		$radio_player['printed_sysend'] = true;
@@ -1449,14 +1535,16 @@ function stream_player_core_scripts() {
 	if ( function_exists( 'wp_enqueue_script' ) ) {
 
 		// --- enqueue player script ---
-		if ( defined( 'STREAM_PLAYER_URL' ) ) {
-			$url = STREAM_PLAYER_URL . 'js/radio-player' . $suffix . '.js';
+		// 2.5.18: change STREAM_PLAYER_URL to STREAM_PLAYER_DIR_URL
+		if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {
+			$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . 'js/radio-player' . $suffix . '.js';
 		} elseif ( defined( 'STREAM_PLAYER_FILE' ) ) {
 			$url = plugins_url( 'player/js/radio-player' . $suffix . '.js', STREAM_PLAYER_FILE );
 		} else {
 			$url = plugins_url( 'js/radio-player' . $suffix . '.js', __FILE__ );
 		}
-		wp_enqueue_script( 'radio-player', $url, array( 'jquery' ), $version, true );
+		// 2.5.18: change radio-player script handle to stream-player
+		wp_enqueue_script( 'stream-player', $url, array( 'jquery' ), $version, true );
 
 	} /* elseif ( !isset( $radio_player['printed_player'] ) ) {
 
@@ -1464,8 +1552,8 @@ function stream_player_core_scripts() {
 
 		// --- output script tag directly ---
 		$url = 'js/radio-player' . $suffix . '.js';
-		if ( defined( 'STREAM_PLAYER_URL' ) ) {
-			$url = STREAM_PLAYER_URL . $url;
+		if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {
+			$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . $url;
 		}
 		stream_player_script_tag( $url, $version );
 		$radio_player['printed_player'] = true;
@@ -1482,8 +1570,8 @@ function stream_player_core_scripts() {
 	// --- set amplitude script ---
 	$path = dirname( __FILE__ ) . '/js/amplitude' . $suffix . '.js';
 	if ( function_exists( 'wp_enqueue_script' ) ) {
-		if ( defined( 'STREAM_PLAYER_URL' ) ) {
-			$url = STREAM_PLAYER_URL . 'js/amplitude' . $suffix . '.js';
+		if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {
+			$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . 'js/amplitude' . $suffix . '.js';
 		} elseif ( defined( 'STREAM_PLAYER_FILE' ) ) {
 			$url = plugins_url( 'player/js/amplitude' . $suffix . '.js', STREAM_PLAYER_FILE );
 		} else {
@@ -1492,8 +1580,8 @@ function stream_player_core_scripts() {
 
 	} /* else {
 		$url = 'js/amplitude' . $suffix . '.js';
-		if ( defined( 'STREAM_PLAYER_URL' ) ) {
-			$url = STREAM_PLAYER_URL . $url;
+		if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {
+			$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . $url;
 		}
 	} */
 	$radio_player['amplitude_script'] = array( 'version' => '5.3.2', 'url' => $url, 'path' => $path );
@@ -1501,8 +1589,8 @@ function stream_player_core_scripts() {
 	// --- set jplayer script ---
 	$path = dirname( __FILE__ ) . '/js/jplayer' . $suffix . '.js';
 	if ( function_exists( 'wp_enqueue_script' ) ) {
-		if ( defined( 'STREAM_PLAYER_URL' ) ) {
-			$url = STREAM_PLAYER_URL . 'js/jplayer' . $suffix . '.js';
+		if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {
+			$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . 'js/jplayer' . $suffix . '.js';
 		} elseif ( defined( 'STREAM_PLAYER_FILE' ) ) {
 			$url = plugins_url( 'player/js/jplayer' . $suffix . '.js', STREAM_PLAYER_FILE );
 		} else {
@@ -1514,11 +1602,25 @@ function stream_player_core_scripts() {
 	} */
 	$radio_player['jplayer_script'] = array( 'version' => '2.9.2', 'url' => $url, 'path' => $path );
 
+	// --- set audio5 script ---
+	// 2.5.18: added audio5 script
+	$path = dirname( __FILE__ ) . '/js/audio5' . $suffix . '.js';
+	if ( function_exists( 'wp_enqueue_script' ) ) {
+		if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {
+			$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . 'js/audio5' . $suffix . '.js';
+		} elseif ( defined( 'STREAM_PLAYER_FILE' ) ) {
+			$url = plugins_url( 'player/js/audio5' . $suffix . '.js', STREAM_PLAYER_FILE );
+		} else {
+			$url = plugins_url( 'js/audio5' . $suffix . '.js', __FILE__ );
+		}
+	}
+	$radio_player['audio5_script'] = array( 'version' => '0.1.12', 'url' => $url, 'path' => $path );
+
 	// --- set howler script ---
 	$path = dirname( __FILE__ ) . '/js/howler' . $suffix . '.js';
 	if ( function_exists( 'wp_enqueue_script' ) ) {
-		if ( defined( 'STREAM_PLAYER_URL' ) ) {
-			$url = STREAM_PLAYER_URL . 'js/howler' . $suffix . '.js';
+		if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {
+			$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . 'js/howler' . $suffix . '.js';
 		} elseif ( defined( 'STREAM_PLAYER_FILE' ) ) {
 			$url = plugins_url( 'player/js/howler' . $suffix . '.js', STREAM_PLAYER_FILE );
 		} else {
@@ -1526,8 +1628,8 @@ function stream_player_core_scripts() {
 		}
 	} /* else {
 		$url = 'js/howler' . $suffix . '.js';
-		if ( defined( 'STREAM_PLAYER_URL' ) ) {
-			$url = STREAM_PLAYER_URL . $url;
+		if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {
+			$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . $url;
 		}
 	} */
 	$radio_player['howler_script'] = array( 'version' => '2.2.3', 'url' => $url, 'path' => $path );
@@ -1536,14 +1638,14 @@ function stream_player_core_scripts() {
 	/* $version = '4.2.6'; // as of WP 4.9
 	$version = filemtime( dirname( __FILE__ ) . '/js/mediaelement-and-player' . $suffix . '.js' );
 	$url = 'js/mediaelement-and-player' . $suffix . '.js';
-	if ( defined( 'STREAM_PLAYER_URL' ) ) {$url = STREAM_PLAYER_URL . $url;}
+	if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . $url;}
 	$radio_player['media_script'] = array( 'version' => $version, 'url' => $url, 'path' => $path );
 
 	// --- set media elements player script ---
 	$path = dirname( __FILE__ ) . '/js/rp-mediaelement' . $suffix . '.js';
 	if ( function_exists( 'wp_enqueue_script' ) ) {
-		if ( defined( 'STREAM_PLAYER_URL' ) ) {
-			$url = STREAM_PLAYER_URL . 'js/rp-mediaelement.js';
+		if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {
+			$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . 'js/rp-mediaelement.js';
 			$version = filemtime( dirname( __FILE__ ) . '/js/rp-mediaelement.js' );
 		} elseif ( defined( 'STREAM_PLAYER_FILE' ) ) {
 			$url = plugins_url( 'player/js/rp-mediaelement.js', STREAM_PLAYER_FILE );
@@ -1556,7 +1658,7 @@ function stream_player_core_scripts() {
 		// note: no minified version here yet ?
 		// $version = filemtime( dirname( __FILE__ ) . '/js/rp-mediaelement.js' );
 		// $url = 'js/rp-mediaelement.js';
-		// if ( defined( 'STREAM_PLAYER_URL' ) ) {$url = STREAM_PLAYER_URL . $url;}
+		// if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . $url;}
 	}
 	$radio_player['elements_script'] = array( 'version' => $version, 'url' => $url, 'path' => $path );
 	*/
@@ -1568,18 +1670,25 @@ function stream_player_core_scripts() {
 		if ( '' != $js ) {
 			if ( function_exists( 'wp_add_inline_script' ) ) {
 				// 2.5.0: added check if script already done
-				if ( !wp_script_is( 'radio-player', 'done' ) ) {
+				// 2.5.18: change radio-player script handle to stream-player
+				if ( !wp_script_is( 'stream-player', 'done' ) ) {
 					// --- add inline script ---
-					wp_add_inline_script( 'radio-player', $js, 'before' );
+					wp_add_inline_script( 'stream-player', $js, 'before' );
 				} else {
 					// --- print settings directly ---
 					// 2.5.7: use direct echo arg for player settings
+					// 2.5.18: wrap direct echo in script tags
+					echo '<script>';
 					stream_player_get_player_settings( true );
+					echo '</script>';
 				}
 			} else {
 				// --- print settings directly ---
 				// 2.5.7: use direct echo arg for player settings
+				// 2.5.18: wrap direct echo in script tags
+				echo '<script>';
 				stream_player_get_player_settings( true );
+				echo '</script>';
 			}
 		}
 		$radio_player['enqueued_player'] = true;
@@ -1614,11 +1723,16 @@ function stream_player_enqueue_script( $script ) {
 
 		stream_player_enqueue_jplayer( true );
 
-	} elseif ( ( 'howler' == $script ) &&  !isset( $radio_player['enqeued_howler'] ) ) {
+	} elseif ( ( 'audio5' == $script ) &&  !isset( $radio_player['enqeued_audio5'] ) ) {
+
+		stream_player_enqueue_audio5( true );
+
+	} /* elseif ( ( 'howler' == $script ) &&  !isset( $radio_player['enqeued_howler'] ) ) {
 
 		stream_player_enqueue_howler( true );
 
-	}
+	} */
+
 	// elseif ( ( 'mediaelements' == $script ) &&  !isset( $radio_player['enqeued_mediaelements'] ) ) {
 	//	stream_player_enqueue_mediaelements( true );
 	//	$js = stream_player_script_mediaelements();
@@ -1655,7 +1769,7 @@ function stream_player_enqueue_script( $script ) {
 
 	// --- output script tag ---
 	if ( '' != $js ) {
-		stream_player_inline_script( $js );
+		stream_player_add_inline_script( $js );
 	}
 	
 	// --- set specific script as enqueued ---
@@ -1668,21 +1782,37 @@ function stream_player_enqueue_script( $script ) {
 // Add Inline Script
 // -----------------
 // 2.5.10: added for fallback printing of scripts in footer
-function stream_player_inline_script( $js, $position = 'after' ) {
+// 2.5.18: renamed from radio_player_inline_script
+function stream_player_add_inline_script( $js, $position = 'after' ) {
 
 	if ( function_exists( 'wp_add_inline_script' ) ) {
-		if ( !wp_script_is( 'radio-player', 'done' ) ) {
-			wp_add_inline_script( 'radio-player', $js, $position );
+		// 2.5.18: change radio-player script handle to stream-player
+		if ( !wp_script_is( 'stream-player', 'done' ) ) {
+			wp_add_inline_script( 'stream-player', $js, $position );
 		} else {
-			$version = function_exists( 'radio_station_plugin_version' ) ? radio_station_plugin_version() : '2.5.0';
-			wp_register_script( 'radio-player-footer', null, array( 'jquery' ), $version, true );
-			wp_enqueue_script( 'radio-player-footer' );
+			// 2.5.18: check if footer scripts are registered
+			if ( !wp_script_is( 'radio-player-footer', 'registered' ) ) {
+				$version = function_exists( 'radio_station_plugin_version' ) ? radio_station_plugin_version() : '2.5.0';
+				wp_register_script( 'radio-player-footer', null, array( 'jquery' ), $version, true );
+				// wp_enqueue_script( 'radio-player-footer' );
+			}
 			wp_add_inline_script( 'radio-player-footer', $js, $position );
+			
+			// 2.5.18: enqueue inline scripts in footer
+			if ( !has_action( 'wp_footer', 'stream_player_enqueue_footer_scripts', 9 ) ) {
+				add_action( 'wp_footer', 'stream_player_enqueue_footer_scripts', 9 );
+			}
 		}
 	}
-
 }
 
+// ----------------------
+// Enqueue Footer Scripts
+// ----------------------
+// 2.5.18: added to ensure catching inline scripts
+function stream_player_enqueue_footer_scripts() {
+	wp_enqueue_script( 'radio-player-footer' );
+}
 
 // --------------------------------
 // Lazy Load Audio Script Fallbacks
@@ -1695,7 +1825,8 @@ function stream_player_load_script_fallbacks( $js ) {
 	global $radio_player;
 
 	// 2.4.0.3: check for fallback selection (default all)
-	$fallbacks = array( 'jplayer', 'howler', 'amplitude' );
+	// 2.5.18: added audio5 script and removed howler
+	$fallbacks = array( 'jplayer', 'amplitude', 'audio5' ); // 'howler'
 	if ( function_exists( 'stream_player_get_setting' ) ) {
 		$fallbacks = stream_player_get_setting( 'player_fallbacks' );
 	} elseif ( function_exists( 'apply_filters' ) ) {
@@ -1707,18 +1838,22 @@ function stream_player_load_script_fallbacks( $js ) {
 	}
 
 	// --- load fallback audio scripts ---
-	if ( count( $fallbacks ) > 0 ) {
+	// 2.5.18: added extra fallback check
+	if ( $fallbacks && ( count( $fallbacks ) > 0 ) ) {
 		$js .= "head = document.getElementsByTagName('head')[0]; ";
-		if ( !isset( $radio_player['enqueued_howler'] ) && in_array( 'howler', $fallbacks ) ) {
-			$js .= "el = document.createElement('script'); el.src = radio_player.scripts.howler; head.appendChild(el);";
+		if ( !isset( $radio_player['enqueued_amplitude'] )  && in_array( 'amplitude', $fallbacks ) ) {
+			$js .= "el = document.createElement('script'); el.src = radio_player.scripts.amplitude; head.appendChild(el);";
 		}
 		if ( !isset( $radio_player['enqueued_jplayer'] )  && in_array( 'jplayer', $fallbacks ) ) {
 			$js .= "el = document.createElement('script'); el.src = radio_player.scripts.jplayer; head.appendChild(el);";
 		}
-		if ( !isset( $radio_player['enqueued_amplitude'] )  && in_array( 'amplitude', $fallbacks ) ) {
-			$js .= "el = document.createElement('script'); el.src = radio_player.scripts.amplitude; head.appendChild(el);";
+		if ( !isset( $radio_player['enqueued_audio5'] ) && in_array( 'audio5', $fallbacks ) ) {
+			$js .= "el = document.createElement('script'); el.src = radio_player.scripts.audio5; head.appendChild(el);";
 		}
-		$js .= PHP_EOL;
+		if ( !isset( $radio_player['enqueued_howler'] ) && in_array( 'howler', $fallbacks ) ) {
+			$js .= "el = document.createElement('script'); el.src = radio_player.scripts.howler; head.appendChild(el);";
+		}
+		$js .= "\n";
 	}
 	
 	return $js;
@@ -1732,10 +1867,7 @@ function stream_player_enqueue_amplitude( $infooter ) {
 	if ( function_exists( 'wp_enqueue_script' ) ) {
 		// note: jquery dependency not required
 		wp_enqueue_script( 'amplitude', $radio_player['amplitude_script']['url'], array(), $radio_player['amplitude_script']['version'], $infooter );
-	} /* elseif ( !isset( $radio_player['printed_amplitude'] ) ) {
-		stream_player_script_tag( $radio_player['amplitude_script']['url'], $radio_player['amplitude_script']['version'] );
-		$radio_player['printed_amplitude'] = true;
-	} */
+	}
 }
 
 // --------------------------
@@ -1745,10 +1877,17 @@ function stream_player_enqueue_jplayer( $infooter ) {
 	global $radio_player;
 	if ( function_exists( 'wp_enqueue_script' ) ) {
 		wp_enqueue_script( 'jplayer', $radio_player['jplayer_script']['url'], array( 'jquery' ), $radio_player['jplayer_script']['version'], $infooter );
-	} /* elseif ( !isset( $radio_player['printed_jplayer'] ) ) {
-		stream_player_script_tag( $radio_player['jplayer_script']['url'], $radio_player['jplayer_script']['version'] );
-		$radio_player['printed_jplayer'] = true;
-	} */
+	}
+}
+
+// -------------------------
+// Enqueue Audio5 Javascript
+// -------------------------
+function stream_player_enqueue_audio5( $infooter ) {
+	global $radio_player;
+	if ( function_exists( 'wp_enqueue_script' ) ) {
+		wp_enqueue_script( 'audio5', $radio_player['audio5_script']['url'], array( 'jquery' ), $radio_player['audio5_script']['version'], $infooter );
+	}
 }
 
 // -------------------------
@@ -1759,10 +1898,7 @@ function stream_player_enqueue_howler( $infooter ) {
 	global $radio_player;
 	if ( function_exists( 'wp_enqueue_script' ) ) {
 		wp_enqueue_script( 'howler', $radio_player['howler_script']['url'], array( 'jquery' ), $radio_player['howler_script']['version'], $infooter );
-	} /* elseif ( !isset( $radio_player['printed_howler'] ) ) {
-		stream_player_script_tag( $radio_player['howler_script']['url'], $radio_player['howler_script']['version'] );
-		$radio_player['printed_howler'] = true;
-	} */
+	}
 }
 
 // --------------------------------
@@ -1861,11 +1997,6 @@ function stream_player_get_player_settings( $echo = false ) {
 
 	global $radio_player;
 	
-	/* if ( isset( $radio_player['localized-script'] ) ) {
-		return '';
-	}
-	$radio_player['localized-script'] = true; */
-	
 	$js = '';
 
 	// ---- set AJAX URL ---
@@ -1891,8 +2022,8 @@ function stream_player_get_player_settings( $echo = false ) {
 
 	// --- set jPlayer Flash path ---
 	// 2.5.7: disable swf fallback support
-	/* if ( defined( 'STREAM_PLAYER_URL' ) ) {
-		$swf_path = STREAM_PLAYER_URL . 'js';
+	/* if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {
+		$swf_path = trailingslashit( STREAM_PLAYER_DIR_URL ) . 'js';
 	} elseif ( function_exists( 'plugins_url' ) ) {
 		if ( defined( 'STREAM_PLAYER_FILE' ) ) {
 			$swf_path = plugins_url( 'player/js', STREAM_PLAYER_FILE );
@@ -1991,7 +2122,7 @@ function stream_player_get_player_settings( $echo = false ) {
 	echo "}" . "\n";
 
 	// --- maybe limit available scripts for testing purposes ---
-	$valid_scripts = array( 'amplitude', 'howler', 'jplayer' );
+	$valid_scripts = array( 'amplitude', 'jplayer', 'howler', 'audio5' );
 	// 2.4.0.3: set single script override only
 	// 2.5.0: fix to typo in $_REQUST['player-script']
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -2007,7 +2138,8 @@ function stream_player_get_player_settings( $echo = false ) {
 	// --- set script URL ouput ---
 	// 2.4.0.3: check for fallback script settings
 	// 2.5.7: remove howler from script fallback list
-	$fallbacks = array( 'jplayer', 'amplitude' ); // 'howler'
+	// 2.5.18: added audio5 to script fallback list
+	$fallbacks = array( 'jplayer', 'amplitude', 'audio5' ); // 'howler'
 	if ( function_exists( 'stream_player_get_setting' ) ) {
 		$fallbacks = stream_player_get_setting( 'player_fallbacks' );
 	} elseif ( function_exists( 'apply_filters' ) ) {
@@ -2044,11 +2176,14 @@ function stream_player_get_player_settings( $echo = false ) {
 		if ( in_array( 'amplitude', $scripts ) ) {
 			echo "'amplitude': '" . esc_url( $radio_player['amplitude_script']['url'] ) . '?version=' . esc_js( $radio_player['amplitude_script']['version'] ) . "', ";
 		}
-		if ( in_array( 'howler', $scripts ) ) {
-			echo "'howler': '" . esc_url( $radio_player['howler_script']['url'] ) . '?version=' . esc_js( $radio_player['howler_script']['version'] ) . "', ";
-		}
 		if ( in_array( 'jplayer', $scripts ) ) {
 			echo "'jplayer': '" . esc_url( $radio_player['jplayer_script']['url'] ) . '?version=' . esc_js( $radio_player['jplayer_script']['version'] ) . "', ";
+		}
+		if ( in_array( 'audio5', $scripts ) ) {
+			echo "'audio5': '" . esc_url( $radio_player['audio5_script']['url'] ) . '?version=' . esc_js( $radio_player['audio5_script']['version'] ) . "', ";
+		}
+		if ( in_array( 'howler', $scripts ) ) {
+			echo "'howler': '" . esc_url( $radio_player['howler_script']['url'] ) . '?version=' . esc_js( $radio_player['howler_script']['version'] ) . "', ";
 		}
 		// echo "'media': '" . $radio_player['media_script']['url'] . '?version=' . $radio_player['media_script']['version'] . "', "
 		// echo "'elements': '" . $radio_player['elements_script']['url'] . '?version=' . $radio_player['elements_script']['version'] . "', ";
@@ -2056,24 +2191,37 @@ function stream_player_get_player_settings( $echo = false ) {
 
 	// --- set player script supported formats ---
 	// TODO: recheck supported amplitude formats ?
-	// [JPlayer] Audio: mp3, m4a - Video: m4v
-	// +Audio: webma, oga, wav, fla, rtmpa +Video: webmv, ogv, flv, rtmpv
-	// [Howler] mp3, opus, ogg, wav, aac, m4a, mp4, webm
-	// +mpeg, oga, caf, weba, webm, dolby, flac
 	// [Amplitude] HTML5 Support - mp3, aac ...?
 	// ref: https://en.wikipedia.org/wiki/HTML5_audio#Supporting_browsers
+	// [JPlayer] Audio: mp3, m4a - Video: m4v
+	// +Audio: webma, oga, wav, fla, rtmpa +Video: webmv, ogv, flv, rtmpv
+	// [Audio5] mp3, ogg, webm, mp4, wav
+	// ref: https://github.com/zohararad/audio5js
+	// [Howler] mp3, opus, ogg, wav, aac, m4a, mp4, webm
+	// +mpeg, oga, caf, weba, webm, dolby, flac
 	// [Media Elements] Audio: mp3, wma, wav +Video: mp4, ogg, webm, wmv
 	// 2.5.7: disable Howler format list
 	echo "formats = {";
 		echo "'amplitude': ['mp3','aac'], ";
 		echo "'jplayer': ['mp3','m4a','webm','oga','rtmpa','wav','flac'], ";
+		echo "'audio5': ['mp3', 'ogg', 'webm', 'mp4', 'wav' ], ";
 		echo "'howler': ['mp3','opus','ogg','oga','wav','aac','m4a','mp4','webm','weba','flac'], ";
 		// $js .= "'mediaelements': ['mp3','wma','wav'], ";
 	echo "}" . "\n";
 
 	// --- set debug mode ---
 	// 2.5.10: moved conditions to stream_player_set_debug_mode
+	// 2.5.18: added sync debug switch mode
 	$debug = STREAM_PLAYER_DEBUG ? 'true' : 'false';
+	$sync_debug = 'false';
+	if ( isset( $_REQUEST['sync-debug'] ) ) {
+		$switch = sanitize_text_field( wp_unslash( $_REQUEST['sync-debug'] ) );
+		if ( ( '1' == $switch ) || ( 'on' == $switch ) ) {
+			$sync_debug = 'on';
+		} elseif ( ( '0' == $switch ) || ( 'off' == $switch ) ) {
+			$sync_debug = 'off';
+		}
+	}			
 
 	// 2.5.6: added explicit touchscreen detection setting
 	echo "matchmedia = window.matchMedia || window.msMatchMedia;" . "\n";
@@ -2081,7 +2229,8 @@ function stream_player_get_player_settings( $echo = false ) {
 
 	// --- set radio player settings and radio data objects ---
 	// (with empty arrays for instances, script types, failbacks, audio targets and stream data)
-	echo "var radio_player = {settings:player_settings, scripts:scripts, formats:formats, loading:false, touchscreen:touchscreen, debug:" . esc_js( $debug ) . "}" . "\n";
+	// 2.5.18: added sync debug switch
+	echo "var radio_player = {settings:player_settings, scripts:scripts, formats:formats, loading:false, touchscreen:touchscreen, debug:" . esc_js( $debug ) . ", sync_debug:" . esc_js( $sync_debug ) . "}" . "\n";
 	echo "var radio_player_data = {state:{}, players:[], scripts:[], failed:[], data:[], types:[], channels:[], faders:[]}" . "\n";
 
 	// --- logged in / user state settings ---
@@ -2102,11 +2251,15 @@ function stream_player_get_player_settings( $echo = false ) {
 	if ( isset( $state ) && isset( $state['station'] ) ) {
 		$station = abs( intval( $state['station'] ) );
 	}
-	if ( isset( $station ) && $station && ( $station > 0 ) ) {
-		echo "radio_player_data.state.station = " . esc_js( $station ) . ";" . "\n";
-	} else {
-		echo "radio_player_data.state.station = 0;" . "\n";
+	$station = ( isset( $station ) && $station && ( $station > 0 ) ) ? $station : 0;
+	echo "radio_player_data.state.station = " . esc_js( $station ) . ";" . "\n";
+
+	// --- maybe set channel ID ---
+	if ( isset( $state ) && isset( $state['channel'] ) ) {
+		$station = abs( intval( $state['channel'] ) );
 	}
+	$channel = ( isset( $channel ) && $channel && ( $channel > 0 ) ) ? $channel : 0;
+	echo "radio_player_data.state.channel = " . esc_js( $channel ) . ";" . "\n";
 
 	// --- maybe set user volume ---
 	// note: default already set above
@@ -2125,7 +2278,6 @@ function stream_player_get_player_settings( $echo = false ) {
 	// --- set main radio stream data ---
 	echo "radio_player_data.state.data = {};" . "\n";
 	if ( function_exists( 'apply_filters' ) ) {
-		$station = ( isset( $state['station'] ) ) ? $state['station'] : 0;
 		// note: this is the main stream data filter hooked into by Radio Station plugin
 		// 2.4.0.3: fix for uninitialized string offset
 		$data = apply_filters( 'radio_station_player_data', false, $station );
@@ -2137,7 +2289,7 @@ function stream_player_get_player_settings( $echo = false ) {
 		// 2.5.7: set currently playing data only if script supported
 		$set_data = false;
 		foreach ( $data as $key => $value ) {
-			if ( ( 'script' == $key ) && in_array( $value, array( 'jplayer', 'amplitude', 'howler' ) ) ) {
+			if ( ( 'script' == $key ) && in_array( $value, array( 'jplayer', 'amplitude', 'howler', 'audio5' ) ) ) {
 				$set_data = true;
 			}
 		}
@@ -2152,7 +2304,9 @@ function stream_player_get_player_settings( $echo = false ) {
 				echo "radio_player_data.state.data['" . esc_js( $key ) . "'] = '" . esc_js( $value ) . "';" . "\n";
 			}
 		}
+		// 2.5.18: set default channel data
 		echo "radio_player.stream_data = radio_player_data.state.data;" . "\n";
+		echo "radio_player_data.channels[0] = radio_player_data.state.data;" . "\n";
 	}
 
 	// --- attempt to set player state from cookies ---
@@ -2221,12 +2375,15 @@ function stream_player_state() {
 
 	// --- get user state values ---
 	// 2.5.9.4: combined with value sanitizing
+	// 2.5.18: added channel state saving
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	$playing = isset( $_REQUEST['playing'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['playing'] ) ) : false;
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	$volume = isset( $_REQUEST['volume'] ) ? absint( wp_unslash( $_REQUEST['volume'] ) ) : 77;
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	$station = isset( $_REQUEST['station'] ) ? absint( wp_unslash( $_REQUEST['station'] ) ) : false;
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	$channel = isset( $_REQUEST['channel'] ) ? absint( wp_unslash( $_REQUEST['channel'] ) ) : false;
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	$mute = isset( $_REQUEST['mute'] ) ? (bool) sanitize_text_field( wp_unslash( $_REQUEST['mute'] ) ) : false;
 
@@ -2239,12 +2396,16 @@ function stream_player_state() {
 	if ( $station < 1 ) {
 		$station = false;
 	}
+	if ( $channel < 0 ) {
+		$station = false;
+	}
 
 	// --- save player state to user meta ---
 	$state = array(
 		'playing'	=> $playing,
 		'volume'	=> $volume,
 		'station'	=> $station,
+		'channel'   => $channel,
 		'mute'		=> $mute,
 	);
 	update_user_meta( $user_id, 'stream_player_state', $state );
@@ -2261,6 +2422,7 @@ function stream_player_state() {
 // Load Amplitude Function
 // -----------------------
 // "mp3" "aac" ... (+HTML5 Browser Supported Sources)
+// deprecated: moved to radio-player.js
 function stream_player_script_amplitude() {
 
 	// $method = 'callbacks';
@@ -2459,122 +2621,6 @@ function stream_player_script_amplitude() {
 	return $js;
 }
 
-// --------------------
-// Load Howler Function
-// --------------------
-// Howler Note: "A live stream can only be played through HTML5 Audio."
-// "mp3", "opus", "ogg", "wav", "aac", "m4a", "mp4", "webm"
-function stream_player_script_howler() {
-
-	// --- load howler player ---
-	$js = "function radio_player_howler(instance, url, format, fallback, fformat) {
-
-		player_id = 'radio_player_'+instance;
-		container_id = 'radio_container_'+instance;
-		if (url == '') {url = radio_player.settings.url;}
-		if (url == '') {return;}
-		if (!format || (format == '')) {format = 'aac';}
-		if (fallback == '') {fallback = radio_player.settings.fallback;}
-		if (!fallback || !fformat || (fformat == '')) {fallback = ''; fformat = '';}
-
-		/* check if already loaded with same source
-		if ( (typeof radio_player_data.scripts[instance] != 'undefined') && (radio_player_data.scripts[instance] == 'howler')
-		  && (typeof radio_player.previous_data != 'undefined') ) {
-			pdata = radio_player.previous_data;
-			if ( (pdata.url == url) && (pdata.format == format) && (pdata.fallback == fallback) && (pdata.fformat == fformat) ) {
-				if (radio_player.debug) {console.log('Player already loaded with this stream data.');}
-				return radio_player_data.players[instance];
-			}
-		} */
-
-		/* set sources */
-		sources = new Array(); formats = new Array();
-		sources[0] = url; /* if (fallback != '') {sources[1] = fallback;} */
-		formats[0] = format; /* if ((fallback != '') && (fformat != '')) {formats[1] = fformat;} */
-
-		/* set volume */
-		if (jQuery('#'+container_id+' .rp-volume-slider').hasClass('changed')) {
-			volume = jQuery('#'+container_id+' .rp-volume-slider').val();
-		} else if (typeof radio_player_data.state.volume != 'undefined') {volume = radio_player_data.state.volume;}
-		else {volume = radio_player.settings.volume;}
-		radio_player_volume_slider(instance, volume);
-		volume = parseFloat(volume / 100);
-		if (radio_player.debug) {console.log('Howler init Volume: '+volume);}
-
-		/* intialize player */
-		if (radio_player.debug) {console.log('Init Howler: '+instance+' : '+url+' : '+format+' : '+fallback+' : '+fformat);}
-		radio_player_instance = new Howl({
-			src: sources,
-			format: formats,
-			html5: false,
-			autoplay: false,
-			preload: false,
-			volume: volume,
-			onload: function(e) {
-				/* possible bug: maybe not always being triggered ? */
-				radio_player.loading = false;
-				instance = radio_player_match_instance(this, e, 'howler');
-				radio_player_event_handler('loaded', {instance:instance, script:'howler'});
-
-				channel = radio_player_data.channels[instance];
-				if (channel) {radio_player_set_state('channel', channel);}
-				station = jQuery('#radio_player_'+instance).attr('station-id');
-				if (station) {radio_player_set_state('station', station);}
-			},
-			onplay: function(e) {
-				radio_player.loading = false;
-				instance = radio_player_match_instance(this, e, 'howler');
-				radio_player_event_handler('playing', {instance:instance, script:'howler'});
-				radio_player_pause_others(instance);
-			},
-			onpause: function(e) {
-				instance = radio_player_match_instance(this, e, 'howler');
-				radio_player_event_handler('paused', {instance:instance, script:'howler'});
-			},
-			onstop: function(e) {
-				instance = radio_player_match_instance(this, e, 'howler');
-				radio_player_event_handler('stopped', {instance:instance, script:'howler'});
-			},
-			onvolume: function(e) {
-				instance = radio_player_match_instance(this, e, 'howler');
-				if (instance && (radio_player_data.scripts[instance] == 'howler')) {
-					volume = this.volume() * 100;
-					if (volume > 100) {volume = 100;}
-					radio_player_player_volume(instance, 'howler', volume);
-				}
-			},
-			onloaderror: function(id,e) {
-				instance = radio_player_match_instance(this, e, 'howler');
-				radio_player_event_handler('error', {instance:instance, script:'howler'});
-				if (radio_player.debug) {console.log('Load Error, Howler Instance: '+instance+', Sound ID: '+id);}
-				radio_player_player_fallback(instance, 'howler', 'Howler Load Error');
-			},
-			onplayerror: function(id,e) {
-				instance = radio_player_match_instance(this, e, 'howler');
-				radio_player_event_handler('error', {instance:instance, script:'howler'});
-				if (radio_player.debug) {console.log('Play Error, Howler Instance: '+instance+', Sound ID: '+id);}
-				radio_player_player_fallback(instance, 'howler', 'Howler Play Error');
-			},
-		});
-		radio_player_data.players[instance] = radio_player_instance;
-		radio_player_data.scripts[instance] = 'howler';
-
-		/* match script select dropdown value */
-		if (jQuery('#'+container_id+' .rp-script-select').length) {
-			jQuery('#'+container_id+' .rp-script-select').val('howler');
-		}
-
-		return radio_player_instance;
-	}";
-
-	// --- filter and return ---
-	if ( function_exists( 'apply_filters' ) ) {
-		$js = apply_filters( 'radio_station_player_script_howler', $js );
-		$js = apply_filters( 'stream_player_script_howler', $js );
-	}
-	return $js;
-}
-
 // ---------------------
 // Load JPlayer Function
 // ---------------------
@@ -2583,6 +2629,7 @@ function stream_player_script_howler() {
 // Extra formats:
 // audio: webma, oga, wav, fla, rtmpa
 // video: webmv, ogv, flv, rtmpv
+// deprecated: moved to radio-player.js
 function stream_player_script_jplayer() {
 
 	// --- load jplayer ---
@@ -2749,6 +2796,123 @@ function stream_player_script_jplayer() {
 	return $js;
 }
 
+// --------------------
+// Load Howler Function
+// --------------------
+// Howler Note: "A live stream can only be played through HTML5 Audio."
+// "mp3", "opus", "ogg", "wav", "aac", "m4a", "mp4", "webm"
+// deprecated: moved to radio-player.js
+function stream_player_script_howler() {
+
+	// --- load howler player ---
+	$js = "function radio_player_howler(instance, url, format, fallback, fformat) {
+
+		player_id = 'radio_player_'+instance;
+		container_id = 'radio_container_'+instance;
+		if (url == '') {url = radio_player.settings.url;}
+		if (url == '') {return;}
+		if (!format || (format == '')) {format = 'aac';}
+		if (fallback == '') {fallback = radio_player.settings.fallback;}
+		if (!fallback || !fformat || (fformat == '')) {fallback = ''; fformat = '';}
+
+		/* check if already loaded with same source
+		if ( (typeof radio_player_data.scripts[instance] != 'undefined') && (radio_player_data.scripts[instance] == 'howler')
+		  && (typeof radio_player.previous_data != 'undefined') ) {
+			pdata = radio_player.previous_data;
+			if ( (pdata.url == url) && (pdata.format == format) && (pdata.fallback == fallback) && (pdata.fformat == fformat) ) {
+				if (radio_player.debug) {console.log('Player already loaded with this stream data.');}
+				return radio_player_data.players[instance];
+			}
+		} */
+
+		/* set sources */
+		sources = new Array(); formats = new Array();
+		sources[0] = url; /* if (fallback != '') {sources[1] = fallback;} */
+		formats[0] = format; /* if ((fallback != '') && (fformat != '')) {formats[1] = fformat;} */
+
+		/* set volume */
+		if (jQuery('#'+container_id+' .rp-volume-slider').hasClass('changed')) {
+			volume = jQuery('#'+container_id+' .rp-volume-slider').val();
+		} else if (typeof radio_player_data.state.volume != 'undefined') {volume = radio_player_data.state.volume;}
+		else {volume = radio_player.settings.volume;}
+		radio_player_volume_slider(instance, volume);
+		volume = parseFloat(volume / 100);
+		if (radio_player.debug) {console.log('Howler init Volume: '+volume);}
+
+		/* intialize player */
+		if (radio_player.debug) {console.log('Init Howler: '+instance+' : '+url+' : '+format+' : '+fallback+' : '+fformat);}
+		radio_player_instance = new Howl({
+			src: sources,
+			format: formats,
+			html5: false,
+			autoplay: false,
+			preload: false,
+			volume: volume,
+			onload: function(e) {
+				/* possible bug: maybe not always being triggered ? */
+				radio_player.loading = false;
+				instance = radio_player_match_instance(this, e, 'howler');
+				radio_player_event_handler('loaded', {instance:instance, script:'howler'});
+
+				channel = radio_player_data.channels[instance];
+				if (channel) {radio_player_set_state('channel', channel);}
+				station = jQuery('#radio_player_'+instance).attr('station-id');
+				if (station) {radio_player_set_state('station', station);}
+			},
+			onplay: function(e) {
+				radio_player.loading = false;
+				instance = radio_player_match_instance(this, e, 'howler');
+				radio_player_event_handler('playing', {instance:instance, script:'howler'});
+				radio_player_pause_others(instance);
+			},
+			onpause: function(e) {
+				instance = radio_player_match_instance(this, e, 'howler');
+				radio_player_event_handler('paused', {instance:instance, script:'howler'});
+			},
+			onstop: function(e) {
+				instance = radio_player_match_instance(this, e, 'howler');
+				radio_player_event_handler('stopped', {instance:instance, script:'howler'});
+			},
+			onvolume: function(e) {
+				instance = radio_player_match_instance(this, e, 'howler');
+				if (instance && (radio_player_data.scripts[instance] == 'howler')) {
+					volume = this.volume() * 100;
+					if (volume > 100) {volume = 100;}
+					radio_player_player_volume(instance, 'howler', volume);
+				}
+			},
+			onloaderror: function(id,e) {
+				instance = radio_player_match_instance(this, e, 'howler');
+				radio_player_event_handler('error', {instance:instance, script:'howler'});
+				if (radio_player.debug) {console.log('Load Error, Howler Instance: '+instance+', Sound ID: '+id);}
+				radio_player_player_fallback(instance, 'howler', 'Howler Load Error');
+			},
+			onplayerror: function(id,e) {
+				instance = radio_player_match_instance(this, e, 'howler');
+				radio_player_event_handler('error', {instance:instance, script:'howler'});
+				if (radio_player.debug) {console.log('Play Error, Howler Instance: '+instance+', Sound ID: '+id);}
+				radio_player_player_fallback(instance, 'howler', 'Howler Play Error');
+			},
+		});
+		radio_player_data.players[instance] = radio_player_instance;
+		radio_player_data.scripts[instance] = 'howler';
+
+		/* match script select dropdown value */
+		if (jQuery('#'+container_id+' .rp-script-select').length) {
+			jQuery('#'+container_id+' .rp-script-select').val('howler');
+		}
+
+		return radio_player_instance;
+	}";
+
+	// --- filter and return ---
+	if ( function_exists( 'apply_filters' ) ) {
+		$js = apply_filters( 'radio_station_player_script_howler', $js );
+		$js = apply_filters( 'stream_player_script_howler', $js );
+	}
+	return $js;
+}
+
 // ---------------------------
 // Load Media Element Function
 // ---------------------------
@@ -2756,6 +2920,7 @@ function stream_player_script_jplayer() {
 // API ref: https://github.com/mediaelement/mediaelement/blob/master/docs/api.md
 // Audio support: MP3, WMA, WAV
 // Video support: MP4, Ogg, WebM, WMV
+// deprecated: not implemented
 function stream_player_script_mediaelements() {
 
 	// --- load media elements ---
@@ -2900,14 +3065,15 @@ function stream_player_enqueue_styles( $script = false, $skin = false ) {
 	if ( file_exists( $path ) ) {
 		$version = filemtime( $path );
 		if ( function_exists( 'wp_enqueue_style' ) ) {
-			if ( defined( 'STREAM_PLAYER_URL' ) ) {
-				$url = STREAM_PLAYER_URL . 'css/radio-player' . $suffix. '.css';
+			if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {
+				$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . 'css/radio-player' . $suffix. '.css';
 			} elseif ( defined( 'STREAM_PLAYER_FILE' ) ) {
 				$url = plugins_url( 'player/css/radio-player' . $suffix . '.css', STREAM_PLAYER_FILE );
 			} else {
 				$url = plugins_url( 'css/radio-player.css', __FILE__ );
 			}
-			wp_enqueue_style( 'radio-player', $url, array(), $version, 'all' );
+			// 2.5.18: change radio-player script handle to stream-player
+			wp_enqueue_style( 'stream-player', $url, array(), $version, 'all' );
 
 			// --- enqueue player control styles inline ---
 			$control_styles = stream_player_control_styles( false );
@@ -2919,10 +3085,10 @@ function stream_player_enqueue_styles( $script = false, $skin = false ) {
 		} /* else {
 			// --- output style tag directly ---
 			$url = 'css/radio-player' . $suffix . '.css';
-			if ( defined( 'STREAM_PLAYER_URL' ) ) {
-				$url = STREAM_PLAYER_URL . $url;
+			if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {
+				$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . $url;
 			}
-			radio_player_style_tag( 'radio-player', $url, $version );
+			radio_player_style_tag( 'stream-player', $url, $version );
 			
 			// 2.5.0: added missing non-WP control style output
 			$control_styles = stream_player_control_styles( false );
@@ -2953,8 +3119,8 @@ function stream_player_enqueue_styles( $script = false, $skin = false ) {
 	if ( file_exists( $path ) ) {
 		$version = filemtime( $path );
 		if ( function_exists( 'wp_enqueue_style' ) ) {
-			if ( defined( 'STREAM_PLAYER_URL' ) ) {
-				$url = STREAM_PLAYER_URL . 'css/jplayer' . $suffix. '.css';
+			if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {
+				$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . 'css/jplayer' . $suffix. '.css';
 			} elseif ( defined( 'STREAM_PLAYER_FILE' ) ) {
 				$url = plugins_url( 'player/css/jplayer' . $suffix . '.css', STREAM_PLAYER_FILE );
 			} else {
@@ -2964,7 +3130,7 @@ function stream_player_enqueue_styles( $script = false, $skin = false ) {
 		} else {
 			// --- output style tag directly ---
 			// $url = 'css/jplayer' . $suffix . '.css';
-			// if ( defined( 'STREAM_PLAYER_URL' ) ) {$url = STREAM_PLAYER_URL . $url;}
+			// if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . $url;}
 			// radio_player_style_tag( 'rp-jplayer', $url, $version );
 		}
 
@@ -2989,8 +3155,8 @@ function stream_player_enqueue_styles( $script = false, $skin = false ) {
 		if ( file_exists( $path ) ) {
 			$version = filemtime( $path );
 			if ( function_exists( 'wp_enqueue_style' ) ) {
-				if ( defined( 'STREAM_PLAYER_URL' ) ) {
-					$url = STREAM_PLAYER_URL . 'css/jplayer' . $skin_ref . $suffix . '.css';
+				if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {
+					$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . 'css/jplayer' . $skin_ref . $suffix . '.css';
 				} elseif ( defined( 'STREAM_PLAYER_FILE' ) ) {
 					$url = plugins_url( 'player/css/jplayer' . $skin_ref . $suffix . '.css', STREAM_PLAYER_FILE );
 				} else {
@@ -3004,7 +3170,7 @@ function stream_player_enqueue_styles( $script = false, $skin = false ) {
 			} else {
 				// --- output style tag directly ---
 				// $url = 'css/jplayer' . $skin_ref . $suffix . '.css';
-				// if ( defined( 'STREAM_PLAYER_URL' ) ) {$url = STREAM_PLAYER_URL . $url;}
+				// if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . $url;}
 				// radio_player_style_tag( 'rp-jplayer-skin', $url, $version );
 			}
 
@@ -3035,8 +3201,8 @@ function stream_player_enqueue_styles( $script = false, $skin = false ) {
 			}
 			$version = filemtime( $path );
 			if ( function_exists( 'wp_enqueue_style' ) ) {
-				if ( defined( 'STREAM_PLAYER_URL' ) ){
-					$url = STREAM_PLAYER_URL . 'css/rp-mediaelement.css';
+				if ( defined( 'STREAM_PLAYER_DIR_URL' ) ){
+					$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . 'css/rp-mediaelement.css';
 				} elseif ( defined( 'STREAM_PLAYER_FILE' ) ) {
 					$url = plugins_url( 'player/css/rp-mediaelement.css', STREAM_PLAYER_FILE );
 				} else {
@@ -3046,7 +3212,7 @@ function stream_player_enqueue_styles( $script = false, $skin = false ) {
 			} else {
 				// --- output style tag directly ---
 				// $url = 'css/rp-mediaelement.css';
-				// if ( defined( 'STREAM_PLAYER_URL' ) ) {$url = STREAM_PLAYER_URL . $url;}
+				// if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . $url;}
 				// radio_player_style_tag( 'rp-mediaelement', $url, $version );
 			}
 
@@ -3061,8 +3227,8 @@ function stream_player_enqueue_styles( $script = false, $skin = false ) {
 			}
 			$version = filemtime( $path );
 			if ( function_exists( 'wp_enqueue_style' ) ) {
-				if ( defined( 'STREAM_PLAYER_URL' ) ) {
-					$url = STREAM_PLAYER_URL . 'css/mediaelement.css';
+				if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {
+					$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . 'css/mediaelement.css';
 				} elseif ( defined( 'STREAM_PLAYER_FILE' ) ) {
 					$url = plugins_url( 'player/css/mediaelement.css', STREAM_PLAYER_FILE );
 				} else {
@@ -3072,7 +3238,7 @@ function stream_player_enqueue_styles( $script = false, $skin = false ) {
 			} else {
 				// --- output style tag directly ---
 				// $url = 'css/mediaelement.css';
-				// if ( defined( 'STREAM_PLAYER_URL' ) ) {$url = STREAM_PLAYER_URL . $url;}
+				// if ( defined( 'STREAM_PLAYER_DIR_URL' ) ) {$url = trailingslashit( STREAM_PLAYER_DIR_URL ) . $url;}
 				// radio_player_style_tag( 'rp-mediaelement', $url, $version );
 			}
 		}
@@ -3090,10 +3256,11 @@ function stream_player_control_styles( $instance, $atts = false ) {
 
 	// --- set default control colors ---
 	// 2.5.0: added empty text and background color styles
+	// 2.5.18: adjust playing default from #70E070
 	$colors = array(
 		'text'		 => '',
 		'background' => '',
-		'playing'	 => '#70E070',
+		'playing'	 => '#70D070',
 		'buttons'	 => '#00A0E0',
 		'track'		 => '#80C080',
 		'thumb'		 => '#80C080',

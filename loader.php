@@ -5,7 +5,7 @@
 // =================================
 
 // -------------
-// Loader v1.3.5
+// Loader v1.3.7
 // -------------
 // Note: Changelog at end of file.
 
@@ -108,7 +108,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 //	'settingsmenu'	=> false,			// to not automatically add a settings menu [non-WQ]
 //
 //	// --- Options ---
-//	'namespace'		=> 'plugin_name',	// plugin namespace (function prefix)
+//	'namespace'		=> 'PLUGIN_PREFIX',	// plugin namespace (function prefix, minus trailing _)
 //	'settings'		=> 'pn',			// input settings prefix
 //	'option'		=> 'plugin_key',	// plugin option key
 //	'options'		=> $options,		// plugin options array set above
@@ -116,7 +116,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 //	// --- WordPress.Org ---
 //	'wporgslug'		=> 'plugin-slug',	// WordPress.org plugin slug
 //	'wporg'			=> false, 			// * rechecked later (via presence of updatechecker.php) *
-//	'textdomain'	=> 'stream-player',	// translation text domain (usually same as plugin slug)
+//	'textdomain'	=> 'plugin-domain',	// translation text domain (usually same as plugin slug)
 //
 //	// --- Freemius ---
 //	'freemius_id'	=> '',				// Freemius plugin ID
@@ -125,14 +125,56 @@ if ( !defined( 'ABSPATH' ) ) exit;
 //	'hasaddons'		=> false,			// if plugin has add ons
 //	'plan'			=> 'free',	 		// * rechecked later (if premium version found) *
 // );
-//
+
 // ------------------------------------
 // Example Start Plugin Loader Instance
 // ------------------------------------
 // (add this to your main plugin file to run this loader)
 // require(dirname(__FILE__).'/loader.php');				// requires this file!
 // $instance = new stream_player_loader($args);				// instantiates loader class
-// (ie. search and replace 'stream_player_' with 'my_plugin_' function namespace)
+// (ie. search and replace all 'stream_player_' with 'my_plugin_' function namespace)
+// and then search and replace 'text-domain' with your plugin's text domain.
+
+
+// ---------------------------------------------
+// 1.3.7: Translated String Settings Update Note
+// ---------------------------------------------
+// Since loader is typically initiated directly within a plugin, this means string translations are "too early".
+// A little bit of an annoying WordPress quirk to have to get around but it is achieved with the following steps:
+
+// 1. Fix is to remove the translated strings (ratetext, sharetext, donatetext) to a later filter added for this purpose:
+/*
+add_filter( 'stream_player_admin_args', 'stream_player_settings_texts' );
+function stream_player_settings_texts( $args ) {
+	$texts = array(
+		'sharetext'    => __( 'Share the Plugin Love', 'stream-player' ),
+		'ratetext'     => __( 'Rate on WordPress.org', 'stream-player' ),
+		'donatetext'   => __( 'Support this Plugin', 'stream-player' ),
+	);
+	$args = array_merge( $args, $texts );
+	return $args;
+} */
+
+// 2. Instead of passing options directly to the loader, create a function with an admin argument.
+// eg. function stream_player_get_options( $admin ) {}
+// and translate any labels or helpers values conditionally using an inline if statement, ie. ? and :
+// 'label' => __( 'Label Test', 'stream-player' ),
+// becomes
+// 'label' => $admin ? __( 'Label Test', 'stream-player' ) : '',
+
+// 3. Then add a filter that runs after the main plugin loader is instantiated:
+/* 
+add_filter( 'stream_player_plugin_options', 'stream_player_get_options' );
+add_action( 'plugins_loaded', 'stream_player_admin_options_init' );
+function stream_player_admin_options_init() {
+	add_filter( 'radio-station_options', 'stream_player_admin_options' );
+	function stream_player_admin_options( $options ) {
+		$admin = is_admin();
+		$options = stream_player_get_options( $admin );
+		return $options;
+	}
+}
+*/
 
 
 // ===========================
@@ -187,17 +229,6 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 			// --- set plugin options ---
 			// 1.0.6: added options filter
 			$args['options'] = apply_filters( $args['namespace'] . '_options', $args['options'] );
-			// 1.0.9: maybe get tabs and sections from options array
-			if ( isset( $args['options']['tabs'] ) ) {
-				$this->tabs = $args['options']['tabs'];
-				unset( $args['options']['tabs'] );
-			}
-			if ( isset( $args['options']['sections'] ) ) {
-				$this->sections = $args['options']['sections'];
-				unset( $args['options']['sections'] );
-			}
-			$this->options = $args['options'];
-			unset( $args['options'] );
 
 			// --- set plugin args and namespace ---
 			// 1.1.9: filter all arguments
@@ -222,6 +253,32 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 
 			// --- autoset class instance global for accessibility ---
 			$GLOBALS[$args['namespace'] . '_instance'] = $this;
+		}
+
+		// -------------
+		// Admin Options
+		// -------------
+		// 1.3.7: added method for loading delayed translation strings
+		function admin_options() {
+			
+			$namespace = $this->namespace;
+			$args = $this->args;
+			$args = apply_filters( $args['namespace'] . '_admin_args', $args );
+			$this->args = $args;
+
+			$options = $this->options;
+			$options = apply_filters( $namespace . '_options', $options );
+
+			// 1.0.9: maybe get tabs and sections from options array
+			if ( isset( $options['tabs'] ) ) {
+				$this->tabs = $options['tabs'];
+				unset( $options['tabs'] );
+			}
+			if ( isset( $options['sections'] ) ) {
+				$this->sections = $options['sections'];
+				unset( $options['sections'] );
+			}
+			$this->options = $options;
 		}
 
 		// ------------
@@ -347,7 +404,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 			// 1.1.2: fix to apply options filter
 			$namespace = $this->namespace;
 			$options = $this->options;
-			$options = apply_filters( $namespace . '_options', $options );
+			$options = apply_filters( $namespace . '_plugin_options', $options );
 			$defaults = array();
 			foreach ( $options as $key => $values ) {
 				// 1.0.9: set default to null if default value not set
@@ -1326,6 +1383,9 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 			// --- add settings on activation ---
 			register_activation_hook( $args['file'], array( $this, 'add_settings' ) );
 
+			// 1.3.7: added for admin options filtering
+			add_action( 'init', array( $this, 'admin_options' ) );
+
 			// --- always check for update and reset of settings ---
 			add_action( 'admin_init', array( $this, 'update_settings' ) );
 			add_action( 'admin_init', array( $this, 'reset_settings' ) );
@@ -1781,20 +1841,22 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 				// --- get plugin options and default settings ---
 				// 1.1.2: fix for filtering of plugin options
 				$options = $this->options;
-				$options = apply_filters( $namespace . '_options', $options );
+				$options = apply_filters( $namespace . '_plugin_options', $options );
 
 				// --- maybe enqueue media scripts ---
 				// 1.1.7: added media gallery script enqueueing for image field
 				// 1.1.7: added color picker and color picker alpha script enqueueing
 				$enqueued_media = $enqueued_color_picker = $enqueue_color_picker = $enqueue_color_picker_alpha = false;
 				foreach ( $options as $option ) {
-					if ( ( 'image' == $option['type'] ) && !$enqueued_media ) {
-						wp_enqueue_media();
-						$enqueued_media = true;
-					} elseif ( 'color' == $option['type'] ) { 
-						$enqueue_color_picker = true;
-					} elseif ( 'coloralpha' == $option['type'] ) {
-						$enqueue_color_picker_alpha = true;
+					if ( isset( $option['type'] ) ) {
+						if ( ( 'image' == $option['type'] ) && !$enqueued_media ) {
+							wp_enqueue_media();
+							$enqueued_media = true;
+						} elseif ( 'color' == $option['type'] ) { 
+							$enqueue_color_picker = true;
+						} elseif ( 'coloralpha' == $option['type'] ) {
+							$enqueue_color_picker_alpha = true;
+						}
 					}
 				}
 
@@ -2392,7 +2454,6 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 
 					$sectionheadings = array();
 					foreach ( $sections as $section => $sectionlabel ) {
-
 						if ( array_key_exists( $section, $taboptions[$tab] ) ) {
 
 							// --- section top ---
@@ -2425,7 +2486,6 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 							echo '</td></tr>' . "\n";
 
 						}
-
 					}
 				} else {
 					foreach ( $taboptions[$tab]['general'] as $key => $option ) {
@@ -2442,7 +2502,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 				$buttons = '<tr height="25"><td> </td></tr>' . "\n";
 				$buttons .= '<tr><td align="center">' . "\n";
 				// 1.2.5: remove reset onclick attribute
-				$buttons .= '<input type="button" id="settingsresetbutton" class="button-secondary settings-button" value="' . esc_attr( __( 'Reset Settings', 'stream-player' ) ) . '">' . "\n";
+				$buttons .= '<input type="button" id="settingsresetbutton" class="button-secondary settings-button reset-button" value="' . esc_attr( __( 'Reset Settings', 'stream-player' ) ) . '">' . "\n";
 				$buttons .= '</td><td colspan="3"></td><td align="center">' . "\n";
 				$buttons .= '<input type="submit" class="button-primary settings-button" value="' . esc_attr( __( 'Save Settings', 'stream-player' ) ) . '">' . "\n";
 				$buttons .= '</td></tr>' . "\n";
@@ -2509,6 +2569,9 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 				'value'			=> array(),
 				'type'			=> array(),
 				'placeholder'	=> array(),
+				// 1.3.6: add rows and cols
+				'rows'			=> array(),
+				'cols'			=> array(),
 			);
 
 			// --- select ---
@@ -2586,7 +2649,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 		// -----------
 		// 1.0.9: added for automatic Settings table generation
 		public function setting_row( $option ) {
-
+			
 			// --- prepare setting keys ---
 			$args = $this->args;
 			$namespace = $this->namespace;
@@ -2637,6 +2700,7 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 				$type = 'multiselect';
 				$option['options'] = 'POSTIDS';
 			}
+			// TODO: password and multitoggle
 
 			// --- prepare row output ---
 			$row = '<tr class="settings-row">' . "\n";
@@ -2926,11 +2990,8 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 						if ( 'text' != $type ) {
 							$class .= ' setting-' . $type;
 						}
-						if ( isset( $option['placeholder'] ) ) {
-							$placeholder = $option['placeholder'];
-						} else {
-							$placeholder = '';
-						}
+						$placeholder = isset( $option['placeholder'] ) ? $option['placeholder'] : '';
+
 						// 1.1.7: fix to attribute quoting output
 						$row .= '<input type="text" name="' . esc_attr( $name ) . '" class="' . esc_attr( $class ) . '" value="' . esc_attr( $setting ) . '" placeholder="' . esc_attr( $placeholder ) . '">' . "\n";
 						if ( isset( $option['suffix'] ) ) {
@@ -2940,43 +3001,22 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 					} elseif ( 'textarea' == $type ) {
 
 						// --- textarea input ---
-						if ( isset( $option['rows'] ) ) {
-							$rows = $option['rows'];
-						} else {
-							$rows = '6';
-						}
-						if ( isset( $option['placeholder'] ) ) {
-							$placeholder = $option['placeholder'];
-						} else {
-							$placeholder = '';
-						}
+						$rows = isset( $option['rows'] ) ? $option['rows'] : '6';
+						$cols = isset( $option['cols'] ) ? $option['cols'] : '80';
+						$placeholder = isset( $option['placeholder'] ) ? $option['placeholder'] : '';
+
 						// 1.2.4: added missing esc_textarea on value
-						$row .= '<textarea class="setting-textarea" name="' . esc_attr( $name ) . '" rows="' . esc_attr( $rows ) . '" placeholder="' . esc_attr( $placeholder ) . '">' . esc_textarea( $setting ) . '</textarea>' . "\n";
+						// 1.3.6: fixed rows attribute, added cols attribute
+						$row .= '<textarea class="setting-textarea" name="' . esc_attr( $name ) . '" rows="' . esc_attr( $rows ) . '" cols="' . esc_attr( $cols ) . '" placeholder="' . esc_attr( $placeholder ) . '">' . esc_textarea( $setting ) . '</textarea>' . "\n";
 
 					} elseif ( ( 'numeric' == $type ) || ( 'number' == $type ) ) {
 
 						// --- numeric text input ---
 						// note: step key is only used for controls, not for validation
-						if ( isset( $option['placeholder'] ) ) {
-							$placeholder = $option['placeholder'];
-						} else {
-							$placeholder = '';
-						}
-						if ( isset( $option['min'] ) ) {
-							$min = $option['min'];
-						} else {
-							$min = 'false';
-						}
-						if ( isset( $option['max'] ) ) {
-							$max = $option['max'];
-						} else {
-							$max = 'false';
-						}
-						if ( isset( $option['step'] ) ) {
-							$step = $option['step'];
-						} else {
-							$step = 1;
-						}
+						$placeholder = isset( $option['placeholder'] ) ? $option['placeholder'] : '';
+						$min =  isset( $option['min'] ) ? $option['min'] : 'false';
+						$max = isset( $option['max'] ) ? $option['max'] : 'false';
+						$step = isset( $option['step'] ) ? $option['step'] : 1;
 
 						// 1.1.7: remove esc_js from onclick attributes
 						// $onclickdown = "plugin_panel_number_step('down', '" . esc_attr( $name ) . "', " . esc_attr( $min ) . ", " . esc_attr( $max ) . ", " . esc_attr( $step ) . ");" . "\n";
@@ -2993,7 +3033,6 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 						// $onclickup = "plugin_panel_number_step('up', '" . esc_attr( $name ) . "', " . esc_attr( $min ) . ", " . esc_attr( $max ) . ", " . esc_attr( $step ) . ");" . "\n";
 						// $row .= '<input class="setting-button button-secondary" type="button" value="+" onclick="' . $onclickup . '">' . "\n";
 						$row .= '<input class="number-button number-up-button setting-button button-secondary" type="button" value="+" data="' . esc_attr( $name ) . '">' . "\n";
-
 
 					} elseif ( 'image' == $type ) {
 
@@ -3149,7 +3188,8 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 						// 1.2.5: changed to jQuery click function to remove onclick button attribute
 						$confirmreset = __( 'Are you sure you want to reset to default settings?', 'stream-player' );
 						// echo "function plugin_panel_reset_defaults() {" . "\n";
-						echo "jQuery('#settingsresetbutton').on('click', function() {" . "\n";
+						// 1.3.7: fix to use class not ID
+						echo "jQuery('.reset-button').on('click', function() {" . "\n";
 						echo "	agree = confirm('" . esc_js( $confirmreset ) . "');" . "\n";
 						echo "	if (!agree) {return false;}" . "\n";
 						echo "	document.getElementById('settings-action').value = 'reset';" . "\n";
@@ -3593,11 +3633,13 @@ if ( !function_exists( 'stream_player_load_prefixed_functions' ) ) {
 		// Settings Row
 		// ------------
 		// 1.0.9: added for standalone setting row output
-		if ( !function_exists( 'stream_player_settings_row' ) ) {
-			function stream_player_settings_row( $option, $setting ) {
+		// 1.3.6: fix to incorrect plural function name _settings_row
+		if ( !function_exists( 'stream_player_setting_row' ) ) {
+			function stream_player_setting_row( $option, $setting ) {
 				$namespace = stream_player_get_namespace_from_function( __FUNCTION__ );
 				$instance = $GLOBALS[$namespace . '_instance'];
-				$instance->settings_row( $option, $setting );
+				// 1.3.6: fix to incorrect plural function name settings_row
+				$instance->setting_row( $option, $setting );
 			}
 		}
 
@@ -3623,6 +3665,19 @@ if ( !function_exists( 'stream_player_load_prefixed_functions' ) ) {
 // =========
 // CHANGELOG
 // =========
+
+// == 1.3.7 ==
+// - updates for loading delayed string translations
+
+// == 1.3.6 ==
+// - delayed support forum redirect to admin_init
+// - added rows and cols attributes to textarea input
+// - enqueue scripts via dummy admin script
+// - change to return style string instead of echo
+// - fix to plural function for settings row
+
+// == 1.3.5 ==
+// - fix to default script enqueueing
 
 // == 1.3.4 ==
 // - switch to settings tab via querystring
