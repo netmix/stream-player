@@ -100,8 +100,36 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'label'   => $admin ? __( 'Display Stream Title', 'stream-player' ) : '',
 			'default' => 'yes',
 			'value'   => 'yes',
-			'helper'  => $admin ? __( 'Display your Stream Title in Player by default.', 'stream-player' ) : '',
+			'helper'  => $admin ? __( 'Display Stream Title in Player by default.', 'stream-player' ) : '',
 			'tab'     => 'stream',
+			'section' => 'channel',
+		),
+
+		// --- [Player] Stream Tagline ---
+		// 2.5.18: added stream tagline
+		'station_tagline' => array(
+			'type'    => 'text',
+			'label'   => $admin ? __( 'Stream Tagline', 'stream-player' ) : '',
+			'default' => '',
+			'helper'  => $admin ? __( 'Tagline for your Stream.', 'stream-player' ) : '',
+			'tab'     => 'general',
+			'section' => 'channel',
+		),
+
+		// --- [Player] Display Tagline ---
+		// 2.5.18: added stream tagline display
+		'player_meta' => array(
+			'type'    => 'multicheck',
+			'label'   => $admin ? __( 'Player Meta Display', 'stream-player' ) : '',
+			'options' => array(
+				'tagline'   => $admin ? __( 'Tagline', 'radio-station' ) : '',
+				// 'frequency' => $admin ? __( 'Frequency', 'radio-station' ) : '',
+				'location'  => $admin ? __( 'Location', 'radio-station' ) : '',
+				'timezone'  => $admin ? __( 'Timezone', 'radio-station' ) : '',
+			),
+			'default' => array( 'tagline' ),
+			'helper'  => $admin ? __( 'Stream Meta to display in Player by default.', 'radio-station' ) : '',
+			'tab'     => 'general',
 			'section' => 'channel',
 		),
 
@@ -373,6 +401,22 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'tab'     => 'bar',
 			'section' => 'display',
 			'helper'  => $admin ? __( 'Set the height of the Sitewide Player Bar in pixels.', 'stream-player' ) : '',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Player] Responsive Mode ---
+		// 2.5.18: added option for responsive expander bar
+		'player_bar_responsive' => array(
+			'type'    => 'select',
+			'label'   => $admin ? __( 'Bar Responsive Mode', 'radio-station' ) : '',
+			'options' => array(
+				'left-right' => $admin ? __( 'Horizontal Arrows', 'radio-station' ) : '',
+				'expander'   => $admin ? __( 'Vertical Expander', 'radio-station' ) : '',
+			),
+			'default' => 'left-right',
+			'tab'     => 'bar',
+			'section' => 'display',
+			'helper'  => $admin ? __( 'Player Bar responsive mode for mobile overflow sections.', 'radio-station' ) : '',
 			'pro'     => true,
 		),
 

@@ -230,6 +230,7 @@ function stream_player_output( $args = array(), $echo = false ) {
 
 	// --- settings defaults ---
 	// 2.5.0: added type, metadata and channel args
+	// 2.5.18: added meta and showmeta display (minimal) defaults
 	$defaults = array(
 		'media'    => 'stream',
 		'url'      => '',
@@ -238,6 +239,8 @@ function stream_player_output( $args = array(), $echo = false ) {
 		'fformat'  => '',
 		'title'    => '',
 		'image'    => '',
+		'meta'     => array( 'frequency' ),
+		'showmeta' => array( 'hosts' ),
 		'script'   => 'amplitude',
 		'layout'   => 'vertical',
 		'theme'    => 'light',
@@ -247,9 +250,21 @@ function stream_player_output( $args = array(), $echo = false ) {
 		'default'  => false,
 	);
 
+	// 2.5.18: explode string attributes
+	if ( isset( $atts['meta'] ) && is_string( $atts['meta'] ) && ( '' != $atts['meta'] ) ) {
+		$atts['meta'] = explode( ',', $atts['meta'] );
+	}
+	if ( isset( $atts['showmeta'] ) && is_string( $atts['showmeta'] )  && ( '' != $atts['meta'] ) ) {
+		$atts['showmeta'] = explode( ',', $atts['showmeta'] );
+	}
+	if ( isset( $atts['volumes'] ) && is_string( $atts['volumes'] )  && ( '' != $atts['meta'] ) ) {
+		$atts['volumes'] = explode( ',', $atts['volumes'] );
+	}
+
 	// --- ensure all arguments are set ---
 	foreach ( $defaults as $key => $value ) {
-		if ( !isset( $args[$key] ) ) {
+		// 2.5.18: allow setting of value to default
+		if ( !isset( $args[$key] ) || ( 'default' == $args[$key] ) ) {
 			$args[$key] = $value;
 		}
 	}
@@ -307,13 +322,18 @@ function stream_player_output( $args = array(), $echo = false ) {
 	$html['player_open'] = '<div id="' . esc_attr( $player_id ) . '" class="' . esc_attr( $class_list ) . '"></div>' . "\n";
 
 	// --- set Player container ---
-	$classes = array( 'radio-container', 'rp-audio' );
-	$classes[] = $args['layout'];
-	$classes[] = $args['theme'];
-	$classes[] = $args['buttons'];
+	$classes = array( 'radio-container', 'rp-audio', $args['layout'], $args['theme'], $args['buttons'] );
 	// 2.5.0: maybe add no volume controls class
 	if ( 0 == count( $args['volumes'] ) ) {
 		$classes[] = 'no-volume-controls';
+	}
+	
+	// 2.5.18: added 24 hour shift time formatting class
+	if ( function_exists( 'stream_player_get_setting' ) ) {
+		$time_format = stream_player_get_setting( 'clock_time_format' );
+		if ( 24 == (int) $time_format ) {
+			$classes[] = 'format-24';
+		}
 	}
 
 	// 2.5.0: added preconnect/dns-prefetch link tags for URL host
@@ -341,7 +361,7 @@ function stream_player_output( $args = array(), $echo = false ) {
 	}
 	$class_list = implode( ' ', $classes );
 
-	$html['player_open'] .= '<div id="' . esc_attr( $container_id ) . '" class="' . esc_attr( $class_list ) . '" role="application" aria-label="media player" data-href="' . esc_url( $args['url'] ) . '" data-format="' . esc_attr( $args['format'] ) . '" data-fallback="' . esc_url( $args['fallback'] ) . '" data-fformat="' . esc_attr( $args['fformat'] ) . '"';
+	$html['player_open'] .= '<div id="' . esc_attr( $container_id ) . '" class="' . esc_attr( $class_list ) . '" role="application" aria-label="media player" data-instance="' . esc_attr( $instance ) . '" data-href="' . esc_url( $args['url'] ) . '" data-format="' . esc_attr( $args['format'] ) . '" data-fallback="' . esc_url( $args['fallback'] ) . '" data-fformat="' . esc_attr( $args['fformat'] ) . '"';
 	// 2.5.6: added optional argument for metadata URL (or 0 to disable)
 	if ( isset( $args['metadata'] ) && ( '1' != $args['metadata'] ) ) {
 		// 2.5.10: use esc_url not esc_url_raw
@@ -381,39 +401,70 @@ function stream_player_output( $args = array(), $echo = false ) {
 		$html['station'] .= $image . '</div>' . "\n";
 
 		// --- station text display ---
-		$html['station'] .= '	<div class="rp-station-text">' . "\n";
+		$station_meta = array();
 
-			// --- station title ---
-			$title_display = '';
-			if ( ( '0' != (string)$args['title'] ) && ( 0 !== $args['title'] ) && ( '' != $args['title'] ) ) {
-				$title_display .= esc_html( $args['title'] );
+		// --- station title ---
+		$title_display = '';
+		if ( ( '0' != (string)$args['title'] ) && ( 0 !== $args['title'] ) && ( '' != $args['title'] ) ) {
+			$title_display .= esc_html( $args['title'] );
+		}
+		$title_display = apply_filters( 'radio_player_station_display', $title_display, $args, $instance );
+		$station_meta['title'] = '<div class="rp-station-title" aria-label="' . esc_attr( __( 'Station Name', 'stream-player' ) ) . '">' . $title_display . '</div>' . "\n";
+
+		// --- station tagline ---
+		// 2.5.18: add tagline display
+		$tagline_display = isset( $args['tagline'] ) ? $args['tagline'] : '';
+		$tagline_display = apply_filters( 'radio_player_tagline_display', $tagline_display, $args, $instance );
+		$station_meta['tagline'] = '<div class="rp-station-tagline"';
+		if ( !in_array( 'tagline', $args['meta'] ) ) {
+			$station_meta['tagline'] .= ' style="display:none;"';
+		}			
+		$station_meta['tagline'] .= '>' . $tagline_display . '</div>' . "\n";
+
+		// --- station timezone / location / frequency ---
+		// 2.5.0: add filters for timezone / frequency / location display
+		$frequency_display = isset( $args['frequency'] ) ? $args['frequency'] : '';
+		$frequency_display = apply_filters( 'radio_player_frequency_display', $frequency_display, $args, $instance );
+		$station_meta['frequency'] = '<div class="rp-station-frequency"';
+		if ( !in_array( 'frequency', $args['meta'] ) ) {
+			$station_meta['frequency'] .= ' style="display:none;"';
+		}			
+		$station_meta['frequency'] .= '>' .  $frequency_display . '</div>' . "\n";
+
+		// --- station location ---
+		// 2.5.0: fix to mismatched location variable and class
+		$location_display = isset( $args['location'] ) ? $args['location'] : '';
+		$location_display = apply_filters( 'radio_player_location_display', $location_display, $args, $instance );
+		$station_meta['location'] = '<div class="rp-station-location"';
+		if ( !in_array( 'location', $args['meta'] ) ) {
+			$station_meta['location'] .= ' style="display:none;"';
+		}			
+		$station_meta['location'] .= '>' .  $location_display . '</div>' . "\n";
+
+		// --- station timezone ---
+		$timezone_display = isset( $args['timezone'] ) ? $args['timezone'] : '';
+		$timezone_display = apply_filters( 'radio_player_timezone_display', $timezone_display, $args, $instance );
+		$station_meta['timezone'] = '<div class="rp-station-timezone"';
+		if ( !in_array( 'timezone', $args['meta'] ) ) {
+			$station_meta['timezone'] .= ' style="display:none;"';
+		}			
+		$station_meta['timezone'] .='>' . $timezone_display . '</div>' . "\n";
+		
+		// 2.5.18: add filtering of station meta and order
+		$station_meta_order = array( 'title', 'tagline', 'frequency', 'location', 'timezone' );
+		$station_meta_order = apply_filters( 'radio_player_station_meta_order', $station_meta_order, $args, $instance );
+		$station_meta = apply_filters( 'radio_player_station_meta', $station_meta, $args, $instance );
+		$station_text_html = '<div class="rp-station-text">' . "\n";
+		if ( count( $station_meta_order ) > 0 ) {
+			foreach ( $station_meta_order as $key ) {
+				if ( isset( $station_meta[$key] ) ) {
+					$station_text_html .= $station_meta[$key];
+				}
 			}
-			$title_display = apply_filters( 'radio_player_station_display', $title_display, $args, $instance );
-			$station_text_html = '<div class="rp-station-title" aria-label="' . esc_attr( __( 'Station Name', 'stream-player' ) ) . '">' . wp_kses( $title_display, $allowed ) . '</div>' . "\n";
-
-			// 2.5.18: add tagline display
-			$tagline_display = isset( $args['tagline'] ) ? $args['tagline'] : '';
-			$tagline_display = apply_filters( 'radio_player_tagline_display', $tagline_display, $args, $instance );
-			$station_text_html .= '<div class="rp-station-tagline">' . wp_kses( $tagline_display, $allowed ) . '</div>' . "\n";
-
-			// --- station timezone / location / frequency ---
-			// 2.5.0: add filters for timezone / frequency / location display
-			$frequency_display = isset( $args['frequency'] ) ? $args['frequency'] : '';
-			$frequency_display = apply_filters( 'radio_player_frequency_display', $frequency_display, $args, $instance );
-			$station_text_html .= '<div class="rp-station-frequency">' . wp_kses( $frequency_display, $allowed ) . '</div>' . "\n";
-
-			// 2.5.0: fix to mismatched location variable and class
-			$location_display = isset( $args['location'] ) ? $args['location'] : '';
-			$location_display = apply_filters( 'radio_player_location_display', $location_display, $args, $instance );
-			$station_text_html .= '<div class="rp-station-location">' . wp_kses( $location_display, $allowed ) . '</div>' . "\n";
-
-			$timezone_display = isset( $args['timezone'] ) ? $args['timezone'] : '';
-			$timezone_display = apply_filters( 'radio_player_timezone_display', $timezone_display, $args, $instance );
-			$station_text_html .= '<div class="rp-station-timezone">' . wp_kses( $timezone_display, $allowed ) . '</div>' . "\n";
-			
-			$html['station'] .= $station_text_html;
-
-		$html['station'] .= '	</div>' . "\n";
+		}
+		$station_text_html .= '</div>' . "\n";
+		
+		$html['station'] .= $station_text_html;
 
 	$html['station'] .= '</div>' . "\n";
 
@@ -426,41 +477,52 @@ function stream_player_output( $args = array(), $echo = false ) {
 			// $html['controls'] .= '		<button class="rp-stop" role="button" tabindex="0">' . esc_html( __( 'Stop', 'stream-player' ) ) . '</button>' . "\n";
 		$html['controls'] .= '	</div>' . "\n";
 
-		// 2.5.18: preload the pause icon to prevent display glitch on play
-		$theme = stream_player_get_setting( 'player_theme' );
-		$buttons = stream_player_get_setting( 'player_buttons' );
-		$pause_icon_url = plugins_url( '/player/images/pause-' . $theme . '-' . $buttons . '.png', STREAM_PLAYER_FILE );
-		$html['controls'] .= '<img style="display:none !important; height: 0; width: 0;" src="' . $pause_icon_url . '?v=2">' . "\n";
+		// 2.5.18: preload the pause icon to prevent display delay glitch on play
+		$pause_icon_url = plugins_url( '/player/images/' . $args['theme'] . '-pause-' . $args['buttons'] . '.png', STREAM_PLAYER_FILE );
+		$pause_icon_url = apply_filters( 'radio_player_pause_preload_url', $pause_icon_url, $args );
+		// $html['controls'] .= '<img class="rp-pause-image-preload" style="display:none !important; height: 0; width: 0;" src="' . esc_url( $pause_icon_url ) . '?v=2">' . "\n";
+		$html['controls'] .= '<div class="rp-pause-image-preload" style="display:none !important; height: 0; width: 0; background-image: url(\'' . esc_url( $pause_icon_url ) . '?v=2\');"></div>' . "\n";
 
 	$html['controls'] .= '</div>' . "\n";
 
 	// --- Volume Controls ---
+	// 2.5.18: respect volumes attribute key
 	$html['volume'] = '<div class="rp-volume-controls">' . "\n";
 
 		// --- Volume Mute ---
-		$html['volume'] .= '<button class="rp-mute" role="button" tabindex="0">' . esc_html( __( 'Mute', 'stream-player' ) ) . '</button>' . "\n";
+		if ( in_array( 'mute', $args['volumes'] ) ) {
+			$html['volume'] .= '<button class="rp-mute" role="button" tabindex="0">' . esc_html( __( 'Mute', 'stream-player' ) ) . '</button>' . "\n";
+		}
 
 		// --- Volume Decrease ---
 		// 2.5.0: fix to attribute typo area-label
-		$html['volume'] .= '<button class="rp-volume-down" role="button" aria-label="' . esc_attr( __( 'Volume Down', 'stream-player' ) ) . '">-</button>' . "\n";
+		if ( in_array( 'updown', $args['volumes'] ) ) {
+			$html['volume'] .= '<button class="rp-volume-down" role="button" aria-label="' . esc_attr( __( 'Volume Down', 'stream-player' ) ) . '">-</button>' . "\n";
+		}
 
 		// --- Custom Range volume slider ---
-		$html['volume'] .= '<div class="rp-volume-slider-container">' . "\n";
-			$html['volume'] .= '<div class="rp-volume-slider-bg" style="width: 0; border: none;"></div>' . "\n";
-				$html['volume'] .= '<input type="range" class="rp-volume-slider" value="' . esc_attr( $args['volume'] ) . '" max="100" min="0" aria-label="' . esc_attr( __( 'Volume Slider', 'stream-player' ) ) . '">' . "\n";
-			$html['volume'] .= '<div class="rp-volume-thumb"></div>' . "\n";
-		$html['volume'] .= '</div>' . "\n";
+		if ( in_array( 'slider', $args['volumes'] ) ) {
+			$html['volume'] .= '<div class="rp-volume-slider-container">' . "\n";
+				$html['volume'] .= '<div class="rp-volume-slider-bg" style="width: 0; border: none;"></div>' . "\n";
+					$html['volume'] .= '<input type="range" class="rp-volume-slider" value="' . esc_attr( $args['volume'] ) . '" max="100" min="0" aria-label="' . esc_attr( __( 'Volume Slider', 'stream-player' ) ) . '">' . "\n";
+				$html['volume'] .= '<div class="rp-volume-thumb"></div>' . "\n";
+			$html['volume'] .= '</div>' . "\n";
+		}
 
 		// --- Volume Increase ---
-		$html['volume'] .= '<button class="rp-volume-up" role="button" aria-label="' . esc_attr( __( 'Volume Up', 'stream-player' ) ) . '">+</button>' . "\n";
+		if ( in_array( 'updown', $args['volumes'] ) ) {
+			$html['volume'] .= '<button class="rp-volume-up" role="button" aria-label="' . esc_attr( __( 'Volume Up', 'stream-player' ) ) . '">+</button>' . "\n";
+		}
 
 		// --- Volume Max ---
-		$html['volume'] .= '<button class="rp-volume-max" role="button" tabindex="0">' . esc_html( __( 'Max', 'stream-player' ) ) . '</button>' . "\n";
+		if ( in_array( 'max', $args['volumes'] ) ) {
+			$html['volume'] .= '<button class="rp-volume-max" role="button" tabindex="0">' . esc_html( __( 'Max', 'stream-player' ) ) . '</button>' . "\n";
+		}
 
 	$html['volume'] .= '</div>' . "\n";
 
 	// --- dropdown script switcher for testing ---
-	if ( STREAM_PLAYER_DEBUG ) {
+	if ( isset( $_REQUEST['script-debug'] ) && ( '1' == sanitize_text_field( wp_unslash( $_REQUEST['script-debug'] ) ) ) ) {
 		$html['switcher'] = '<div class="rp-script-switcher">' . "\n";
 			$html['switcher'] .= '<div class="rp-show-switcher" onclick="radio_player_show_switcher(' . esc_js( $instance ) . ');">*</div>';
 			$html['switcher'] .= '<select class="rp-script-select" name="rp-script-select">' . "\n";
@@ -477,22 +539,72 @@ function stream_player_output( $args = array(), $echo = false ) {
 	}
 
 	// --- Current Show Texts ---
-	// TODO: add other show info divs ( with expander ) ?
+	// 2.5.18: set display according to showmeta attribute
+	$show_meta = array();
+	
+	// --- show title ---
+	$show_meta['title'] = '<div class="rp-show-title" aria-label="' . esc_attr( __( 'Show Title', 'stream-player' ) ) . '"></div>' . "\n";
+
+	// --- show hosts ---
+	$show_meta['hosts'] = '<div class="rp-show-hosts"';
+	if ( !in_array( 'hosts', $args['showmeta'] ) ) {
+		$show_meta['hosts'] .= ' style="display:none;"';
+	}		
+	$show_meta['hosts'] .= '></div>' . "\n";
+
+	// --- show producers ---
+	$show_meta['producers'] = '<div class="rp-show-producers"';
+	if ( !in_array( 'producers', $args['showmeta'] ) ) {
+		$show_meta['producers'] .= ' style="display:none;"';
+	}		
+	$show_meta['producers'] .= '></div>' . "\n";
+
+	// --- show shift ---
+	$show_meta['shift'] = '<div class="rp-show-shift"';
+	if ( !in_array( 'shift', $args['showmeta'] ) ) {
+		$show_meta['shift'] .= ' style="display:none;"';
+	}	
+	$show_meta['shift'] .= '></div>' . "\n";
+
+	// --- show remaining time ---
+	$show_meta['remaining'] = '<div class="rp-show-remaining"';
+	if ( !in_array( 'remaining', $args['showmeta'] ) ) {
+		$show_meta['remaining'] .= ' style="display:none;"';
+	}		
+	$show_meta['remaining'] .= '></div>' . "\n";
+
+	// --- show description ---
+	$show_meta['description'] = '<div class="rp-show-description"';
+	if ( !in_array( 'description', $args['showmeta'] ) ) {
+		$show_meta['description'] .= ' style="display:none;"';
+	}				
+	$show_meta['description'] .= '></div>' . "\n";
+
+	// 2.5.18: add filtering of show meta and order
+	$show_meta_order = array( 'title', 'hosts', 'producers', 'shift', 'remaining', 'description' );
+	$show_meta_order = apply_filters( 'radio_player_show_meta_order', $show_meta_order, $args, $instance );
+	$show_meta = apply_filters( 'radio_player_show_meta', $show_meta, $args, $instance );
+
 	$show_text_html = '<div class="rp-show-text">' . "\n";
-		$show_text_html .= '<div class="rp-show-title" aria-label="' . esc_attr( __( 'Show Title', 'stream-player' ) ) . '"></div>' . "\n";
-		$show_text_html .= '<div class="rp-show-hosts"></div>' . "\n";
-		$show_text_html .= '<div class="rp-show-producers"></div>' . "\n";
-		$show_text_html .= '<div class="rp-show-shift"></div>' . "\n";
-		$show_text_html .= '<div class="rp-show-remaining"></div>' . "\n";
+	if ( count( $show_meta_order ) > 0 ) {
+		foreach ( $show_meta_order as $key ) {
+			if ( isset( $show_meta[$key] ) ) {
+				$show_text_html .= $show_meta[$key];
+			}
+		}
+	}
 	$show_text_html .= '</div>' . "\n";
 
-	// 2.5.18: make show logo clickable
-	$show_text_html .= '<a href="javascript:void(0);" class="rp-show-image-link">' . "\n";
-		$show_text_html .= '<div id="rp-show-image-' . esc_attr( $instance ) . '" class="rp-show-image no-image" aria-label="' . esc_attr( __( 'Show Logo Image', 'stream-player' ) ) . '"></div>' . "\n";
-	$show_text_html .= '</a>' . "\n";
-
 	$html['show'] = '<div class="rp-show-info">' . "\n";
+
 		$html['show'] .= $show_text_html;
+
+		// --- show logo (placeholder) ---
+		// 2.5.18: make show logo clickable
+		$html['show'] .= '<a href="javascript:void(0);" class="rp-show-image-link">' . "\n";
+			$html['show'] .= '<div id="rp-show-image-' . esc_attr( $instance ) . '" class="rp-show-image no-image" aria-label="' . esc_attr( __( 'Show Logo Image', 'stream-player' ) ) . '"></div>' . "\n";
+		$html['show'] .= '</a>' . "\n";
+
 	$html['show'] .= '	</div>' . "\n";
 
 	// --- Playback Progress Bar ---
@@ -510,6 +622,7 @@ function stream_player_output( $args = array(), $echo = false ) {
 	$html['progress'] .= '</div>' . "\n"; */
 
 	// --- no solution section ---
+	// deprecated: along with flash player fallback
 	// $html['no-solution'] = '<div class="rp-no-solution">' . "\n";
 	// $html['no-solution'] .= '<span>' . esc_html( __( 'Update Required', 'stream-player' ) ) . '</span>' . "\n";
 	// $html['no-solution'] .= 'To play the media you will need to either update your browser to a recent version or update your <a href="https://get.adobe.com/flashplayer/" target="_blank">Flash plugin</a>.' . "\n";
@@ -563,13 +676,15 @@ function stream_player_output( $args = array(), $echo = false ) {
 	// --- set alternative text sections ---
 	// 2.4.0.2: added for alternative display methods
 	// 2.4.0.3: added missing function_exists wrappers
-	$station_text_alt = '<div class="rp-station-text-alt">' . $station_text_html . '</div>' . "\n";
+	// 2.6.16: just replace class and leave contents
+	$station_text_alt = str_replace( 'rp-station-text', 'rp-station-text-alt', $station_text_html );
 	if ( function_exists( 'apply_filters' ) ) {
 		$station_text_alt = apply_filters( 'radio_station_player_station_text_alt', $station_text_alt, $args, $instance );
 		$station_text_alt = apply_filters( 'radio_player_station_text_alt', $station_text_alt, $args, $instance );
 	}
 	// 2.5.18: fix class from rp-station-text-alt
-	$show_text_alt = '<div class="rp-show-text-alt">' . $show_text_html . '</div>' . "\n";
+	// 2.6.16: just replace class and leave contents
+	$show_text_alt = str_replace( 'rp-show-text', 'rp-show-text-alt', $show_text_html );
 	if ( function_exists( 'apply_filters' ) ) {
 		$show_text_alt = apply_filters( 'radio_station_player_show_text_alt', $show_text_alt, $args, $instance );
 		$show_text_alt = apply_filters( 'radio_player_show_text_alt', $show_text_alt, $args, $instance );
@@ -634,7 +749,9 @@ function stream_player_instance_args( $args, $instance ) {
 	global $radio_player;
 
 	// 2.5.0: store volume control arguments
-	$radio_player['instance-props'][$instance]['volume-controls'] = $args['volumes'];
+	// 2.5.18: store all args/atts for instance
+	// $radio_player['instance-props'][$instance]['volume-controls'] = $args['volumes'];
+	$radio_player['instance-props'][$instance] = $args;
 
 	return $args;
 }
@@ -735,11 +852,7 @@ function stream_player_shortcode( $atts, $echo = false ) {
 
 	// --- set base defaults ---
 	$title = $image = $image_url = '';
-	$meta = array();
-	$script = 'amplitude';
-	$layout = 'horizontal';
-	$theme = 'light';
-	$buttons = 'rounded';
+	$meta = $showmeta = $script = $layout = $theme = $buttons = 'default';
 	$volume = 77;
 
 	// --- set default player title ---
@@ -748,7 +861,8 @@ function stream_player_shortcode( $atts, $echo = false ) {
 	} elseif ( function_exists( 'stream_player_get_setting' ) ) {
 		$title = stream_player_get_setting( 'player_title' );
 		$title = ( 'yes' == $title ) ? '' : 0;
-	} elseif ( function_exists( 'apply_filters' ) ) {
+	}
+	if ( function_exists( 'apply_filters' ) ) {
 		$title = apply_filters( 'radio_station_player_default_title_display', $title );
 		$title = apply_filters( 'radio_player_default_title_display', $title );
 	}
@@ -759,7 +873,8 @@ function stream_player_shortcode( $atts, $echo = false ) {
 	} elseif ( function_exists( 'stream_player_get_setting' ) ) {
 		$image = stream_player_get_setting( 'player_image' );
 		$image = ( 'yes' == $image ) ? 1 : 0;
-	} elseif ( function_exists( 'apply_filters' ) ) {
+	}
+	if ( function_exists( 'apply_filters' ) ) {
 		$image = apply_filters( 'radio_station_player_default_image_display', $image );
 		$image = apply_filters( 'radio_player_default_image_display', $image );
 	}
@@ -772,9 +887,22 @@ function stream_player_shortcode( $atts, $echo = false ) {
 		}
 	} elseif ( function_exists( 'stream_player_get_setting' ) ) {
 		$meta = stream_player_get_setting( 'player_meta' );
-	} elseif ( function_exists( 'apply_filters' ) ) {
+	}
+	if ( function_exists( 'apply_filters' ) ) {
 		$meta = apply_filters( 'radio_station_player_default_meta_display', $meta );
 		$meta = apply_filters( 'radio_player_default_meta_display', $meta );
+	}
+
+	// 2.5.18: added show meta display options
+	if ( defined( 'STREAM_PLAYER_SHOWMETA_DISPLAY' ) ) {
+		$showmeta = STREAM_PLAYER_SHOWMETA_DISPLAY;
+		if ( is_string( $showmeta ) ) {
+			$showmeta = explode( ',', $showmeta );
+		}
+	}
+	if ( function_exists( 'apply_filters' ) ) {
+		$showmeta = apply_filters( 'radio_station_player_default_showmeta_display', $showmeta );
+		$showmeta = apply_filters( 'radio_player_default_showmeta_display', $showmeta );
 	}
 
 	// --- set default player script ---
@@ -785,7 +913,8 @@ function stream_player_shortcode( $atts, $echo = false ) {
 		$script = STREAM_PLAYER_SCRIPT;
 	} elseif ( function_exists( 'stream_player_get_setting' ) ) {
 		$script = stream_player_get_setting( 'player_script' );
-	} elseif ( function_exists( 'apply_filters' ) ) {
+	}
+	if ( function_exists( 'apply_filters' ) ) {
 		$script = apply_filters( 'radio_station_player_default_script', $script );
 		$script = apply_filters( 'radio_player_default_script', $script );
 	}
@@ -797,7 +926,8 @@ function stream_player_shortcode( $atts, $echo = false ) {
 	// --- set default player layout ---
 	if ( defined( 'STREAM_PLAYER_LAYOUT' ) ) {
 		$layout = STREAM_PLAYER_LAYOUT;
-	} elseif ( function_exists( 'apply_filters' ) ) {
+	}
+	if ( function_exists( 'apply_filters' ) ) {
 		$layout = apply_filters( 'radio_station_player_default_layout', $layout );
 		$layout = apply_filters( 'radio_player_default_layout', $layout );
 	}
@@ -822,13 +952,10 @@ function stream_player_shortcode( $atts, $echo = false ) {
 	} elseif ( function_exists( 'stream_player_get_setting' ) ) {
 		$volume_controls = stream_player_get_setting( 'player_volumes' );
 		if ( !is_array( $volume_controls ) ) {
-			$volume_controls = array( 'slider', 'updown', 'mute', 'max' );
+			$volume_controls = 'default';
 		}
 	}
 	// 2.5.6: move isset check outside of function_exists
-	if ( !isset( $volume_controls ) ) {
-		$volume_controls = array( 'slider', 'updown', 'mute', 'max' );
-	}
 	if ( function_exists( 'apply_filters' ) ) {
 		$volume_controls = apply_filters( 'radio_station_player_volumes_display', $volume_controls );
 		$volume_controls = apply_filters( 'radio_player_volumes_display', $volume_controls );
@@ -839,7 +966,8 @@ function stream_player_shortcode( $atts, $echo = false ) {
 		$theme = STREAM_PLAYER_THEME;
 	} elseif ( function_exists( 'stream_player_get_setting' ) ) {
 		$theme = stream_player_get_setting( 'player_theme' );
-	} elseif ( function_exists( 'apply_filters' ) ) {
+	}
+	if ( function_exists( 'apply_filters' ) ) {
 		$theme = apply_filters( 'radio_station_player_default_theme', $theme );
 		$theme = apply_filters( 'radio_player_default_theme', $theme );
 	}
@@ -849,7 +977,8 @@ function stream_player_shortcode( $atts, $echo = false ) {
 		$buttons = STREAM_PLAYER_BUTTONS;
 	} elseif ( function_exists( 'stream_player_get_setting' ) ) {
 		$buttons = stream_player_get_setting( 'player_buttons' );
-	} elseif ( function_exists( 'apply_filters' ) ) {
+	}
+	if ( function_exists( 'apply_filters' ) ) {
 		$buttons = apply_filters( 'radio_station_player_default_buttons', $buttons );
 		$buttons = apply_filters( 'radio_player_default_buttons', $buttons );
 	}
@@ -867,6 +996,7 @@ function stream_player_shortcode( $atts, $echo = false ) {
 		'title'	    => $title,
 		'image'	    => $image,
 		'meta'      => $meta,
+		'showmeta'  => $showmeta,
 		// --- player options ---
 		'script'    => $script,
 		'layout'    => $layout,
@@ -1161,7 +1291,7 @@ function stream_player_ajax() {
 	// 2.5.10: moved up so that inline style can be in header
 	// 2.5.14: add body prefix to selector
 	// 2.5.18: reset body margins (from theme styles)
-	$css = 'body {margin: 0 !important; padding: 10px !important;}';
+	$css = 'body {margin: 0 !important; padding: 10px !important;}' . "\n";
 	if ( '' != $text_color ) {
 		if ( ( 'rgb' != substr( $text_color, 0, 3 ) ) && ( '#' != substr( $text_color, 0, 1 ) ) ) {
 			$text_color = '#' . $text_color;
@@ -1289,8 +1419,10 @@ function stream_player_add_inline_style( $css ) {
 		wp_add_inline_style( 'stream-player-footer', $css );
 
 		// 2.5.18: enqueue late to allow for in-between additions
-		if ( !has_action( 'wp_footer', 'stream_player_enqueue_footer_styles', 9 ) ) {
-			add_action( 'wp_footer', 'stream_player_enqueue_footer_styles', 9 );
+		// 2.5.18: allow for admin footer position
+		$hook = is_admin() ? 'admin_footer' : 'wp_footer';
+		if ( !has_action( $hook, 'stream_player_enqueue_footer_styles', 5 ) ) {
+			add_action( $hook, 'stream_player_enqueue_footer_styles', 5 );
 		}
 	}
 }
@@ -1314,7 +1446,8 @@ function stream_player_sanitize_shortcode_values() {
 	// 2.5.0: added alternative text attribute
 	// 2.5.0: added block attribute
 	// 2.5.18: added audio5 script option
-	// 2.5.18: added ptheme key for conflict fix
+	// 2.5.18: added ptheme key for theme conflict fix
+	// TODO: handle meta and showmeta keys ?
 	$keys = array(
 		'url'        => 'url',
 		'title'	     => 'text',
@@ -1799,8 +1932,10 @@ function stream_player_add_inline_script( $js, $position = 'after' ) {
 			wp_add_inline_script( 'radio-player-footer', $js, $position );
 			
 			// 2.5.18: enqueue inline scripts in footer
-			if ( !has_action( 'wp_footer', 'stream_player_enqueue_footer_scripts', 9 ) ) {
-				add_action( 'wp_footer', 'stream_player_enqueue_footer_scripts', 9 );
+			// 2.5.18: allow for admin hook
+			$hook = is_admin() ? 'admin_footer' : 'wp_footer';
+			if ( !has_action( $hook, 'stream_player_enqueue_footer_scripts', 9 ) ) {
+				add_action( $hook, 'stream_player_enqueue_footer_scripts', 9 );
 			}
 		}
 	}
@@ -2211,17 +2346,7 @@ function stream_player_get_player_settings( $echo = false ) {
 
 	// --- set debug mode ---
 	// 2.5.10: moved conditions to stream_player_set_debug_mode
-	// 2.5.18: added sync debug switch mode
 	$debug = STREAM_PLAYER_DEBUG ? 'true' : 'false';
-	$sync_debug = 'false';
-	if ( isset( $_REQUEST['sync-debug'] ) ) {
-		$switch = sanitize_text_field( wp_unslash( $_REQUEST['sync-debug'] ) );
-		if ( ( '1' == $switch ) || ( 'on' == $switch ) ) {
-			$sync_debug = 'on';
-		} elseif ( ( '0' == $switch ) || ( 'off' == $switch ) ) {
-			$sync_debug = 'off';
-		}
-	}			
 
 	// 2.5.6: added explicit touchscreen detection setting
 	echo "matchmedia = window.matchMedia || window.msMatchMedia;" . "\n";
@@ -2230,8 +2355,10 @@ function stream_player_get_player_settings( $echo = false ) {
 	// --- set radio player settings and radio data objects ---
 	// (with empty arrays for instances, script types, failbacks, audio targets and stream data)
 	// 2.5.18: added sync debug switch
-	echo "var radio_player = {settings:player_settings, scripts:scripts, formats:formats, loading:false, touchscreen:touchscreen, debug:" . esc_js( $debug ) . ", sync_debug:" . esc_js( $sync_debug ) . "}" . "\n";
+	// 2.5.19: added debug scope variable
+	echo "var radio_player = {settings:player_settings, scripts:scripts, formats:formats, loading:false, touchscreen:touchscreen, debug:" . esc_js( $debug ) . "}" . "\n";
 	echo "var radio_player_data = {state:{}, players:[], scripts:[], failed:[], data:[], types:[], channels:[], faders:[]}" . "\n";
+	echo "var radio_player_debug = {};" . "\n";
 
 	// --- logged in / user state settings ---
 	$loggedin = 'false';
@@ -2727,6 +2854,11 @@ function stream_player_script_jplayer() {
 		});
 		radio_player_data.players[instance] = radio_player_instance;
 		radio_player_data.scripts[instance] = 'jplayer';
+
+		/* set instance on audio source */
+		audio = radio_player_instance.data('jPlayer').htmlElement.audio;
+		if (radio_player.debug) {console.log('jPlayer Audio Element:'); console.log(audio);}
+		audio.setAttribute('instance-id', instance);
 
 		/* bind load event */
 		jQuery('#'+player_id).bind(jQuery.jPlayer.event.load, function(e) {
@@ -3250,10 +3382,17 @@ function stream_player_enqueue_styles( $script = false, $skin = false ) {
 // Player Control Styles
 // ---------------------
 // 2.5.16: add optional attribute overrides argument
-function stream_player_control_styles( $instance, $atts = false ) {
+function stream_player_control_styles( $instance, $overrides = false ) {
 
 	global $radio_player;
 
+	// 2.5.18: added secondary container option
+	$secondary = false;
+	if ( ( $instance !== false ) && strstr( $instance, 'b' ) ) {
+		$instance = (int) str_replace( 'b', '', $instance );
+		$secondary = true;
+	}
+			
 	// --- set default control colors ---
 	// 2.5.0: added empty text and background color styles
 	// 2.5.18: adjust playing default from #70E070
@@ -3274,9 +3413,9 @@ function stream_player_control_styles( $instance, $atts = false ) {
 		$colors['track'] = stream_player_get_setting( 'player_range_color' );
 	}
 
-	// 2.5.16: maybe apply override attributes
-	if ( $atts ) {
-		foreach ( $atts as $key => $value ) {
+	// 2.5.16: maybe apply override attributes (AJAX)
+	if ( $overrides ) {
+		foreach ( $overrides as $key => $value ) {
 			$colors[$key] = $value;
 		}
 	}
@@ -3300,8 +3439,15 @@ function stream_player_control_styles( $instance, $atts = false ) {
 	// 2.5.0: improved instance and ID matching
 	if ( false !== $instance ) {
 		
+		$atts = $radio_player['instance-props'][$instance];
+		// echo '<span style="display:none;">INSTANCE ATTS: ' . print_r( $atts, true ) . '</span>';
+
 		// -- set instance container selector ---
 		$container = '#radio_container_' . $instance;
+		// 2.5.18: added secondary container option
+		if ( $secondary ) {
+			$container = '#rp_container_' . $instance;
+		}
 
 		// --- get colors for container instance ---
 		if ( isset( $radio_player['instance-props'][$instance] ) ) {
@@ -3357,86 +3503,112 @@ function stream_player_control_styles( $instance, $atts = false ) {
 
 	// --- Play Button ---
 	// 2.4.0.2: fix to glowingloading animation reference
-	$css .= "/* Playing Button */
-" . esc_attr( $container ) . ".loaded .rp-play-pause-button-bg {background-color: " . esc_attr( $colors['buttons'] ) . ";}
-" . esc_attr( $container ) . ".playing .rp-play-pause-button-bg {background-color: " . esc_attr( $colors['playing'] ) . ";}
-" . esc_attr( $container ) . ".error .rp-play-pause-button-bg {background-color: #CC0000;}
-" . esc_attr( $container ) . ".loading .rp-play-pause-button-bg {animation: glowingloading 1s infinite alternate;}
-" . esc_attr( $container ) . ".playing .rp-play-pause-button-bg, 
-" . esc_attr( $container ) . ".playing.loaded .rp-play-pause-button-bg {animation: glowingplaying 1s infinite alternate;}
-@keyframes glowingloading {
-	from {background-color: " . esc_attr( $colors['buttons'] ) . ";} to {background-color: " . esc_attr( $colors['buttons'] ) . "80;}
-}
-@keyframes glowingplaying {
-	from {background-color: " . esc_attr( $colors['playing'] ) . ";} to {background-color: " . esc_attr( $colors['playing'] ) . "C0;}
-}" . "\n";
+	// 2.5.18: add check for solid/semisolid play/pause buttons
+	if ( !isset( $atts ) || !strstr( $atts['buttons'], 'solid' ) ) {
+		$css .= "/* Playing Button */" . "\n";
+		$css .= esc_attr( $container ) . ".error .rp-play-pause-button-bg {background-color: #CC0000;}" . "\n";
+		if ( '' != $colors['buttons'] ) {
+			$css .= esc_attr( $container ) . ".loaded .rp-play-pause-button-bg {background-color: " . esc_attr( $colors['buttons'] ) . ";}" . "\n";
+			$css .= esc_attr( $container ) . ".loading .rp-play-pause-button-bg {animation: glowingloading 1s infinite alternate;}" . "\n";
+			$css .= "@keyframes glowingloading { from {background-color: " . esc_attr( $colors['buttons'] ) . ";} to {background-color: " . esc_attr( $colors['buttons'] ) . "80;} }" . "\n";
+		}
+		if ( '' != $colors['playing'] ) {
+			$css .= esc_attr( $container ) . ".playing .rp-play-pause-button-bg {background-color: " . esc_attr( $colors['playing'] ) . ";}" . "\n";
+			$css .= esc_attr( $container ) . ".playing .rp-play-pause-button-bg, " . esc_attr( $container ) . ".playing.loaded .rp-play-pause-button-bg {animation: glowingplaying 1s infinite alternate;}" . "\n";
+			$css .= "@keyframes glowingplaying { from {background-color: " . esc_attr( $colors['playing'] ) . ";} to {background-color: " . esc_attr( $colors['playing'] ) . "C0;} }" . "\n";
+		}
 
-	// --- Active Volume Buttons Color ---
-	// 2.5.0: added popup player button selector
-	$css .= "/* Volume Buttons */
+		// --- Active Volume Buttons Color ---
+		// 2.5.0: added popup player button selector
+		// 2.5.19: fix to incorrect variable buttons['colors']
+		if ( '' != $colors['buttons'] ) {
+			$css .= "/* Volume Buttons */
 " . esc_attr( $container ) . " .rp-mute:hover, " . esc_attr( $container ) . ".muted .rp-mute, " . esc_attr( $container ) . ".muted .rp-mute:hover,
 " . esc_attr( $container ) . " .rp-volume-max:focus, " . esc_attr( $container ) . " .rp-volume-max:hover, " . esc_attr( $container ) . ".maxed .rp-volume-max,
 " . esc_attr( $container ) . " .rp-volume-up:focus, " . esc_attr( $container ) . " .rp-volume-up:hover,
 " . esc_attr( $container ) . " .rp-volume-down:focus, " . esc_attr( $container ) . " .rp-volume-down:hover,
-" . esc_attr( $container ) . " .rp-popup-button:focus, " . esc_attr( $container ) . " .rp-popup-button:hover {
-	background-color: " . esc_attr( $colors['buttons'] ) . ";
+" . esc_attr( $container ) . " .rp-popup-button:focus, " . esc_attr( $container ) . " .rp-popup-button:hover {background-color: " . esc_attr( $colors['buttons'] ) . ";
 }" . "\n";
+		}
+
+	} else {
+		// 2.5.18: no background colors/animations for solid/semisolid play/pause buttons
+		// TODO: maybe create matching SVG background layers for animation colors?
+		$css .= "/* Playing Button */
+" . esc_attr( $container ) . ".loaded .rp-play-pause-button-bg {background-color: transparent;}
+" . esc_attr( $container ) . ".playing .rp-play-pause-button-bg {background-color: transparent;}
+" . esc_attr( $container ) . ".error .rp-play-pause-button-bg {background-color: transparent;}
+" . esc_attr( $container ) . ".loading .rp-play-pause-button-bg,
+" . esc_attr( $container ) . ".playing .rp-play-pause-button-bg, 
+" . esc_attr( $container ) . ".playing.loaded .rp-play-pause-button-bg {animation: none;}" . "\n";
+
+	// --- Active Volume Buttons Color ---
+	// 2.5.0: added popup player button selector
+	$css .= "/* Volume Buttons */
+" . esc_attr( $container ) . " .rp-mute, " . esc_attr( $container ) . " .rp-mute:hover, " . esc_attr( $container ) . ".muted .rp-mute, " . esc_attr( $container ) . ".muted .rp-mute:hover,
+" . esc_attr( $container ) . " .rp-volume-max, " . esc_attr( $container ) . " .rp-volume-max:focus, " . esc_attr( $container ) . " .rp-volume-max:hover, " . esc_attr( $container ) . ".maxed .rp-volume-max,
+" . esc_attr( $container ) . " .rp-volume-up, " . esc_attr( $container ) . " .rp-volume-up:focus, " . esc_attr( $container ) . " .rp-volume-up:hover,
+" . esc_attr( $container ) . " .rp-volume-down, " . esc_attr( $container ) . " .rp-volume-down:focus, " . esc_attr( $container ) . " .rp-volume-down:hover,
+" . esc_attr( $container ) . " .rp-popup-button, " . esc_attr( $container ) . " .rp-popup-button:focus, " . esc_attr( $container ) . " .rp-popup-button:hover {background-color: transparent;}" . "\n";
+	}
 
 	// --- Volume Range Input and Container ---
 	// ref: http://danielstern.ca/range.css/#/
 	// ref: https://css-tricks.fcom/sliding-nightmare-understanding-range-input/
 	// 2.4.0.4: added no border style to range input (border added on some themes)
 	// 2.5.0: added input height 100% to fix vertical slider alignment
+	// 2.5.18: remove .rp-volume-controls selector
 	$css .= "/* Range Input */
-" . esc_attr( $container ) . " .rp-volume-controls input[type=range] {";
+" . esc_attr( $container ) . " input[type=\"range\"] {";
 	$css .= "height: 100%; margin: 0; background-color: transparent; vertical-align: middle; -webkit-appearance: none; border: none;}
-" . esc_attr( $container ) . " .rp-volume-controls input[type=range]:focus {outline: none; box-shadow: none;}
-" . esc_attr( $container ) . " .rp-volume-controls input[type=range]::-moz-focus-inner,
-" . esc_attr( $container ) . " .rp-volume-controls input[type=range]::-moz-focus-outer {outline: none; box-shadow: none;}" . "\n";
+" . esc_attr( $container ) . " input[type=\"range\"]:focus {outline: none; box-shadow: none;}
+" . esc_attr( $container ) . " input[type=\"range\"]::-moz-focus-inner,
+" . esc_attr( $container ) . " input[type=\"range\"]::-moz-focus-outer {outline: none; box-shadow: none;}" . "\n";
 
 	// --- Range Track (synced Background Div) ---
 	// 2.4.0.3: add position absolute/top on slider background (cross-browser display fix)
 	// 2.5.10: set top bottom and height to 10px for consistent display
 	// 2.5.10: set z-index to 1 to use with improved javascript calculations
 	$css .= "/* Range Track */
-" . esc_attr( $container ) . " .rp-volume-controls .rp-volume-slider-bg {
+" . esc_attr( $container ) . " .rp-volume-slider-bg {
 	position: absolute; top: 10px; bottom: 10px; overflow: hidden; height: 10px; margin-left: 9px; z-index: 1; border: 1px solid rgba(128, 128, 128, 0.5); border-radius: 3px; background: rgba(128, 128, 128, 0.5);
 }
-" . esc_attr( $container ) . ".playing .rp-volume-controls .rp-volume-slider-bg {background: " . esc_attr( $colors['track'] ) . ";}
-" . esc_attr( $container ) . ".playing.muted .rp-volume-controls .rp-volume-slider-bg {background: rgba(128, 128, 128, 0.5);}" . "\n";
+" . esc_attr( $container ) . ".playing .rp-volume-slider-bg {background: " . esc_attr( $colors['track'] ) . ";}
+" . esc_attr( $container ) . ".playing.muted .rp-volume-slider-bg {background: rgba(128, 128, 128, 0.5);}" . "\n";
 
 	// --- Slider Range Track (Clickable Transparent) ---
+	// 2.5.18: remove .rp-volume-controls selector
 	$css .= "/* Range Track */
-" . esc_attr( $container ) . " .rp-volume-controls input[type=range]::-webkit-slider-runnable-track {height: 9px; background: transparent; -webkit-appearance: none; color: transparent}
-" . esc_attr( $container ) . " .rp-volume-controls input[type=range]::-moz-range-track {height: 9px; background: transparent; color: transparent;}
-" . esc_attr( $container ) . " .rp-volume-controls input[type=range]::-ms-track {height: 9px; color: transparent; background: transparent; border-color: transparent;}" . "\n";
+" . esc_attr( $container ) . " input[type=\"range\"]::-webkit-slider-runnable-track {height: 9px; background: transparent; -webkit-appearance: none; color: transparent}
+" . esc_attr( $container ) . " input[type=\"range\"]::-moz-range-track {height: 9px; background: transparent; color: transparent;}
+" . esc_attr( $container ) . " input[type=\"range\"]::-ms-track {height: 9px; color: transparent; background: transparent; border-color: transparent;}" . "\n";
 // 2.4.0.3: remove float on range input (cross-browser display fix)
-// " . $container . " .rp-volume-controls input[type=range] {float: left; margin-top: -9px;}
+// " . esc_attr( $container ) . " .rp-volume-controls input[type=\"range\"] {float: left; margin-top: -9px;}
 
 	// --- Slider Range Thumb ---
 	// 2.5.10: fix to slider range thumb border radius (for default circle buttons)
 	$css .= "/* Range Thumb */
-" . esc_attr( $container ) . " .rp-volume-controls input[type=range]::-webkit-slider-thumb {
+" . esc_attr( $container ) . " input[type=\"range\"]::-webkit-slider-thumb {
 	width: 18px; height: 18px; cursor: pointer; background: rgba(128, 128, 128, 1);
 	border: 1px solid rgba(128, 128, 128, 0.5); border-radius: 9px; z-index: 2;
 	margin-top: -4.5px; -webkit-appearance: none;
 }
-" . esc_attr( $container ) . " .rp-volume-controls input[type=range]::-moz-range-thumb {
+" . esc_attr( $container ) . " input[type=\"range\"]::-moz-range-thumb {
 	width: 18px; height: 18px; cursor: pointer; background: rgba(128, 128, 128, 1);
 	border: 1px solid rgba(128, 128, 128, 0.5); border-radius: 9px; z-index: 2;
 }
-" . esc_attr( $container ) . " .rp-volume-controls input[type=range]::-ms-thumb {
+" . esc_attr( $container ) . " input[type=\"range\"]::-ms-thumb {
 	width: 18px; height: 18px; cursor: pointer; background: rgba(128, 128, 128, 1);
 	border: 1px solid rgba(128, 128, 128, 0.5); border-radius: 9px; z-index: 2; margin-top: 0px; 
 }
-" . esc_attr( $container ) . ".rounded .rp-volume-controls input[type=range]::-webkit-slider-thumb {border-radius: 5px !important;}
-" . esc_attr( $container ) . ".square .rp-volume-controls input[type=range]::-webkit-slider-thumb {border-radius: 0px !important;}
-" . esc_attr( $container ) . ".playing .rp-volume-controls input[type=range]::-webkit-slider-thumb {background: " . esc_attr( $colors['thumb'] ) . "};
-" . esc_attr( $container ) . ".playing .rp-volume-controls input[type=range]::-moz-range-thumb {background: " . esc_attr( $colors['thumb'] ) . "};
-" . esc_attr( $container ) . ".playing .rp-volume-controls input[type=range]::-ms-thumb {background: " . esc_attr( $colors['thumb'] ) . "};
+" . esc_attr( $container ) . ".rounded input[type=\"range\"]::-webkit-slider-thumb {border-radius: 5px !important;}
+" . esc_attr( $container ) . ".square input[type=\"range\"]::-webkit-slider-thumb {border-radius: 0px !important;}
+" . esc_attr( $container ) . ".playing input[type=\"range\"]::-webkit-slider-thumb {background: " . esc_attr( $colors['thumb'] ) . "}
+" . esc_attr( $container ) . ".playing input[type=\"range\"]::-moz-range-thumb {background: " . esc_attr( $colors['thumb'] ) . "}
+" . esc_attr( $container ) . ".playing input[type=\"range\"]::-ms-thumb {background: " . esc_attr( $colors['thumb'] ) . "}
 " . esc_attr( $container ) . " input[type=range]::-ms-tooltip {display: none;}
 @supports (-ms-ime-align:auto) {
-  " . esc_attr( $container ) . " .rp-volume-controls input[type=range] {margin: 0;}
+  " . esc_attr( $container ) . " input[type=\"range\"] {margin: 0;}
 }" . "\n";
 
 	// --- dummy element style for thumb width ---
@@ -3448,8 +3620,8 @@ function stream_player_control_styles( $instance, $atts = false ) {
 	// 2.4.1.4: added volume control visibility options filter
 	// 2.5.0: added check for instance property for volume controls
 	$volume_controls = array( 'slider', 'updown', 'mute', 'max' );
-	if ( isset( $radio_player['instance-props'][$instance]['volume-controls'] ) ) {
-		$volume_controls = $radio_player['instance-props'][$instance]['volume-controls'];
+	if ( isset( $radio_player['instance-props'][$instance]['volumes'] ) ) {
+		$volume_controls = $radio_player['instance-props'][$instance]['volumes'];
 	}
 
 	// --- volume display styles ---
@@ -3469,6 +3641,10 @@ function stream_player_control_styles( $instance, $atts = false ) {
 	// --- filter and return ---
 	// 2.4.0.3: added missing function_exists wrapper
 	if ( function_exists( 'apply_filters' ) ) {
+		// 2.6.16: restore possible b instance for filter
+		if ( $secondary ) {
+			$instance .= 'b';
+		}
 		$css = apply_filters( 'radio_station_player_control_styles', $css, $instance );
 		$css = apply_filters( 'stream_player_control_styles', $css, $instance );
 	}
@@ -3486,15 +3662,16 @@ function stream_player_control_styles_ajax() {
 
 	// --- get provided parameters ---
 	$instance = absint( $_REQUEST['instance'] );
-	$atts['text'] = sanitize_text_field( wp_unslash( $_REQUEST['text'] ) );
-	$atts['background'] = sanitize_text_field( wp_unslash( $_REQUEST['background'] ) );
-	$atts['playing'] = sanitize_text_field( wp_unslash( $_REQUEST['playing'] ) );
-	$atts['buttons'] = sanitize_text_field( wp_unslash( $_REQUEST['buttons'] ) );
-	$atts['thumb'] = sanitize_text_field( wp_unslash( $_REQUEST['thumb'] ) );
-	$atts['track'] = sanitize_text_field( wp_unslash( $_REQUEST['track'] ) );
+	$colors = array();
+	$colors['text'] = sanitize_text_field( wp_unslash( $_REQUEST['text'] ) );
+	$colors['background'] = sanitize_text_field( wp_unslash( $_REQUEST['background'] ) );
+	$colors['playing'] = sanitize_text_field( wp_unslash( $_REQUEST['playing'] ) );
+	$colors['buttons'] = sanitize_text_field( wp_unslash( $_REQUEST['buttons'] ) );
+	$colors['thumb'] = sanitize_text_field( wp_unslash( $_REQUEST['thumb'] ) );
+	$colors['track'] = sanitize_text_field( wp_unslash( $_REQUEST['track'] ) );
 	
 	// --- generate control styles ---
-	$css = stream_player_control_styles( $instance, $atts );
+	$css = stream_player_control_styles( $instance, $colors );
 	
 	// --- return result ---
 	if ( '' != $css ) {
