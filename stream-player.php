@@ -6,7 +6,7 @@ Plugin Name: Stream Player
 Plugin URI: https://streamplayer.pro
 Description: Open-source live streaming audio player by Radio Station by netmix®. Supports Icecast, Shoutcast, Live365, multiple formats & scripts.
 Author: Tony Hayes, Tony Zeoli
-Version: 2.5.16
+Version: 2.5.20
 License: GPLv2 or later
 Requires at least: 4.0
 Text Domain: stream-player
@@ -26,11 +26,14 @@ if ( !defined( 'ABSPATH' ) ) exit;
 // - Plugin Loader Settings
 // - Bundle Plan Settings Filter
 // - Start Plugin Loader Instance
-// - Include Plugin Admin Files
+// - Filter Admin Texts
+// - Plugin Admin Options Filter
+// - Plugin Options Filter
 // - Load Plugin Text Domain
+// - Filter Freemius Load Path
 // - Filter Freemius Plugin Icon Path
-// - Add Pricing Page Path Filter
-// - Pricing Page Path Filter
+// x Add Pricing Page Path Filter
+// x Pricing Page Path Filter
 // === Helper Functions ===
 // - Get Now Timestamp
 // - Add Inline Script
@@ -48,9 +51,11 @@ if ( !defined( 'ABSPATH' ) ) exit;
 // - Get Station Image URL
 // - Filter for Streaming Data
 // - Get Broadcast Data
-// - Get Allowed HTML
+// === Sanitization Helpers ===
+// - KSES Allowed HTML
 // - Filter Anchor Tag Allowed HTML
 // - Settings Inputs Allowed HTML
+// - Player Widget Allowed HTML
 
 
 // -------------
@@ -102,9 +107,9 @@ if ( function_exists( 'register_block_type' ) ) {
 // ---------------------------
 // Plugin Options and Defaults
 // ---------------------------
-$formats = stream_player_get_stream_formats();
 $plan_options = stream_player_check_plan_options();
 require STREAM_PLAYER_DIR . '/options.php';
+$options = stream_player_get_plugin_options( false );
 
 // ----------------------
 // Plugin Loader Settings
@@ -119,16 +124,16 @@ $settings = array(
 	'version'      => '0.0.1',
 
 	// --- Menus and Links ---
-	'title'        => __( 'Stream Player', 'stream-player' ),
+	'title'        => 'Stream Player',
 	'parentmenu'   => STREAM_PLAYER_SLUG,
 	'home'         => STREAM_PLAYER_HOME_URL,
 	'docs'         => STREAM_PLAYER_DOCS_URL,
 	'support'      => 'https://github.com/netmix/stream-player/issues/',
-	'ratetext'     => __( 'Rate on WordPress.org', 'stream-player' ),
+	// 'ratetext'     => __( 'Rate on WordPress.org', 'stream-player' ),
 	'share'        => STREAM_PLAYER_HOME_URL . '#share',
-	'sharetext'    => __( 'Share the Plugin Love', 'stream-player' ),
+	// 'sharetext'    => __( 'Share the Plugin Love', 'stream-player' ),
 	'donate'       => 'https://patreon.com/radiostation',
-	'donatetext'   => __( 'Support this Plugin', 'stream-player' ),
+	// 'donatetext'   => __( 'Support this Plugin', 'stream-player' ),
 	'readme'       => false,
 	'settingsmenu' => false,
 
@@ -195,6 +200,50 @@ if ( STREAM_PLAYER_DEBUG ) {
 require STREAM_PLAYER_DIR . '/loader.php';
 $instance = new stream_player_loader( $settings );
 
+// ------------------
+// Filter Admin Texts
+// ------------------
+// 2.5.18: added filter for delayed translations
+add_filter( 'stream_player_admin_args', 'stream_player_settings_texts' );
+function stream_player_settings_texts( $args ) {
+	$texts = array(
+		'title'        => __( 'Stream Player', 'stream-player' ),
+		'sharetext'    => __( 'Share the Plugin Love', 'stream-player' ),
+		'ratetext'     => __( 'Rate on WordPress.org', 'stream-player' ),
+		'donatetext'   => __( 'Support this Plugin', 'stream-player' ),
+	);
+	$args = array_merge( $args, $texts );
+	return $args;
+}
+
+// ---------------------------
+// Plugin Admin Options Filter
+// ---------------------------
+// 2.5.18: added filter for delay translated admin options
+add_filter( 'stream_player_options', 'stream_player_admin_options' );
+function stream_player_admin_options( $options ) {
+	$admin = is_admin();
+	$options = stream_player_get_plugin_options( $admin );
+	return $options;
+}
+
+// ---------------------
+// Plugin Options Filter
+// ---------------------
+// 2.5.18: added to bypass REST null options bug
+add_filter( 'stream_player_plugin_options', 'stream_player_plugin_options' );
+function stream_player_plugin_options( $options ) {
+	$options = stream_player_get_plugin_options( false );
+	return $options;
+}
+
+// -----------------------
+// Load Plugin Text Domain
+// -----------------------
+// add_action( 'init', 'stream_player_init' );
+function stream_player_init() {
+	load_plugin_textdomain( 'stream-player', false, STREAM_PLAYER_DIR . '/languages' );
+}
 
 // -------------------------
 // Filter Freemius Load Path
@@ -207,15 +256,6 @@ function stream_player_freemius_load_path( $freemius_path, $namespace, $args ) {
 	}
 	return $freemius_path;
 }
-
-// -----------------------
-// Load Plugin Text Domain
-// -----------------------
-// add_action( 'init', 'stream_player_init' );
-function stream_player_init() {
-	load_plugin_textdomain( 'stream-player', false, STREAM_PLAYER_DIR . '/languages' );
-}
-
 // --------------------------------
 // Filter Freemius Plugin Icon Path
 // --------------------------------
@@ -237,7 +277,8 @@ function stream_player_freemius_plugin_url_path( $default_path ) {
 // Add Pricing Page Path Filter
 // ----------------------------
 // 2.5.0: added for Freemius Pricing Page v2
-add_action( 'stream_player_loaded', 'stream_player_add_pricing_path_filter' );
+// 2.5.18: removed pricing page as merged in Freemius
+// add_action( 'stream_player_loaded', 'stream_player_add_pricing_path_filter' );
 function stream_player_add_pricing_path_filter() {
 	global $stream_player_freemius;
 	if ( method_exists( $stream_player_freemius, 'add_filter' ) ) {
@@ -259,6 +300,70 @@ function stream_player_pricing_page_path( $default_pricing_js_path ) {
 // ------------------------
 // === Helper Functions ===
 // ------------------------
+
+// ------------
+// Get Template
+// ------------
+// 2.5.18: added for future usage
+function stream_player_get_template( $type, $template, $paths = false ) {
+
+	$dirs = array();
+	$styledir = get_stylesheet_directory();
+	$styledirurl = get_stylesheet_directory_uri();
+	$templatedir = get_template_directory();
+	$templatedirurl = get_template_directory_uri();
+
+	// --- maybe generate default hierarchies ---
+	foreach ( $paths as $path ) {
+		$dirs[] = array(
+			'path'    => $styledir . '/' . $path,
+			'urlpath' => $styledirurl . '/' . $path,
+		);
+	}
+	if ( $styledir != $templatedir ) {
+		foreach ( $paths as $path ) {
+			$dirs[] = array(
+				'path'    => $templatedir . '/' . $path,
+				'urlpath' => $templatedirurl . '/' . $path,
+			);
+		}
+	}
+	if ( defined( 'STREAM_PLAYER_PRO_DIR' ) ) {
+		foreach ( $paths as $path ) {
+			$dirs[] = array(
+				'path'    => STREAM_PLAYER_PRO_DIR . '/' . $path,
+				'urlpath' => plugins_url( $path, STREAM_PLAYER_PRO_FILE ),
+			);
+		}
+	}
+	foreach ( $paths as $path ) {
+		$dirs[] = array(
+			'path'    => STREAM_PLAYER_DIR . '/' . $path,
+			'urlpath' => plugins_url( $path, STREAM_PLAYER_FILE ),
+		);
+	}
+	$dirs = apply_filters( 'stream_player_template_dir_hierarchy', $dirs, $template, $paths );
+
+	// --- loop directory hierarchy to find first template ---
+	foreach ( $dirs as $dir ) {
+
+		// 2.3.4: use trailingslashit to account for empty paths
+		$template_path = trailingslashit( $dir['path'] ) . $template;
+		$template_url = trailingslashit( $dir['urlpath'] ) . $template;
+
+		if ( file_exists( $template_path ) ) {
+			if ( 'file' == (string) $type ) {
+				return $template_path;
+			} elseif ( 'url' === (string) $type ) {
+				return $template_url;
+			} else {
+				return array( 'file' => $template_path, 'url' => $template_url );
+			}
+		}
+	}
+
+	return false;
+}
 
 // -----------------
 // Get Now Timestamp
@@ -283,7 +388,8 @@ function stream_player_get_now() {
 // Add Inline Script
 // -----------------
 // 2.5.0: added for missed inline scripts (via shortcodes)
-function stream_player_add_inline_script( $handle, $js, $position = 'after' ) {
+// 2.5.18: deprecated: duplicated function in radio player
+/* function stream_player_add_inline_script( $handle, $js, $position = 'after' ) {
 
 	// --- add check if script is already done ---
 	if ( wp_script_is( $handle, 'registered' ) && !wp_script_is( $handle, 'done' ) ) {
@@ -294,14 +400,27 @@ function stream_player_add_inline_script( $handle, $js, $position = 'after' ) {
 	} else {
 
 		// 2.5.7: enqueue dummy javascript file to output in footer
+		// 2.5.18: register but do not enqueue
 		if ( !wp_script_is( 'stream-player-footer', 'registered' ) ) {
-			$version = functIon_exists( 'stream_player_plugin_version' ) ? stream_player_plugin_version() : '2.5.0';
+			$version = function_exists( 'stream_player_plugin_version' ) ? stream_player_plugin_version() : '2.5.0';
 			wp_register_script( 'stream-player-footer', null, array( 'jquery' ), $version, true );
-			wp_enqueue_script( 'stream-player-footer' );
+			// wp_enqueue_script( 'stream-player-footer' );
 		}
 		wp_add_inline_script( 'stream-player-footer', $js, $position );
+		
+		// 2.5.18: enqueue scripts in footer
+		if ( !has_action( 'wp_footer', 'stream_player_enqueue_footer_scripts', 9 ) ) {
+			add_action( 'wp_footer', 'stream_player_enqueue_footer_scripts', 9 );
+		}
 	}
-}
+} */
+
+// ----------------------
+// Enqueue Footer Scripts
+// ----------------------
+/* function stream_player_enqueue_footer_scripts() {
+	wp_enqueue_script( 'stream-player-footer' );	
+} */
 
 // -----------------
 // Add Inline Styles
@@ -618,6 +737,12 @@ function stream_player_widget_player_allowed_html( $allowed, $type, $context ) {
 	if ( ( 'widget' != $type ) || ( 'player' != $context ) ) {
 		return $allowed;
 	}
+
+	// 2.5.18: let list and div items have an onclick and style
+	$allowed['li']['onclick'] = array();
+	$allowed['li']['style'] = array();
+	$allowed['div']['onclick'] = array();
+	$allowed['div']['style'] = array();
 
 	// --- link ---
 	$allowed['link'] = array(
