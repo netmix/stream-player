@@ -76,6 +76,8 @@ For Stream Player customers using the free, open-source version of our plugin, y
 
 Stream Player uses the Amplitude and jPlayer scripts to play audio. In the that case you are connecting the player to a Soundcloud stream URL, Amplitude may load the latest Soundcloud SDK automatically via connect.soundcloud.com ... Soundcloud's terms of service are available at [here](https://soundcloud.com/terms-of-use).
 
+[Pro] If the "Fetch Album Artwork?" setting is enabled (on by default), Stream Player PRO looks up album artwork for the currently playing track via the free iTunes Search API - no signup or account required. If iTunes has no match, and you have configured a Spotify Client ID and Secret under Settings > Bar tab, it will also query the Spotify Search API as a fallback. Spotify credentials must be obtained by signing up for your own free [Spotify Developer account](https://developer.spotify.com/dashboard) and creating an app there; Stream Player PRO cannot supply these on your behalf.
+
 
 == Screenshots ==
 
