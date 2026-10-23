@@ -107,7 +107,8 @@ function stream_player_block_editor_assets() {
 	$callbacks = stream_player_get_block_callbacks();
 
 	// --- set block dependencies ---
-	$deps = array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-components', 'wp-editor' );
+	// wp-server-side-render became its own package in WP 6.3.
+	$deps = array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-components', 'wp-editor', 'wp-server-side-render' );
 
 	// --- set base block URL and path ---
 	$blocks_url = plugins_url( '/blocks/', STREAM_PLAYER_FILE );
@@ -146,7 +147,7 @@ function stream_player_block_editor_assets() {
 
 	// 2.5.0: added for script loading
 	// $js = "var stream_ajax_url = " . admin_url( 'admin-ajax.php' ) . "'; ";
-	$js = "var stream_player_script = '" . esc_js( plugins_url( '/player/js/radio-player.js', STREAM_PLAYER_FILE ) ) . "';";
+	$js = "var stream_player_script = '" . esc_js( plugins_url( '/player/js/radio-player.js', $plugin_file ) ) . "';";
 	// 2.5.12: add stream player settings
 	$js .= stream_player_get_player_settings();
 	wp_add_inline_script( 'stream-blockedit-js', $js, 'before' );
@@ -165,7 +166,7 @@ function stream_player_block_editor_assets() {
 	// --- enqueue radio player styles ---
 	if ( array_key_exists( 'player', $callbacks ) ) {
 		$suffix = ''; // dev temp
-		$style_path = STREAM_PLAYER_DIR . 'player/css/radio-player' . $suffix . '.css';
+		$style_path = STREAM_PLAYER_DIR . '/player/css/radio-player' . $suffix . '.css';
 		$style_url = plugins_url( '/player/css/radio-player' . $suffix . '.css', STREAM_PLAYER_FILE );
 		$version = filemtime( $style_path );
 		wp_enqueue_style( 'radio-player', $style_url, array(), $version, 'all' );
