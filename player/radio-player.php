@@ -2244,17 +2244,18 @@ function stream_player_get_player_settings( $echo = false ) {
 	// --- set radio player settings ---
 	// 2.5.7: disable swf fallback support
 	// 2.5.13: set swf_path to empty string to prevent jplayer error
-	echo "player_settings = {";
-		echo "'ajaxurl': '" . esc_url( $admin_ajax ) . "', ";
-		echo "'saveinterval':" . esc_js( $save_interval ) . ", ";
-		// echo "'swf_path': '" . esc_url( $swf_path ) . "', ";
-		echo "'swf_path': '', ";
-		echo "'script': '" . esc_js( $player_script ). "', ";
-		echo "'title': '" . esc_js( $player_title ) . "', ";
-		echo "'image': '" . esc_url( $player_image ) . "', ";
-		echo "'singular': " . esc_js( $player_single ) . ", ";
-		// echo "'suffix': '" . esc_js( $suffix ) . "', ";
-	echo "}" . "\n";
+	// 2.9.0: use wp_json_encode to safely escape all values (prevents JS syntax
+	//        errors when title/image contain quotes or special characters).
+	$player_settings = array(
+		'ajaxurl'      => esc_url_raw( $admin_ajax ),
+		'saveinterval' => (int) $save_interval,
+		'swf_path'     => '',
+		'script'       => $player_script,
+		'title'        => $player_title,
+		'image'        => esc_url_raw( $player_image ),
+		'singular'     => ( 'true' === $player_single ),
+	);
+	echo 'var player_settings = ' . wp_json_encode( $player_settings ) . ";\n";
 
 	// --- maybe limit available scripts for testing purposes ---
 	$valid_scripts = array( 'amplitude', 'jplayer', 'howler', 'audio5' );

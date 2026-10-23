@@ -50,7 +50,7 @@ function stream_player_get_block_attributes() {
 			'script' => array( 'type' => 'string', 'default' => 'default' ),
 			'volume' => array( 'type' => 'number', 'default' => 77 ),
 			// 2.5.14: added missing volumes attribute
-			'volumes' => array( 'type' => 'array', 'default' => array( 'slider' ) ),			
+			'volumes' => array( 'type' => 'array', 'default' => array( 'slider' ) ),
 			'default' => array( 'type' => 'boolean', 'default' => false ),
 			// --- Player Styles ---
 			'layout' => array( 'type' => 'string', 'default' => 'horizontal' ),
@@ -103,15 +103,23 @@ function stream_player_register_blocks() {
 add_action( 'enqueue_block_editor_assets', 'stream_player_block_editor_assets' );
 function stream_player_block_editor_assets() {
 
-	// --- get block callabacks ---
+	// --- get block callbacks ---
 	$callbacks = stream_player_get_block_callbacks();
 
 	// --- set block dependencies ---
-	$deps = array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-components', 'wp-editor' );
+	// 2.9.0: wp-server-side-render became its own package in WP 6.3.
+	$deps = array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-components', 'wp-editor', 'wp-server-side-render' );
+
+	// --- resolve plugin root reliably ---
+	// STREAM_PLAYER_FILE / STREAM_PLAYER_DIR may not be defined yet when this
+	// callback fires depending on load order. Use dirname(__DIR__) as a safe
+	// fallback since this file is always at <plugin-root>/includes/blocks.php.
+	$plugin_dir  = defined( 'STREAM_PLAYER_DIR' )  ? STREAM_PLAYER_DIR  : dirname( __DIR__ );
+	$plugin_file = defined( 'STREAM_PLAYER_FILE' ) ? STREAM_PLAYER_FILE : $plugin_dir . '/stream-player.php';
 
 	// --- set base block URL and path ---
-	$blocks_url = plugins_url( '/blocks/', STREAM_PLAYER_FILE );
-	$blocks_path = STREAM_PLAYER_DIR . '/blocks/';
+	$blocks_url  = plugins_url( '/blocks/', $plugin_file );
+	$blocks_path = $plugin_dir . '/blocks/';
 
 	// --- loop callbacks to enqueue scripts ---
 	$block_scripts = array();
@@ -138,15 +146,15 @@ function stream_player_block_editor_assets() {
 	}
 
 	// --- block editor support for conditional loading ---
-	$script_url = plugins_url( '/blocks/editor.js', STREAM_PLAYER_FILE );
-	// 2.5.12: fix to add missing / in script path
-	$script_path = STREAM_PLAYER_DIR . '/blocks/editor.js';
-	$version = filemtime( $script_path );
+	$script_url  = plugins_url( '/blocks/editor.js', $plugin_file );
+	$script_path = $plugin_dir . '/blocks/editor.js';
+	$version     = file_exists( $script_path ) ? filemtime( $script_path ) : false;
 	wp_enqueue_script( 'stream-blockedit-js', $script_url, $deps, $version, true );
 
 	// 2.5.0: added for script loading
-	// $js = "var stream_ajax_url = " . admin_url( 'admin-ajax.php' ) . "'; ";
-	$js = "var stream_player_script = '" . esc_js( plugins_url( '/player/js/radio-player.js', STREAM_PLAYER_FILE ) ) . "';";
+	// 2.9.0: use $plugin_file (resolved above) so the URL is correct even when
+	//        STREAM_PLAYER_FILE is not yet defined.
+	$js = "var stream_player_script = '" . esc_js( plugins_url( '/player/js/radio-player.js', $plugin_file ) ) . "';";
 	// 2.5.12: add stream player settings
 	$js .= stream_player_get_player_settings();
 	wp_add_inline_script( 'stream-blockedit-js', $js, 'before' );
@@ -164,10 +172,10 @@ function stream_player_block_editor_assets() {
 
 	// --- enqueue radio player styles ---
 	if ( array_key_exists( 'player', $callbacks ) ) {
-		$suffix = ''; // dev temp
-		$style_path = STREAM_PLAYER_DIR . 'player/css/radio-player' . $suffix . '.css';
-		$style_url = plugins_url( '/player/css/radio-player' . $suffix . '.css', STREAM_PLAYER_FILE );
-		$version = filemtime( $style_path );
+		$suffix     = ''; // dev temp
+		$style_path = $plugin_dir . '/player/css/radio-player' . $suffix . '.css';
+		$style_url  = plugins_url( '/player/css/radio-player' . $suffix . '.css', $plugin_file );
+		$version    = file_exists( $style_path ) ? filemtime( $style_path ) : false;
 		wp_enqueue_style( 'radio-player', $style_url, array(), $version, 'all' );
 
 		// --- enqueue player control styles inline ---
