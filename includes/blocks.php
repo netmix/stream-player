@@ -56,6 +56,7 @@ function stream_player_get_block_attributes() {
 			'layout' => array( 'type' => 'string', 'default' => 'horizontal' ),
 			'theme' => array( 'type' => 'string', 'default' => 'default' ),
 			'buttons' => array( 'type' => 'string', 'default' => 'default' ),
+			'channel' => array( 'type' => 'number', 'default' => 0 ),
 		),
 		// 'jukebox' => ...
 	);

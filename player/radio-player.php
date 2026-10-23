@@ -2309,16 +2309,16 @@ function stream_player_get_player_settings( $echo = false ) {
 		$scripts = array_merge( $scripts, $fallbacks );
 	}
 	echo "scripts = {";
-		if ( in_array( 'amplitude', $scripts ) ) {
+		if ( in_array( 'amplitude', $scripts ) && is_array( $radio_player['amplitude_script'] ) ) {
 			echo "'amplitude': '" . esc_url( $radio_player['amplitude_script']['url'] ) . '?version=' . esc_js( $radio_player['amplitude_script']['version'] ) . "', ";
 		}
-		if ( in_array( 'jplayer', $scripts ) ) {
+		if ( in_array( 'jplayer', $scripts ) && is_array( $radio_player['jplayer_script'] ) ) {
 			echo "'jplayer': '" . esc_url( $radio_player['jplayer_script']['url'] ) . '?version=' . esc_js( $radio_player['jplayer_script']['version'] ) . "', ";
 		}
-		if ( in_array( 'audio5', $scripts ) ) {
+		if ( in_array( 'audio5', $scripts ) && is_array( $radio_player['audio5_script'] ) ) {
 			echo "'audio5': '" . esc_url( $radio_player['audio5_script']['url'] ) . '?version=' . esc_js( $radio_player['audio5_script']['version'] ) . "', ";
 		}
-		if ( in_array( 'howler', $scripts ) ) {
+		if ( in_array( 'howler', $scripts ) && is_array( $radio_player['howler_script'] ) ) {
 			echo "'howler': '" . esc_url( $radio_player['howler_script']['url'] ) . '?version=' . esc_js( $radio_player['howler_script']['version'] ) . "', ";
 		}
 		// echo "'media': '" . $radio_player['media_script']['url'] . '?version=' . $radio_player['media_script']['version'] . "', "
