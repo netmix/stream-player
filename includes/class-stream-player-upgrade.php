@@ -116,6 +116,7 @@ class Stream_Player_Upgrade {
 
 		/* ---- Card header ---- */
 		.sp-upgrade-card .sp-card-header {
+			text-align: center;
 			display: flex;
 			align-items: center;
 			gap: 12px;
@@ -175,6 +176,34 @@ class Stream_Player_Upgrade {
 			left: 0;
 			color: #00a32a;
 			font-weight: 700;
+		}
+
+
+		/* ---- Coupon banner ---- */
+		.sp-upgrade-card .sp-card-coupon {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			background: #fff8e5;
+			border: 1px dashed #f0b429;
+			border-radius: 4px;
+			padding: 10px 14px;
+			margin-bottom: 16px;
+			font-size: 13px;
+			color: #3c434a;
+			line-height: 1.4;
+		}
+		.sp-upgrade-card .sp-card-coupon .sp-coupon-code {
+			display: inline-block;
+			font-family: monospace;
+			font-size: 14px;
+			font-weight: 700;
+			letter-spacing: .08em;
+			background: #f0b429;
+			color: #1d2327;
+			padding: 2px 8px;
+			border-radius: 3px;
+			white-space: nowrap;
 		}
 
 		/* ---- CTA buttons ---- */
@@ -301,12 +330,13 @@ class Stream_Player_Upgrade {
 		<div class="sp-upgrade-card sp-card-pro">
 
 			<div class="sp-card-header">
+				<img src="<?php echo esc_url( plugins_url( 'images/stream-player.png', STREAM_PLAYER_FILE ) ); ?>" alt="<?php esc_attr_e( 'Stream Player PRO', 'stream-player' ); ?>" class="sp-card-logo" />
 				<span class="sp-card-badge"><?php esc_html_e( 'PRO', 'stream-player' ); ?></span>
 				<h2><?php esc_html_e( 'Stream Player PRO', 'stream-player' ); ?></h2>
 			</div>
 
 			<p class="sp-card-tagline">
-				<?php esc_html_e( 'Unlock the full sitewide persistent player bar experience — custom styling, live now-playing metadata, smooth page transitions, and continuous playback across every page of your site.', 'stream-player' ); ?>
+				<?php esc_html_e( 'Unlock the full sitewide persistent player bar experience — custom styling, live now-playing metadata, smooth page transitions, and continuous playback across every page of your site. Keep your listeners engaged and on-air branded without interruption.', 'stream-player' ); ?>
 			</p>
 
 			<ul class="sp-feature-list">
@@ -314,6 +344,14 @@ class Stream_Player_Upgrade {
 					<li><?php echo esc_html( $feature ); ?></li>
 				<?php endforeach; ?>
 			</ul>
+
+			<?php if ( ! $pro_active ) : ?>
+				<div class="sp-card-coupon">
+					<?php esc_html_e( 'Save 30% — use code', 'stream-player' ); ?>
+					<span class="sp-coupon-code">30OFF</span>
+					<?php esc_html_e( 'at checkout.', 'stream-player' ); ?>
+				</div>
+			<?php endif; ?>
 
 			<?php if ( $pro_active ) : ?>
 				<div class="sp-card-active-notice">
@@ -325,7 +363,7 @@ class Stream_Player_Upgrade {
 						<?php esc_html_e( 'Upgrade to PRO', 'stream-player' ); ?>
 					</a>
 					<a href="<?php echo esc_url( $sp_pro_url ); ?>" class="sp-btn-secondary" target="_blank" rel="noopener noreferrer">
-						<?php esc_html_e( 'View Pricing', 'stream-player' ); ?>
+						<?php esc_html_e( 'View Pricing Details', 'stream-player' ); ?>
 					</a>
 				</div>
 			<?php endif; ?>
@@ -360,12 +398,13 @@ class Stream_Player_Upgrade {
 		<div class="sp-upgrade-card sp-card-rsp">
 
 			<div class="sp-card-header">
+				<img src="<?php echo esc_url( plugins_url( 'images/radio-station-pro.png', STREAM_PLAYER_FILE ) ); ?>" alt="<?php esc_attr_e( 'Radio Station PRO', 'stream-player' ); ?>" class="sp-card-logo" />
 				<span class="sp-card-badge"><?php esc_html_e( 'PRO', 'stream-player' ); ?></span>
 				<h2><?php esc_html_e( 'Radio Station PRO', 'stream-player' ); ?></h2>
 			</div>
 
 			<p class="sp-card-tagline">
-				<?php esc_html_e( 'Build a complete radio station website. Radio Station PRO adds full station management tools — schedules, shows, DJs, playlists, and episode archives — and includes Stream Player PRO as part of the package.', 'stream-player' ); ?>
+				<?php esc_html_e( 'Build a complete radio station website. Radio Station PRO adds full station management tools — schedules, shows, DJs, playlists, and episode archives — and includes Stream Player PRO as part of the package. One subscription powers your entire on-air brand online.', 'stream-player' ); ?>
 			</p>
 
 			<ul class="sp-feature-list">
@@ -380,8 +419,14 @@ class Stream_Player_Upgrade {
 				</div>
 			<?php else : ?>
 
+				<div class="sp-card-coupon">
+					<?php esc_html_e( 'Save 30% — use code', 'stream-player' ); ?>
+					<span class="sp-coupon-code">30OFF</span>
+					<?php esc_html_e( 'at checkout.', 'stream-player' ); ?>
+				</div>
+
 				<div class="sp-card-actions">
-					<a href="<?php echo esc_url( $rsp_pro_url ); ?>" class="sp-btn-primary" target="_blank" rel="noopener noreferrer">
+					<a href="<?php echo esc_url( add_query_arg( 'page', 'stream-player-pricing', admin_url( 'admin.php' ) ) ); ?>" class="sp-btn-primary">
 						<?php esc_html_e( 'Upgrade to Radio Station PRO', 'stream-player' ); ?>
 					</a>
 					<a href="<?php echo esc_url( $rs_free_url ); ?>" class="sp-btn-secondary" target="_blank" rel="noopener noreferrer">
@@ -391,6 +436,17 @@ class Stream_Player_Upgrade {
 
 				<p style="font-size:12px;color:#646970;margin:12px 0 0;">
 					<?php esc_html_e( 'Already managing your station with Radio Station (free)? Upgrading to Radio Station PRO unlocks all PRO features including Stream Player PRO — no separate license needed.', 'stream-player' ); ?>
+				</p>
+
+				<p style="font-size:12px;color:#646970;margin:8px 0 0;">
+					<?php printf(
+						wp_kses(
+							/* translators: %s: Radio Station free download URL */
+							__( 'New to Radio Station? <a href="%s" target="_blank" rel="noopener noreferrer">Download Radio Station free</a> to explore the platform — then upgrade to PRO with a <strong>14-day free trial</strong>, no commitment required.', 'stream-player' ),
+							array( 'a' => array( 'href' => array(), 'target' => array(), 'rel' => array() ), 'strong' => array() )
+						),
+						esc_url( $rs_free_url )
+					); ?>
 				</p>
 
 			<?php endif; ?>

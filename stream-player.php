@@ -90,6 +90,8 @@ if ( !defined( 'STREAM_PLAYER_DEBUG' ) ) {
 // --- Admin ---
 if ( is_admin() ) {
 	include STREAM_PLAYER_DIR . '/stream-player-admin.php';
+	require STREAM_PLAYER_DIR . '/includes/class-stream-player-upgrade.php';
+	Stream_Player_Upgrade::init();
 }
 
 // --- Player ---
@@ -214,6 +216,194 @@ function stream_player_settings_texts( $args ) {
 	);
 	$args = array_merge( $args, $texts );
 	return $args;
+}
+
+// -----------------------------------
+// Plugin Settings Page Header Redesign
+// -----------------------------------
+// Replace the default square icon with the Stream Player logotype.
+add_filter( 'stream_player_settings_page_icon_url', 'stream_player_header_logotype_url' );
+function stream_player_header_logotype_url( $icon_url ) {
+	return plugins_url( 'images/stream-player-logo.png', STREAM_PLAYER_FILE );
+}
+
+// Suppress the plain-text plugin title — the logotype speaks for itself.
+add_filter( 'stream_player_settings_page_title', '__return_empty_string' );
+
+// Inject inline CSS to reshape the header into three sections:
+//   A (left)   – logotype + byline
+//   B (middle) – Home / Docs / Support links, vertical
+//   C (right)  – Rate / Share / Support links, vertical
+add_action( 'admin_enqueue_scripts', 'stream_player_logotype_css' );
+function stream_player_logotype_css() {
+	if ( ! wp_style_is( 'plugin-admin-settings', 'enqueued' ) ) {
+		return;
+	}
+	$css = '
+/* ---- Logotype: natural wide dimensions, no square crop ---- */
+.plugin-settings-page-icon {
+	width: auto !important;
+	height: 40px !important;
+	max-width: 300px !important;
+	border-radius: 0 !important;
+	display: block;
+}
+
+/* ---- Hide the empty title anchor left by __return_empty_string ---- */
+.plugin-settings-page-header h3:first-child,
+.plugin-settings-page-header h3 a:empty,
+.plugin-settings-page-header td h3 {
+	display: none !important;
+}
+/* spacer td between icon and inner-table */
+.plugin-settings-page-header > tbody > tr > td:nth-child(2) {
+	display: none !important;
+}
+
+/* ---- Outer header: flex row, three sections ---- */
+.plugin-settings-page-header,
+.plugin-settings-page-header > tbody,
+.plugin-settings-page-header > tbody > tr {
+	display: flex !important;
+	width: 100%;
+}
+.plugin-settings-page-header > tbody > tr {
+	align-items: flex-start;
+	gap: 32px;
+	flex-wrap: nowrap;
+}
+
+/* Section A – logotype + byline (first td: the icon cell) */
+.plugin-settings-page-header > tbody > tr > td:first-child {
+	display: flex !important;
+	flex-direction: column;
+	align-items: flex-start;
+	flex: 0 0 auto;
+	min-width: 180px;
+}
+
+/* Section B – inner nav table (second real td, which becomes the third td in DOM) */
+.plugin-settings-page-header > tbody > tr > td:nth-child(3) {
+	display: flex !important;
+	flex: 1 1 auto;
+	align-items: flex-start;
+}
+
+/* Section C – rate/share/support links (last td) */
+.plugin-settings-page-header > tbody > tr > td:last-child {
+	display: flex !important;
+	flex: 0 0 auto;
+	align-items: flex-start;
+}
+
+/* ---- Inner table (Home|Readme|Docs|Support links) → vertical list ---- */
+.plugin-settings-page-header td > table {
+	display: flex !important;
+	flex-direction: column;
+	align-items: flex-start;
+}
+.plugin-settings-page-header td > table > tbody,
+.plugin-settings-page-header td > table > tbody > tr {
+	display: flex !important;
+	flex-direction: column;
+	align-items: flex-start;
+}
+.plugin-settings-page-header td > table > tbody > tr > td {
+	display: block !important;
+	padding: 2px 0;
+}
+/* hide loader-rendered author name + icon — we replace with JS byline in section A */
+.plugin-settings-page-header td > table font {
+	display: none !important;
+}
+/* hide the author icon TD (last td in the inner table row) */
+.plugin-settings-page-header td > table tr > td:last-child:not(:first-child) {
+	display: none !important;
+}
+/* hide author name link (the <a> directly inside the inner table td, before the links) */
+.plugin-settings-page-header td > table td > a:not(.pluginlink):not(.smalllink) {
+	display: none !important;
+}
+
+/* ---- Version: push into the right-side td, style it small ---- */
+.plugin-setttings-page-version {
+	font-size: 12px !important;
+	font-weight: 400 !important;
+	color: #646970 !important;
+	white-space: nowrap;
+	margin: 0 !important;
+}
+
+/* ---- Link styling: match the right-column links ---- */
+.plugin-settings-page-header .pluginlink,
+.plugin-settings-page-header .smalllink {
+	display: block !important;
+	font-size: 13px !important;
+	font-weight: normal !important;
+	text-decoration: none;
+	padding: 2px 0 !important;
+	line-height: 1.6 !important;
+}
+.plugin-settings-page-header .pluginlink {
+	display: flex !important;
+	align-items: center;
+}
+/* Section C: remove extra spacing/breaks */
+.plugin-settings-page-links {
+	display: flex;
+	flex-direction: column;
+	padding-top: 0 !important;
+}
+.plugin-settings-page-links br {
+	display: none !important;
+}
+/* ---- Byline ---- */
+.sp-header-byline {
+	display: block;
+	font-size: 12px;
+	color: #646970;
+	margin-top: 6px;
+	line-height: 1.4;
+}
+.sp-header-byline a {
+	color: #646970;
+	text-decoration: none;
+}
+.sp-header-byline a:hover {
+	color: #2271b1;
+	text-decoration: underline;
+}
+';
+	wp_add_inline_style( 'plugin-admin-settings', $css );
+}
+
+// Inject the byline HTML after the logotype via admin_footer JS.
+add_action( 'admin_footer', 'stream_player_header_byline_js' );
+function stream_player_header_byline_js() {
+	if ( ! wp_style_is( 'plugin-admin-settings', 'enqueued' ) ) {
+		return;
+	}
+	?>
+	<script>
+	(function() {
+		// Byline: insert under the logotype
+		var icon = document.querySelector( '.plugin-settings-page-header .plugin-settings-page-icon' );
+		if ( icon && ! document.querySelector( '.sp-header-byline' ) ) {
+			var byline = document.createElement( 'span' );
+			byline.className = 'sp-header-byline';
+			byline.innerHTML = 'by <a href="https://profiles.wordpress.org/tonyzeoli/" target="_blank" rel="noopener noreferrer">Tony Zeoli</a> &amp; <a href="https://profiles.wordpress.org/majick777/" target="_blank" rel="noopener noreferrer">Tony Hayes</a>';
+			icon.parentNode.insertBefore( byline, icon.nextSibling );
+		}
+		// Strip the ' | ' text-node separators between the nav links
+		var linksCell = document.querySelector( '.plugin-settings-page-header td > table td[align="center"]' );
+		if ( linksCell ) {
+			linksCell.childNodes.forEach( function( node ) {
+				if ( node.nodeType === 3 ) { node.textContent = ''; }
+			});
+		}
+	})();
+	</script>
+	<?php
 }
 
 // ---------------------------
