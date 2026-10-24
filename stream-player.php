@@ -243,7 +243,7 @@ function stream_player_logotype_css() {
 /* ---- Logotype: natural wide dimensions, no square crop ---- */
 .plugin-settings-page-icon {
 	width: auto !important;
-	height: 60px !important;
+	height: 80px !important;
 	max-width: 300px !important;
 	border-radius: 0 !important;
 	display: block;
