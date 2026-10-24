@@ -224,7 +224,7 @@ function stream_player_settings_texts( $args ) {
 // Replace the default square icon with the Stream Player logotype.
 add_filter( 'stream_player_settings_page_icon_url', 'stream_player_header_logotype_url' );
 function stream_player_header_logotype_url( $icon_url ) {
-	return plugins_url( 'images/stream-player-logo.png', STREAM_PLAYER_FILE );
+	return plugins_url( 'images/stream-player-free-banner.png', STREAM_PLAYER_FILE );
 }
 
 // Suppress the plain-text plugin title — the logotype speaks for itself.
@@ -243,7 +243,7 @@ function stream_player_logotype_css() {
 /* ---- Logotype: natural wide dimensions, no square crop ---- */
 .plugin-settings-page-icon {
 	width: auto !important;
-	height: 40px !important;
+	height: 60px !important;
 	max-width: 300px !important;
 	border-radius: 0 !important;
 	display: block;
