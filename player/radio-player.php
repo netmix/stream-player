@@ -2244,17 +2244,18 @@ function stream_player_get_player_settings( $echo = false ) {
 	// --- set radio player settings ---
 	// 2.5.7: disable swf fallback support
 	// 2.5.13: set swf_path to empty string to prevent jplayer error
-	echo "player_settings = {";
-		echo "'ajaxurl': '" . esc_url( $admin_ajax ) . "', ";
-		echo "'saveinterval':" . esc_js( $save_interval ) . ", ";
-		// echo "'swf_path': '" . esc_url( $swf_path ) . "', ";
-		echo "'swf_path': '', ";
-		echo "'script': '" . esc_js( $player_script ). "', ";
-		echo "'title': '" . esc_js( $player_title ) . "', ";
-		echo "'image': '" . esc_url( $player_image ) . "', ";
-		echo "'singular': " . esc_js( $player_single ) . ", ";
-		// echo "'suffix': '" . esc_js( $suffix ) . "', ";
-	echo "}" . "\n";
+	// 2.9.0: use wp_json_encode to safely escape all values (prevents JS syntax
+	//        errors when title/image contain quotes or special characters).
+	$player_settings = array(
+		'ajaxurl'      => esc_url_raw( $admin_ajax ),
+		'saveinterval' => (int) $save_interval,
+		'swf_path'     => '',
+		'script'       => $player_script,
+		'title'        => $player_title,
+		'image'        => esc_url_raw( $player_image ),
+		'singular'     => ( 'true' === $player_single ),
+	);
+	echo 'var player_settings = ' . wp_json_encode( $player_settings ) . ";\n";
 
 	// --- maybe limit available scripts for testing purposes ---
 	$valid_scripts = array( 'amplitude', 'jplayer', 'howler', 'audio5' );
@@ -2308,16 +2309,16 @@ function stream_player_get_player_settings( $echo = false ) {
 		$scripts = array_merge( $scripts, $fallbacks );
 	}
 	echo "scripts = {";
-		if ( in_array( 'amplitude', $scripts ) ) {
+		if ( in_array( 'amplitude', $scripts ) && is_array( $radio_player['amplitude_script'] ) ) {
 			echo "'amplitude': '" . esc_url( $radio_player['amplitude_script']['url'] ) . '?version=' . esc_js( $radio_player['amplitude_script']['version'] ) . "', ";
 		}
-		if ( in_array( 'jplayer', $scripts ) ) {
+		if ( in_array( 'jplayer', $scripts ) && is_array( $radio_player['jplayer_script'] ) ) {
 			echo "'jplayer': '" . esc_url( $radio_player['jplayer_script']['url'] ) . '?version=' . esc_js( $radio_player['jplayer_script']['version'] ) . "', ";
 		}
-		if ( in_array( 'audio5', $scripts ) ) {
+		if ( in_array( 'audio5', $scripts ) && is_array( $radio_player['audio5_script'] ) ) {
 			echo "'audio5': '" . esc_url( $radio_player['audio5_script']['url'] ) . '?version=' . esc_js( $radio_player['audio5_script']['version'] ) . "', ";
 		}
-		if ( in_array( 'howler', $scripts ) ) {
+		if ( in_array( 'howler', $scripts ) && is_array( $radio_player['howler_script'] ) ) {
 			echo "'howler': '" . esc_url( $radio_player['howler_script']['url'] ) . '?version=' . esc_js( $radio_player['howler_script']['version'] ) . "', ";
 		}
 		// echo "'media': '" . $radio_player['media_script']['url'] . '?version=' . $radio_player['media_script']['version'] . "', "
