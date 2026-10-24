@@ -252,7 +252,7 @@ function stream_player_logotype_css() {
 /* ---- Hide the empty title anchor left by __return_empty_string ---- */
 .plugin-settings-page-header h3:first-child,
 .plugin-settings-page-header h3 a:empty,
-.plugin-settings-page-header td h3 {
+.plugin-settings-page-header td h3:not(.plugin-setttings-page-version) {
 	display: none !important;
 }
 /* spacer td between icon and inner-table */
@@ -269,7 +269,7 @@ function stream_player_logotype_css() {
 }
 .plugin-settings-page-header > tbody > tr {
 	align-items: flex-start;
-	gap: 32px;
+	gap: 30px;
 	flex-wrap: nowrap;
 }
 
@@ -285,7 +285,7 @@ function stream_player_logotype_css() {
 /* Section B – inner nav table (second real td, which becomes the third td in DOM) */
 .plugin-settings-page-header > tbody > tr > td:nth-child(3) {
 	display: flex !important;
-	flex: 1 1 auto;
+	flex: 0 0 auto;
 	align-items: flex-start;
 }
 
@@ -404,28 +404,64 @@ function stream_player_header_byline_js() {
 	?>
 	<script>
 	(function() {
-		// 1. Byline: insert under the logotype
+		// 1. Byline + version: insert under the logotype in Section A
 		var icon = document.querySelector( '.plugin-settings-page-header .plugin-settings-page-icon' );
-		if ( icon && ! document.querySelector( '.sp-header-byline' ) ) {
-			var byline = document.createElement( 'span' );
-			byline.className = 'sp-header-byline';
-			byline.innerHTML = 'by <a href="https://profiles.wordpress.org/tonyzeoli/" target="_blank" rel="noopener noreferrer">Tony Zeoli</a> &amp; <a href="https://profiles.wordpress.org/majick777/" target="_blank" rel="noopener noreferrer">Tony Hayes</a>';
-			icon.parentNode.insertBefore( byline, icon.nextSibling );
+		if ( icon ) {
+			// Move version number into Section A (below icon)
+			var ver = document.querySelector( '.plugin-setttings-page-version' );
+			if ( ver && ! document.querySelector( '.sp-moved-version' ) ) {
+				ver.classList.add( 'sp-moved-version' );
+				icon.parentNode.insertBefore( ver, icon.nextSibling );
+			}
+			// Byline: insert after the version (or after icon if no version)
+			if ( ! document.querySelector( '.sp-header-byline' ) ) {
+				var byline = document.createElement( 'span' );
+				byline.className = 'sp-header-byline';
+				byline.innerHTML = 'by <a href="https://profiles.wordpress.org/tonyzeoli/" target="_blank" rel="noopener noreferrer">Tony Zeoli</a> &amp; <a href="https://profiles.wordpress.org/majick777/" target="_blank" rel="noopener noreferrer">Tony Hayes</a>';
+				// Insert after whatever is now the last child of Section A's td
+				icon.parentNode.appendChild( byline );
+			}
 		}
 
-		// 2. Strip ' | ' text-node separators between the nav links.
-		// The loader nests: outer td[align=center] > table > tbody > tr > inner td[align=center]
-		// We need ALL td[align=center] elements and pick the one that contains the .smalllink anchors.
+		// 2. Strip ' | ' text-node separators between the Section B nav links.
+		// The loader produces: outer td[align=center] > table > ... > inner td[align=center]
+		// The pipes are TEXT NODES directly inside the INNER td (the one with .smalllink as direct children).
 		var allCenterCells = document.querySelectorAll( '.plugin-settings-page-header td[align="center"]' );
 		allCenterCells.forEach( function( cell ) {
-			if ( cell.querySelector( '.smalllink' ) ) {
+			// Check for .smalllink as a DIRECT child (not just a descendant)
+			var hasDirectSmalllink = Array.from( cell.childNodes ).some( function( n ) {
+				return n.nodeType === 1 && n.classList && n.classList.contains( 'smalllink' );
+			} );
+			if ( hasDirectSmalllink ) {
 				cell.childNodes.forEach( function( node ) {
 					if ( node.nodeType === 3 ) { node.textContent = ''; }
-				});
+				} );
 			}
 		} );
 
-		// 3. Standardise right-column icons: replace mixed dashicons with uniform link-style icons.
+		// 3. Add icons to Section B (Home / Docs / Support) links
+		var smallLinks = document.querySelectorAll( '.plugin-settings-page-header .smalllink' );
+		smallLinks.forEach( function( link ) {
+			var span = link.querySelector( '.dashicons' );
+			if ( ! span ) {
+				span = document.createElement( 'span' );
+				link.insertBefore( span, link.firstChild );
+			}
+			span.className = 'dashicons';
+			var text = ( link.textContent || '' ).trim().toLowerCase();
+			var href = link.getAttribute( 'href' ) || '';
+			if ( text.indexOf( 'home' ) !== -1 || href.indexOf( '#top' ) !== -1 ) {
+				span.classList.add( 'dashicons-admin-home' );
+			} else if ( text.indexOf( 'doc' ) !== -1 || href.indexOf( 'doc' ) !== -1 ) {
+				span.classList.add( 'dashicons-media-document' );
+			} else if ( text.indexOf( 'support' ) !== -1 || href.indexOf( 'support' ) !== -1 ) {
+				span.classList.add( 'dashicons-sos' );
+			} else {
+				span.classList.add( 'dashicons-admin-links' );
+			}
+		} );
+
+		// 4. Standardise Section C icons: replace mixed dashicons with uniform link-style icons.
 		var links = document.querySelectorAll( '.plugin-settings-page-links .pluginlink' );
 		links.forEach( function( link ) {
 			var span = link.querySelector( '.dashicons' );
@@ -433,7 +469,6 @@ function stream_player_header_byline_js() {
 				span = document.createElement( 'span' );
 				link.insertBefore( span, link.firstChild );
 			}
-			// Remove all dashicons-* classes, keep base dashicons class
 			span.className = 'dashicons';
 			var href = link.getAttribute( 'href' ) || '';
 			if ( href.indexOf( 'wordpress.org/support' ) !== -1 || href.indexOf( 'support' ) !== -1 ) {
