@@ -362,11 +362,11 @@ function stream_player_logotype_css() {
 	color: #2271b1 !important;
 	flex-shrink: 0;
 }
-/* Section C: vertical column, no extra breaks */
+/* Section C: vertical column, no extra breaks; nudge down to align with Section B first link */
 .plugin-settings-page-links {
 	display: flex;
 	flex-direction: column;
-	padding-top: 0 !important;
+	padding-top: 8px !important;
 }
 .plugin-settings-page-links br {
 	display: none !important;
@@ -393,6 +393,68 @@ function stream_player_logotype_css() {
 }
 ';
 	wp_add_inline_style( 'plugin-admin-settings', $css );
+}
+
+// Inject plan logos on the Freemius pricing page.
+add_action( 'admin_footer', 'stream_player_pricing_logos_js' );
+function stream_player_pricing_logos_js() {
+	$screen = get_current_screen();
+	if ( ! $screen || false === strpos( $screen->id, 'stream-player-pricing' ) ) {
+		return;
+	}
+	$sp_pro_url = plugins_url( 'images/stream-player-pro-logo.webp', STREAM_PLAYER_FILE );
+	$rs_pro_url = plugins_url( 'images/radio-station-pro-logo.png', STREAM_PLAYER_FILE );
+	?>
+	<style>
+	/* Hide the ugly green Freemius bundle-logo header icon */
+	.fs-plugin-logo img[alt="bundle-logo"] {
+		display: none !important;
+	}
+	/* Plan logo images injected by JS */
+	.sp-plan-logo {
+		display: block;
+		max-width: 180px;
+		height: auto;
+		margin: 0 auto 8px;
+	}
+	</style>
+	<script>
+	(function() {
+		// Wait for Freemius pricing React component to render
+		function injectPlanLogos() {
+			var planHeadings = document.querySelectorAll( '.fs-package .fs-package-name, .fs-package h2' );
+			if ( ! planHeadings.length ) { return false; }
+
+			planHeadings.forEach( function( heading ) {
+				var text = heading.textContent.trim().toLowerCase();
+				var logoUrl = null;
+				if ( text.indexOf( 'stream player pro' ) !== -1 ) {
+					logoUrl = <?php echo json_encode( $sp_pro_url ); ?>;
+				} else if ( text.indexOf( 'radio station pro' ) !== -1 ) {
+					logoUrl = <?php echo json_encode( $rs_pro_url ); ?>;
+				}
+				if ( logoUrl && ! heading.parentNode.querySelector( '.sp-plan-logo' ) ) {
+					var img = document.createElement( 'img' );
+					img.src = logoUrl;
+					img.className = 'sp-plan-logo';
+					img.alt = heading.textContent.trim();
+					heading.parentNode.insertBefore( img, heading );
+				}
+			} );
+			return true;
+		}
+
+		// Poll until the pricing component has rendered
+		var attempts = 0;
+		var interval = setInterval( function() {
+			attempts++;
+			if ( injectPlanLogos() || attempts > 40 ) {
+				clearInterval( interval );
+			}
+		}, 250 );
+	})();
+	</script>
+	<?php
 }
 
 // Inject the byline HTML after the logotype via admin_footer JS.
