@@ -395,6 +395,18 @@ function stream_player_logotype_css() {
 	wp_add_inline_style( 'plugin-admin-settings', $css );
 }
 
+// Nav menu icon CSS — must load on every admin page, not just settings page.
+add_action( 'admin_head', 'stream_player_nav_icon_css' );
+function stream_player_nav_icon_css() {
+	echo '<style>
+#adminmenu #toplevel_page_stream-player .wp-menu-image img {
+	width: 20px !important;
+	height: 20px !important;
+	padding: 7px 0 !important;
+}
+</style>' . "\n";
+}
+
 // Inject plan logos on the Freemius pricing page.
 add_action( 'admin_footer', 'stream_player_pricing_logos_js' );
 function stream_player_pricing_logos_js() {
