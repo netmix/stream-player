@@ -296,32 +296,32 @@ function stream_player_logotype_css() {
 	align-items: flex-start;
 }
 
-/* ---- Inner table (Home|Readme|Docs|Support links) → vertical list ---- */
-.plugin-settings-page-header td > table {
-	display: flex !important;
-	flex-direction: column;
-	align-items: flex-start;
-}
-.plugin-settings-page-header td > table > tbody,
-.plugin-settings-page-header td > table > tbody > tr {
-	display: flex !important;
-	flex-direction: column;
-	align-items: flex-start;
-}
-.plugin-settings-page-header td > table > tbody > tr > td {
+/* ---- Inner table (Home|Docs|Support links) → vertical list ---- */
+/* Outer wrapper td[align=center] containing the nested nav table */
+.plugin-settings-page-header td[align=center] {
 	display: block !important;
-	padding: 2px 0;
 }
-/* hide loader-rendered author name + icon — we replace with JS byline in section A */
+/* The nested nav table itself */
+.plugin-settings-page-header td[align=center] > table,
+.plugin-settings-page-header td[align=center] > table > tbody,
+.plugin-settings-page-header td[align=center] > table > tbody > tr,
+.plugin-settings-page-header td[align=center] > table > tbody > tr > td[align=center] {
+	display: block !important;
+}
+/* hide loader-rendered author name + icon — replaced by JS byline in section A */
 .plugin-settings-page-header td > table font {
 	display: none !important;
 }
-/* hide the author icon TD (last td in the inner table row) */
+/* hide the author icon TD */
 .plugin-settings-page-header td > table tr > td:last-child:not(:first-child) {
 	display: none !important;
 }
-/* hide author name link (the <a> directly inside the inner table td, before the links) */
+/* hide the author name anchor (the bare <a> before the pluginlinks) */
 .plugin-settings-page-header td > table td > a:not(.pluginlink):not(.smalllink) {
+	display: none !important;
+}
+/* hide the two <br> tags after the author name */
+.plugin-settings-page-header td[align=center] > table td[align=center] > br {
 	display: none !important;
 }
 
@@ -334,21 +334,35 @@ function stream_player_logotype_css() {
 	margin: 0 !important;
 }
 
-/* ---- Link styling: match the right-column links ---- */
+/* ---- Link styling ---- */
 .plugin-settings-page-header .pluginlink,
 .plugin-settings-page-header .smalllink {
-	display: block !important;
+	display: flex !important;
+	align-items: center;
+	gap: 6px;
 	font-size: 13px !important;
 	font-weight: normal !important;
 	text-decoration: none;
-	padding: 2px 0 !important;
-	line-height: 1.6 !important;
+	padding: 3px 0 !important;
+	line-height: 1.5 !important;
+	color: #2271b1 !important;
 }
-.plugin-settings-page-header .pluginlink {
-	display: flex !important;
-	align-items: center;
+.plugin-settings-page-header .pluginlink:hover,
+.plugin-settings-page-header .smalllink:hover {
+	color: #135e96 !important;
+	text-decoration: underline;
 }
-/* Section C: remove extra spacing/breaks */
+/* Uniform dashicons: all same size and color */
+.plugin-settings-page-header .pluginlink .dashicons,
+.plugin-settings-page-header .smalllink .dashicons,
+.plugin-settings-page-header .pluginlink .sp-icon {
+	width: 16px !important;
+	height: 16px !important;
+	font-size: 16px !important;
+	color: #2271b1 !important;
+	flex-shrink: 0;
+}
+/* Section C: vertical column, no extra breaks */
 .plugin-settings-page-links {
 	display: flex;
 	flex-direction: column;
@@ -356,6 +370,10 @@ function stream_player_logotype_css() {
 }
 .plugin-settings-page-links br {
 	display: none !important;
+}
+/* Section B: smalllinks vertical */
+.plugin-settings-page-header .smalllink {
+	display: flex !important;
 }
 /* ---- Byline ---- */
 .sp-header-byline {
@@ -386,7 +404,7 @@ function stream_player_header_byline_js() {
 	?>
 	<script>
 	(function() {
-		// Byline: insert under the logotype
+		// 1. Byline: insert under the logotype
 		var icon = document.querySelector( '.plugin-settings-page-header .plugin-settings-page-icon' );
 		if ( icon && ! document.querySelector( '.sp-header-byline' ) ) {
 			var byline = document.createElement( 'span' );
@@ -394,13 +412,40 @@ function stream_player_header_byline_js() {
 			byline.innerHTML = 'by <a href="https://profiles.wordpress.org/tonyzeoli/" target="_blank" rel="noopener noreferrer">Tony Zeoli</a> &amp; <a href="https://profiles.wordpress.org/majick777/" target="_blank" rel="noopener noreferrer">Tony Hayes</a>';
 			icon.parentNode.insertBefore( byline, icon.nextSibling );
 		}
-		// Strip the ' | ' text-node separators between the nav links
-		var linksCell = document.querySelector( '.plugin-settings-page-header td > table td[align="center"]' );
-		if ( linksCell ) {
-			linksCell.childNodes.forEach( function( node ) {
-				if ( node.nodeType === 3 ) { node.textContent = ''; }
-			});
-		}
+
+		// 2. Strip ' | ' text-node separators between the nav links.
+		// The loader nests: outer td[align=center] > table > tbody > tr > inner td[align=center]
+		// We need ALL td[align=center] elements and pick the one that contains the .smalllink anchors.
+		var allCenterCells = document.querySelectorAll( '.plugin-settings-page-header td[align="center"]' );
+		allCenterCells.forEach( function( cell ) {
+			if ( cell.querySelector( '.smalllink' ) ) {
+				cell.childNodes.forEach( function( node ) {
+					if ( node.nodeType === 3 ) { node.textContent = ''; }
+				});
+			}
+		} );
+
+		// 3. Standardise right-column icons: replace mixed dashicons with uniform link-style icons.
+		var links = document.querySelectorAll( '.plugin-settings-page-links .pluginlink' );
+		links.forEach( function( link ) {
+			var span = link.querySelector( '.dashicons' );
+			if ( ! span ) {
+				span = document.createElement( 'span' );
+				link.insertBefore( span, link.firstChild );
+			}
+			// Remove all dashicons-* classes, keep base dashicons class
+			span.className = 'dashicons';
+			var href = link.getAttribute( 'href' ) || '';
+			if ( href.indexOf( 'wordpress.org/support' ) !== -1 || href.indexOf( 'support' ) !== -1 ) {
+				span.classList.add( 'dashicons-sos' );
+			} else if ( href.indexOf( 'share' ) !== -1 || href.indexOf( '#share' ) !== -1 ) {
+				span.classList.add( 'dashicons-share' );
+			} else if ( href.indexOf( 'wordpress.org/plugins' ) !== -1 || href.indexOf( 'rate' ) !== -1 ) {
+				span.classList.add( 'dashicons-star-filled' );
+			} else {
+				span.classList.add( 'dashicons-admin-links' );
+			}
+		} );
 	})();
 	</script>
 	<?php
