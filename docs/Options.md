@@ -123,6 +123,9 @@ Add button to open Popup Player in separate window.
 
 ## Player Bar
 
+> **🔒 Player Bar is a Pro Feature**
+> All Player Bar settings below are available with [Stream Player Pro](https://radiostation.pro/stream-player/). On the free version, these options are visible in the settings screen but grayed out. Upgrade to Pro to unlock the Sitewide Bar Player, continuous playback, metadata display, and all color and transition options.
+
 ### [Pro] Bar Display
 
 #### [Pro] Sitewide Player Bar
