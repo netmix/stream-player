@@ -90,6 +90,18 @@ Stream Player uses the Amplitude and jPlayer scripts to play audio. In the that 
 
 = 2.7.0 =
 * Updated: Radio Player Script (1.0.5)
+* Updated: Tested up to WordPress 7.1
+* Added: Admin header redesign — logotype banner, version number, three-column layout (logo/byline, nav links, rate/share/support)
+* Added: Dashicons to all admin header navigation links (Home, Docs, Support, Rate, Share, Support this Plugin)
+* Added: Version number display (v2.7.0) below logotype in admin header
+* Added: Byline (Tony Zeoli & Tony Hayes) below logotype in admin header
+* Improved: Admin nav menu icon replaced with new Stream Player logo mark, sized and colored to match WordPress standard icons
+* Improved: Plugin icon (notifications, Freemius) updated to new Stream Player logo with logotype
+* Fixed: Admin header Rate/Share/Support links alignment with Home/Docs/Support links
+* Fixed: Pipe separators removed between admin header navigation links
+* Fixed: Freemius pricing page bundle-logo CSS selector
+* Fixed: Block editor compatibility, safe JS output, free bar default styles
+* Fixed: Block channel attribute registration and null script array guard
 
 = 2.5.20 =
 * Updated: Freemius SDK (2.13.0)
