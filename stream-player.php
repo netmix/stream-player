@@ -554,6 +554,23 @@ function stream_player_get_stream_formats() {
 // Free Sitewide Player Bar
 // --------------------------
 // 2.7.0: basic sitewide bar for free tier - renders the shortcode player in a fixed bottom bar.
+//
+// FREE vs PRO boundary — important for developers:
+//
+// This function implements a COSMETIC sticky bar only (#1 in Tony Hayes' taxonomy).
+// The player shortcode is output into a fixed-position div on every page load.
+// Navigation causes a full page reload and the player restarts — this is intentional
+// and expected behaviour for the free tier.
+//
+// What this is NOT:
+// - It does NOT load or initialise Teleporter.
+// - It does NOT implement continuous/uninterruptable/SPA-like playback (#2).
+// - It does NOT sync player state across tabs or windows.
+//
+// The persistent/continuous playback USP lives entirely in Stream Player PRO and is
+// gated by the `player_bar_continuous` option (pro => true in options.php).
+// Teleporter should only be initialised when that Pro option is active.
+// Keep those two code paths cleanly separate when implementing the full Pro bar.
 add_action( 'init', 'stream_player_maybe_add_bar' );
 function stream_player_maybe_add_bar() {
 	if ( is_admin() ) {
