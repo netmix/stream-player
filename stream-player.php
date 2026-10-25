@@ -90,6 +90,8 @@ if ( !defined( 'STREAM_PLAYER_DEBUG' ) ) {
 // --- Admin ---
 if ( is_admin() ) {
 	include STREAM_PLAYER_DIR . '/stream-player-admin.php';
+	require STREAM_PLAYER_DIR . '/includes/class-stream-player-upgrade.php';
+	Stream_Player_Upgrade::init();
 }
 
 // --- Player ---
@@ -128,7 +130,7 @@ $settings = array(
 	'parentmenu'   => STREAM_PLAYER_SLUG,
 	'home'         => STREAM_PLAYER_HOME_URL,
 	'docs'         => STREAM_PLAYER_DOCS_URL,
-	'support'      => 'https://github.com/netmix/stream-player/issues/',
+	'support'      => 'https://wordpress.org/support/plugin/stream-player/',
 	// 'ratetext'     => __( 'Rate on WordPress.org', 'stream-player' ),
 	'share'        => STREAM_PLAYER_HOME_URL . '#share',
 	// 'sharetext'    => __( 'Share the Plugin Love', 'stream-player' ),
@@ -214,6 +216,348 @@ function stream_player_settings_texts( $args ) {
 	);
 	$args = array_merge( $args, $texts );
 	return $args;
+}
+
+// -----------------------------------
+// Plugin Settings Page Header Redesign
+// -----------------------------------
+// Replace the default square icon with the Stream Player logotype.
+add_filter( 'stream_player_settings_page_icon_url', 'stream_player_header_logotype_url' );
+function stream_player_header_logotype_url( $icon_url ) {
+	return plugins_url( 'images/stream-player-free-banner.png', STREAM_PLAYER_FILE );
+}
+
+// Suppress the plain-text plugin title — the logotype speaks for itself.
+add_filter( 'stream_player_settings_page_title', '__return_empty_string' );
+
+// Inject inline CSS to reshape the header into three sections:
+//   A (left)   – logotype + byline
+//   B (middle) – Home / Docs / Support links, vertical
+//   C (right)  – Rate / Share / Support links, vertical
+add_action( 'admin_enqueue_scripts', 'stream_player_logotype_css' );
+function stream_player_logotype_css() {
+	if ( ! wp_style_is( 'plugin-admin-settings', 'enqueued' ) ) {
+		return;
+	}
+	$css = '
+/* ---- Logotype: natural wide dimensions, no square crop ---- */
+.plugin-settings-page-icon {
+	width: auto !important;
+	height: 80px !important;
+	max-width: 300px !important;
+	border-radius: 0 !important;
+	display: block;
+}
+
+/* ---- Hide the empty title anchor left by __return_empty_string ---- */
+.plugin-settings-page-header h3:first-child,
+.plugin-settings-page-header h3 a:empty,
+.plugin-settings-page-header td h3:not(.plugin-setttings-page-version) {
+	display: none !important;
+}
+/* spacer td between icon and inner-table */
+.plugin-settings-page-header > tbody > tr > td:nth-child(2) {
+	display: none !important;
+}
+
+/* ---- Outer header: flex row, three sections ---- */
+.plugin-settings-page-header,
+.plugin-settings-page-header > tbody,
+.plugin-settings-page-header > tbody > tr {
+	display: flex !important;
+	width: 100%;
+}
+.plugin-settings-page-header > tbody > tr {
+	align-items: flex-start;
+	gap: 30px;
+	flex-wrap: nowrap;
+}
+
+/* Section A – logotype + byline (first td: the icon cell) */
+.plugin-settings-page-header > tbody > tr > td:first-child {
+	display: flex !important;
+	flex-direction: column;
+	align-items: flex-start;
+	flex: 0 0 auto;
+	min-width: 180px;
+}
+
+/* Section B – inner nav table (second real td, which becomes the third td in DOM) */
+.plugin-settings-page-header > tbody > tr > td:nth-child(3) {
+	display: flex !important;
+	flex: 0 0 auto;
+	align-items: flex-start;
+}
+
+/* Section C – rate/share/support links (last td) */
+.plugin-settings-page-header > tbody > tr > td:last-child {
+	display: flex !important;
+	flex: 0 0 auto;
+	align-items: flex-start;
+}
+
+/* ---- Inner table (Home|Docs|Support links) → vertical list ---- */
+/* Outer wrapper td[align=center] containing the nested nav table */
+.plugin-settings-page-header td[align=center] {
+	display: block !important;
+}
+/* The nested nav table itself */
+.plugin-settings-page-header td[align=center] > table,
+.plugin-settings-page-header td[align=center] > table > tbody,
+.plugin-settings-page-header td[align=center] > table > tbody > tr,
+.plugin-settings-page-header td[align=center] > table > tbody > tr > td[align=center] {
+	display: block !important;
+}
+/* hide loader-rendered author name + icon — replaced by JS byline in section A */
+.plugin-settings-page-header td > table font {
+	display: none !important;
+}
+/* hide the author icon TD */
+.plugin-settings-page-header td > table tr > td:last-child:not(:first-child) {
+	display: none !important;
+}
+/* hide the author name anchor (the bare <a> before the pluginlinks) */
+.plugin-settings-page-header td > table td > a:not(.pluginlink):not(.smalllink) {
+	display: none !important;
+}
+/* hide the two <br> tags after the author name */
+.plugin-settings-page-header td[align=center] > table td[align=center] > br {
+	display: none !important;
+}
+
+/* ---- Version: push into the right-side td, style it small ---- */
+.plugin-setttings-page-version {
+	font-size: 12px !important;
+	font-weight: 400 !important;
+	color: #646970 !important;
+	white-space: nowrap;
+	margin: 0 !important;
+}
+
+/* ---- Link styling ---- */
+.plugin-settings-page-header .pluginlink,
+.plugin-settings-page-header .smalllink {
+	display: flex !important;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px !important;
+	font-weight: normal !important;
+	text-decoration: none;
+	padding: 3px 0 !important;
+	line-height: 1.5 !important;
+	color: #2271b1 !important;
+}
+.plugin-settings-page-header .pluginlink:hover,
+.plugin-settings-page-header .smalllink:hover {
+	color: #135e96 !important;
+	text-decoration: underline;
+}
+/* Uniform dashicons: all same size and color */
+.plugin-settings-page-header .pluginlink .dashicons,
+.plugin-settings-page-header .smalllink .dashicons,
+.plugin-settings-page-header .pluginlink .sp-icon {
+	width: 16px !important;
+	height: 16px !important;
+	font-size: 16px !important;
+	color: #2271b1 !important;
+	flex-shrink: 0;
+}
+/* Section C: vertical column, no extra breaks; nudge down to align with Section B first link */
+.plugin-settings-page-links {
+	display: flex;
+	flex-direction: column;
+	padding-top: 8px !important;
+}
+.plugin-settings-page-links br {
+	display: none !important;
+}
+/* Section B: smalllinks vertical */
+.plugin-settings-page-header .smalllink {
+	display: flex !important;
+}
+/* ---- Byline ---- */
+.sp-header-byline {
+	display: block;
+	font-size: 12px;
+	color: #646970;
+	margin-top: 6px;
+	line-height: 1.4;
+}
+.sp-header-byline a {
+	color: #646970;
+	text-decoration: none;
+}
+.sp-header-byline a:hover {
+	color: #2271b1;
+	text-decoration: underline;
+}
+';
+	wp_add_inline_style( 'plugin-admin-settings', $css );
+}
+
+// Nav menu icon CSS — must load on every admin page, not just settings page.
+add_action( 'admin_head', 'stream_player_nav_icon_css' );
+function stream_player_nav_icon_css() {
+	echo '<style>
+#adminmenu #toplevel_page_stream-player .wp-menu-image img {
+	width: 20px !important;
+	height: 20px !important;
+	padding: 7px 0 !important;
+}
+</style>' . "\n";
+}
+
+// Inject plan logos on the Freemius pricing page.
+add_action( 'admin_footer', 'stream_player_pricing_logos_js' );
+function stream_player_pricing_logos_js() {
+	$screen = get_current_screen();
+	if ( ! $screen || false === strpos( $screen->id, 'stream-player-pricing' ) ) {
+		return;
+	}
+	$sp_pro_url = plugins_url( 'images/stream-player-pro-logo.webp', STREAM_PLAYER_FILE );
+	$rs_pro_url = plugins_url( 'images/radio-station-pro-logo.png', STREAM_PLAYER_FILE );
+	?>
+	<style>
+	/* Hide the ugly green Freemius bundle-logo header icon */
+	.fs-plugin-logo img[alt="bundle-logo"] {
+		display: none !important;
+	}
+	/* Plan logo images injected by JS */
+	.sp-plan-logo {
+		display: block;
+		max-width: 180px;
+		height: auto;
+		margin: 0 auto 8px;
+	}
+	</style>
+	<script>
+	(function() {
+		// Wait for Freemius pricing React component to render
+		function injectPlanLogos() {
+			var planHeadings = document.querySelectorAll( '.fs-package .fs-package-name, .fs-package h2' );
+			if ( ! planHeadings.length ) { return false; }
+
+			planHeadings.forEach( function( heading ) {
+				var text = heading.textContent.trim().toLowerCase();
+				var logoUrl = null;
+				if ( text.indexOf( 'stream player pro' ) !== -1 ) {
+					logoUrl = <?php echo json_encode( $sp_pro_url ); ?>;
+				} else if ( text.indexOf( 'radio station pro' ) !== -1 ) {
+					logoUrl = <?php echo json_encode( $rs_pro_url ); ?>;
+				}
+				if ( logoUrl && ! heading.parentNode.querySelector( '.sp-plan-logo' ) ) {
+					var img = document.createElement( 'img' );
+					img.src = logoUrl;
+					img.className = 'sp-plan-logo';
+					img.alt = heading.textContent.trim();
+					heading.parentNode.insertBefore( img, heading );
+				}
+			} );
+			return true;
+		}
+
+		// Poll until the pricing component has rendered
+		var attempts = 0;
+		var interval = setInterval( function() {
+			attempts++;
+			if ( injectPlanLogos() || attempts > 40 ) {
+				clearInterval( interval );
+			}
+		}, 250 );
+	})();
+	</script>
+	<?php
+}
+
+// Inject the byline HTML after the logotype via admin_footer JS.
+add_action( 'admin_footer', 'stream_player_header_byline_js' );
+function stream_player_header_byline_js() {
+	if ( ! wp_style_is( 'plugin-admin-settings', 'enqueued' ) ) {
+		return;
+	}
+	?>
+	<script>
+	(function() {
+		// 1. Byline + version: insert under the logotype in Section A
+		var icon = document.querySelector( '.plugin-settings-page-header .plugin-settings-page-icon' );
+		if ( icon ) {
+			// Move version number into Section A (below icon)
+			var ver = document.querySelector( '.plugin-setttings-page-version' );
+			if ( ver && ! document.querySelector( '.sp-moved-version' ) ) {
+				ver.classList.add( 'sp-moved-version' );
+				icon.parentNode.insertBefore( ver, icon.nextSibling );
+			}
+			// Byline: insert after the version (or after icon if no version)
+			if ( ! document.querySelector( '.sp-header-byline' ) ) {
+				var byline = document.createElement( 'span' );
+				byline.className = 'sp-header-byline';
+				byline.innerHTML = 'by <a href="https://profiles.wordpress.org/tonyzeoli/" target="_blank" rel="noopener noreferrer">Tony Zeoli</a> &amp; <a href="https://profiles.wordpress.org/majick777/" target="_blank" rel="noopener noreferrer">Tony Hayes</a>';
+				// Insert after whatever is now the last child of Section A's td
+				icon.parentNode.appendChild( byline );
+			}
+		}
+
+		// 2. Strip ' | ' text-node separators between the Section B nav links.
+		// The loader produces: outer td[align=center] > table > ... > inner td[align=center]
+		// The pipes are TEXT NODES directly inside the INNER td (the one with .smalllink as direct children).
+		var allCenterCells = document.querySelectorAll( '.plugin-settings-page-header td[align="center"]' );
+		allCenterCells.forEach( function( cell ) {
+			// Check for .smalllink as a DIRECT child (not just a descendant)
+			var hasDirectSmalllink = Array.from( cell.childNodes ).some( function( n ) {
+				return n.nodeType === 1 && n.classList && n.classList.contains( 'smalllink' );
+			} );
+			if ( hasDirectSmalllink ) {
+				cell.childNodes.forEach( function( node ) {
+					if ( node.nodeType === 3 ) { node.textContent = ''; }
+				} );
+			}
+		} );
+
+		// 3. Add icons to Section B (Home / Docs / Support) links
+		var smallLinks = document.querySelectorAll( '.plugin-settings-page-header .smalllink' );
+		smallLinks.forEach( function( link ) {
+			var span = link.querySelector( '.dashicons' );
+			if ( ! span ) {
+				span = document.createElement( 'span' );
+				link.insertBefore( span, link.firstChild );
+			}
+			span.className = 'dashicons';
+			var text = ( link.textContent || '' ).trim().toLowerCase();
+			var href = link.getAttribute( 'href' ) || '';
+			if ( text.indexOf( 'home' ) !== -1 || href.indexOf( '#top' ) !== -1 ) {
+				span.classList.add( 'dashicons-admin-home' );
+			} else if ( text.indexOf( 'doc' ) !== -1 || href.indexOf( 'doc' ) !== -1 ) {
+				span.classList.add( 'dashicons-media-document' );
+			} else if ( text.indexOf( 'support' ) !== -1 || href.indexOf( 'support' ) !== -1 ) {
+				span.classList.add( 'dashicons-sos' );
+			} else {
+				span.classList.add( 'dashicons-admin-links' );
+			}
+		} );
+
+		// 4. Standardise Section C icons: replace mixed dashicons with uniform link-style icons.
+		var links = document.querySelectorAll( '.plugin-settings-page-links .pluginlink' );
+		links.forEach( function( link ) {
+			var span = link.querySelector( '.dashicons' );
+			if ( ! span ) {
+				span = document.createElement( 'span' );
+				link.insertBefore( span, link.firstChild );
+			}
+			span.className = 'dashicons';
+			var href = link.getAttribute( 'href' ) || '';
+			if ( href.indexOf( 'wordpress.org/support' ) !== -1 || href.indexOf( 'support' ) !== -1 ) {
+				span.classList.add( 'dashicons-sos' );
+			} else if ( href.indexOf( 'share' ) !== -1 || href.indexOf( '#share' ) !== -1 ) {
+				span.classList.add( 'dashicons-share' );
+			} else if ( href.indexOf( 'wordpress.org/plugins' ) !== -1 || href.indexOf( 'rate' ) !== -1 ) {
+				span.classList.add( 'dashicons-star-filled' );
+			} else {
+				span.classList.add( 'dashicons-admin-links' );
+			}
+		} );
+	})();
+	</script>
+	<?php
 }
 
 // ---------------------------

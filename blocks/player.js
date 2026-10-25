@@ -6,7 +6,8 @@
 	/* --- Import Modules/Components --- */
 	const sp_el = window.wp.element.createElement;
 	const sp__ = window.wp.i18n.__;
-	const { serverSideRender: ServerSideRender } = window.wp;
+	// wp.serverSideRender moved to its own package in WP 6.3+
+	const ServerSideRender = window.wp.serverSideRender || ( window.wp.components && window.wp.components.ServerSideRender );
 	const { registerBlockType, getBlockType } = window.wp.blocks;
 	const { InspectorControls, useBlockProps } = window.wp.blockEditor;
 	const { Fragment, useEffect, createRef, useRef } = window.wp.element;

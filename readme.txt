@@ -5,7 +5,7 @@ Tags: player, stream, audio, radio, broadcast
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires at least: 4.0
-Tested up to: 7.0
+Tested up to: 7.1
 Stable tag: 2.7.0
 
 Free, open source streaming audio player plugin by netmix®. Works with Icecast, Shoutcast, and Live 365 streams. For additional features, upgrade to Stream Player PRO.
@@ -76,6 +76,8 @@ For Stream Player customers using the free, open-source version of our plugin, y
 
 Stream Player uses the Amplitude and jPlayer scripts to play audio. In the that case you are connecting the player to a Soundcloud stream URL, Amplitude may load the latest Soundcloud SDK automatically via connect.soundcloud.com ... Soundcloud's terms of service are available at [here](https://soundcloud.com/terms-of-use).
 
+[Pro] If the "Fetch Album Artwork?" setting is enabled (on by default), Stream Player PRO looks up album artwork for the currently playing track via the free iTunes Search API - no signup or account required. If iTunes has no match, and you have configured a Spotify Client ID and Secret under Settings > Bar tab, it will also query the Spotify Search API as a fallback. Spotify credentials must be obtained by signing up for your own free [Spotify Developer account](https://developer.spotify.com/dashboard) and creating an app there; Stream Player PRO cannot supply these on your behalf.
+
 
 == Screenshots ==
 
@@ -88,6 +90,18 @@ Stream Player uses the Amplitude and jPlayer scripts to play audio. In the that 
 
 = 2.7.0 =
 * Updated: Radio Player Script (1.0.5)
+* Updated: Tested up to WordPress 7.1
+* Added: Admin header redesign — logotype banner, version number, three-column layout (logo/byline, nav links, rate/share/support)
+* Added: Dashicons to all admin header navigation links (Home, Docs, Support, Rate, Share, Support this Plugin)
+* Added: Version number display (v2.7.0) below logotype in admin header
+* Added: Byline (Tony Zeoli & Tony Hayes) below logotype in admin header
+* Improved: Admin nav menu icon replaced with new Stream Player logo mark, sized and colored to match WordPress standard icons
+* Improved: Plugin icon (notifications, Freemius) updated to new Stream Player logo with logotype
+* Fixed: Admin header Rate/Share/Support links alignment with Home/Docs/Support links
+* Fixed: Pipe separators removed between admin header navigation links
+* Fixed: Freemius pricing page bundle-logo CSS selector
+* Fixed: Block editor compatibility, safe JS output, free bar default styles
+* Fixed: Block channel attribute registration and null script array guard
 
 = 2.5.20 =
 * Updated: Freemius SDK (2.13.0)

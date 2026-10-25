@@ -141,7 +141,7 @@ function stream_player_settings_cap_check() {
 add_action( 'admin_menu', 'stream_player_add_admin_menus' );
 function stream_player_add_admin_menus() {
 
-	$icon = plugins_url( 'images/stream-player-icon.png?v=2', STREAM_PLAYER_FILE );
+	$icon = plugins_url( 'images/stream-player-icon.png?v=3', STREAM_PLAYER_FILE );
 	$position = apply_filters( 'stream_player_menu_position', 5 );
 	$settingscap = apply_filters( 'stream_player_manage_options_capability', 'manage_options' );
 	$sp = __( 'Stream Player', 'stream-player' );

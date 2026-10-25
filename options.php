@@ -524,6 +524,44 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'pro'     => true,
 		),
 
+		// --- [Pro/Player] Fetch Track Artwork ---
+		// 2.8.0: added album artwork lookup via iTunes/Spotify
+		'player_bar_artwork' => array(
+			'type'    => 'checkbox',
+			'label'   => $admin ? __( 'Fetch Album Artwork?', 'stream-player' ) : '',
+			'default' => 'yes',
+			'value'   => 'yes',
+			'tab'     => 'bar',
+			'section' => 'metadata',
+			'helper'  => $admin ? __( 'Look up and display album artwork for the current track via the iTunes Search API (and Spotify as a fallback, if configured below). Useful for streams like Live365 that do not include artwork in their metadata.', 'stream-player' ) : '',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Player] Spotify Client ID ---
+		// 2.8.0: optional fallback artwork source when iTunes has no match
+		'player_bar_artwork_spotify_id' => array(
+			'type'    => 'text',
+			'options' => 'TEXT',
+			'label'   => $admin ? __( 'Spotify Client ID', 'stream-player' ) : '',
+			'default' => '',
+			'tab'     => 'bar',
+			'section' => 'metadata',
+			'helper'  => $admin ? __( 'Optional. Used as a fallback artwork source when iTunes has no match. Create an app at developer.spotify.com to get a Client ID and Secret.', 'stream-player' ) : '',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Player] Spotify Client Secret ---
+		'player_bar_artwork_spotify_secret' => array(
+			'type'    => 'text',
+			'options' => 'TEXT',
+			'label'   => $admin ? __( 'Spotify Client Secret', 'stream-player' ) : '',
+			'default' => '',
+			'tab'     => 'bar',
+			'section' => 'metadata',
+			'helper'  => $admin ? __( 'Used together with the Spotify Client ID above.', 'stream-player' ) : '',
+			'pro'     => true,
+		),
+
 		// --- [Pro/Player] Track Animation ---
 		'player_bar_track_animation' => array(
 			'type'    => 'select',
