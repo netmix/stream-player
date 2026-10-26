@@ -83,6 +83,8 @@ The Stream Player Block supports extra theming and color options matching to the
 
 ### [Pro] Sitewide Bar Player
 
+> **🔒 This feature requires Stream Player Pro.** The Sitewide Bar Player settings are visible in the Plugin Settings → Player tab on the free version, but they appear grayed out and cannot be enabled until you upgrade. [Upgrade to Stream Player Pro →](https://radiostation.pro/stream-player/)
+
 [Stream Player Pro](https://radiostation.pro/stream-player/) includes a Sitewide Bar Streaming Player, including continuous uninterruptable playback via the integrated Teleporter page transition plugin. The Player Bar isn't added via the Widgets page, but is instead configured via the Plugin Settings page under the Player tab. It has the following main options:
 
 * *Bar Position*: Fixed in the header or footer area (top or bottom of page, unaffected by scrolling.)
@@ -99,8 +101,7 @@ The Stream Player Block supports extra theming and color options matching to the
 
 #### [Pro] Responsive Bar Display
 
-
-
+The Sitewide Bar Player is fully responsive and adapts to mobile screen widths. On smaller screens, non-essential controls (such as track metadata text) are hidden to keep the bar clean and usable on touch devices.
 
 #### [Pro] Continous Player Integration
 
@@ -136,18 +137,15 @@ And in addition to the existing Light and Dark button themes, you can also choos
 
 #### [Pro] Playback Autoresume
 
+When enabled, Stream Player Pro will attempt to resume playback automatically for returning visitors who were previously listening. This is triggered only after the visitor first interacts with the page (a requirement of modern browser audio policies) to avoid unexpected audio on page load.
 
 #### [Pro] Popup Player Window
 
+Adds a button to the Player Bar (and individual player instances when enabled) that opens the player in a small, separate browser window. This lets listeners keep the player open while navigating away from the site entirely.
 
 #### [Pro] Track Metadata
 
-
-
-
-
-
-
+Stream Player Pro can display the currently playing track title retrieved from your stream's metadata (Icecast/Shoutcast title tags). The Now Playing display appears inside the Player Bar and can be animated with scrolling text. You can also specify an alternative Metadata Source URL if your stream metadata is served from a separate endpoint.
 
 ### [Pro] Beaver Builder Module
 

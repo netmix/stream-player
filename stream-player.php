@@ -550,6 +550,72 @@ function stream_player_get_stream_formats() {
 	return $formats;
 }
 
+// --------------------------
+// Free Sitewide Player Bar
+// --------------------------
+// 2.7.0: basic sitewide bar for free tier - renders the shortcode player in a fixed bottom bar.
+//
+// FREE vs PRO boundary — important for developers:
+//
+// This function implements a COSMETIC sticky bar only (#1 in Tony Hayes' taxonomy).
+// The player shortcode is output into a fixed-position div on every page load.
+// Navigation causes a full page reload and the player restarts — this is intentional
+// and expected behaviour for the free tier.
+//
+// What this is NOT:
+// - It does NOT load or initialise Teleporter.
+// - It does NOT implement continuous/uninterruptable/SPA-like playback (#2).
+// - It does NOT sync player state across tabs or windows.
+//
+// The persistent/continuous playback USP lives entirely in Stream Player PRO and is
+// gated by the `player_bar_continuous` option (pro => true in options.php).
+// Teleporter should only be initialised when that Pro option is active.
+// Keep those two code paths cleanly separate when implementing the full Pro bar.
+add_action( 'init', 'stream_player_maybe_add_bar' );
+function stream_player_maybe_add_bar() {
+	if ( is_admin() ) {
+		return;
+	}
+	$enabled = stream_player_get_setting( 'player_bar_active' );
+	if ( 'yes' === $enabled ) {
+		add_action( 'wp_footer', 'stream_player_output_bar', 100 );
+		add_action( 'wp_head', 'stream_player_bar_styles' );
+	}
+}
+
+function stream_player_bar_styles() {
+	echo '<style id="stream-player-bar-css">
+#stream-player-bar {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	z-index: 9999;
+	background: #000;
+	padding: 6px 16px;
+	box-shadow: 0 -2px 8px rgba(0,0,0,0.4);
+}
+#stream-player-bar .radio-player-wrap {
+	max-width: 900px;
+	margin: 0 auto;
+}
+/* Push page content up so the bar does not overlap the footer */
+body.stream-player-bar-active {
+	padding-bottom: 80px;
+}
+</style>' . "
+";
+	echo '<script>document.body.classList.add("stream-player-bar-active");</script>' . "
+";
+}
+
+function stream_player_output_bar() {
+	echo '<div id="stream-player-bar" role="region" aria-label="' . esc_attr__( 'Audio Player', 'stream-player' ) . '">';
+	echo do_shortcode( '[stream-player layout="horizontal"]' );
+	echo '</div>' . "
+";
+}
+
 // -----------------
 // Get Streaming URL
 // -----------------
