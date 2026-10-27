@@ -112,7 +112,8 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'label'   => $admin ? __( 'Stream Tagline', 'stream-player' ) : '',
 			'default' => '',
 			'helper'  => $admin ? __( 'Tagline for your Stream.', 'stream-player' ) : '',
-			'tab'     => 'general',
+			// 2.7.1: fix to use existing stream tab (no general tab)
+			'tab'     => 'stream',
 			'section' => 'channel',
 		),
 
@@ -129,7 +130,8 @@ function stream_player_get_plugin_options( $admin = false ) {
 			),
 			'default' => array( 'tagline' ),
 			'helper'  => $admin ? __( 'Stream Meta to display in Player by default.', 'radio-station' ) : '',
-			'tab'     => 'general',
+			// 2.7.1: fix to use existing stream tab (no general tab)
+			'tab'     => 'stream',
 			'section' => 'channel',
 		),
 
