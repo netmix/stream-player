@@ -195,7 +195,16 @@ function stream_player_plugin_docs_page() {
 	// --- include markdown reader ---
 	include_once STREAM_PLAYER_DIR . '/reader.php';
 
-	$docs = scandir( STREAM_PLAYER_DIR . '/docs/' );
+	// 2.7.1: bail with message if docs directory is missing
+	$docs_dir = STREAM_PLAYER_DIR . '/docs/';
+	$docs = is_dir( $docs_dir ) ? scandir( $docs_dir ) : false;
+	if ( !$docs ) {
+		echo '<div class="notice notice-warning inline"><p>';
+		echo esc_html( __( 'The plugin documentation files could not be found. Please reinstall the plugin or view the documentation online.', 'stream-player' ) );
+		echo ' <a href="' . esc_url( STREAM_PLAYER_DOCS_URL ) . '" target="_blank">' . esc_html( __( 'Online Documentation', 'stream-player' ) ) . '</a>';
+		echo '</p></div>' . "\n";
+		return;
+	}
 	// $docs[] = 'CHANGELOG.md'; // temporarily removed
 	foreach ( $docs as $doc ) {
 		if ( !in_array( $doc, array( '.', '..' ) ) ) {
