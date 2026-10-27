@@ -294,7 +294,8 @@ function stream_player_parse_doc( $id ) {
 	$contents = str_replace( '.md#', '#', $contents );
 
 	// --- process markdown formatting ---
-	$formatted = Markdown( $contents );
+	// 2.7.1: fix to use prefixed markdown function from reader.php
+	$formatted = stream_player_markdown( $contents );
 
 	// --- a # name links to headings ---
 	for ( $i = 1; $i < 7; $i++ ) {
