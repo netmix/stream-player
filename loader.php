@@ -2357,6 +2357,10 @@ if ( !class_exists( 'stream_player_loader' ) ) {
 			} elseif ( isset( $settings['settingstab'] ) ) {
 				$currenttab = $settings['settingstab'];
 			}
+			// 1.3.9: reset to first tab if current tab does not exist
+			if ( ( '' != $currenttab ) && is_array( $tabs ) && !array_key_exists( $currenttab, $tabs ) ) {
+				$currenttab = '';
+			}
 
 			// --- loop options to maybe get tabbed groupings ---
 			$taboptions = array();
