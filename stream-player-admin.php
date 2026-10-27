@@ -12,6 +12,11 @@ if ( !defined( 'ABSPATH' ) ) exit;
 // === Admin Menu ===
 // - Setting Page Capability Check
 // - Add Admin Menu and Submenu Items
+// - Check for Music Reporting
+// - Add Music Reporting Teaser Submenu
+// - Music Reporting Teaser Page
+// - Music Reporting Tab Upgrade Notice
+// - Hide Teaser Options When Radio Station PRO Reports
 // - Fix to Redirect Plugin Settings Menu Link
 // - Display Plugin Docs Page
 // - Parse Markdown Doc File
@@ -158,6 +163,105 @@ function stream_player_add_admin_menus() {
 
 	do_action( 'stream_player_admin_submenu_bottom' );
 
+}
+
+// --------------------------
+// Check for Music Reporting
+// --------------------------
+// 2.7.1: Music Reporting is provided by Stream Player PRO, or by Radio Station PRO when it is active
+// (checks the reporting files, as Radio Station Plus also defines the Radio Station PRO constants)
+function stream_player_has_music_reporting() {
+	$active = defined( 'STREAM_PLAYER_PRO_DIR' ) && file_exists( STREAM_PLAYER_PRO_DIR . '/includes/spp-reporting.php' );
+	return apply_filters( 'stream_player_has_music_reporting', $active || stream_player_reporting_in_radio_station() );
+}
+function stream_player_reporting_in_radio_station() {
+	return defined( 'RADIO_STATION_PRO_DIR' ) && file_exists( RADIO_STATION_PRO_DIR . '/includes/rsp-reporting.php' );
+}
+
+// ----------------------------------
+// Add Music Reporting Teaser Submenu
+// ----------------------------------
+// 2.7.1: added Pro feature teaser (Music Reporting is available in Stream Player PRO)
+add_action( 'stream_player_admin_submenu_bottom', 'stream_player_add_reporting_teaser_submenu', 14 );
+function stream_player_add_reporting_teaser_submenu() {
+	if ( stream_player_has_music_reporting() ) {
+		return;
+	}
+	$settings_cap = apply_filters( 'stream_player_manage_options_capability', 'manage_options' );
+	add_submenu_page( STREAM_PLAYER_SLUG, __( 'Music Reporting', 'stream-player' ), __( 'Music Reporting', 'stream-player' ), $settings_cap, 'stream-player-music-reporting', 'stream_player_reporting_teaser_page' );
+}
+
+// --------------------------
+// Music Reporting Teaser Page
+// --------------------------
+// 2.7.1: describes the Pro royalty reporting feature with upgrade links
+function stream_player_reporting_teaser_page() {
+
+	$pricing_url = add_query_arg( 'page', 'stream-player-pricing', admin_url( 'admin.php' ) );
+	$features = array(
+		__( 'Automatically logs every track played on your Shoutcast or Icecast stream: artist, title, ISRC, play time, duration and listener counts.', 'stream-player' ),
+		__( 'Ready-made reports for SoundExchange (ATP and ATH), ASCAP, BMI, SESAC and GMR, PRS for Music, PPL and APRA AMCOS, plus per-play logs for PPCA, Recorded Music NZ, GEMA, GVL, SACEM, ECAD, SADAIC, SACM, SOCAN and other societies.', 'stream-player' ),
+		__( 'Download reports as spreadsheets or have them emailed weekly, monthly or quarterly.', 'stream-player' ),
+		__( 'Track catalog to add ISRCs, labels, composers and publishers, with CSV import from your music library and optional ISRC lookup.', 'stream-player' ),
+		__( 'Searchable play history kept for years, so you can cross-check society statements and lists against what you actually played.', 'stream-player' ),
+		__( 'Webhook for automation software (AzuraCast, LibreTime, RadioDJ, SAM Broadcaster, mAirList) to send full track details.', 'stream-player' ),
+	);
+
+	echo '<div class="wrap">' . PHP_EOL;
+	echo '<h1>' . esc_html__( 'Music Reporting', 'stream-player' ) . ' <span class="title-count">' . esc_html__( 'PRO', 'stream-player' ) . '</span></h1>' . PHP_EOL;
+	echo '<p style="font-size:15px;max-width:760px;">' . esc_html__( 'Stations and webcasters must report the music they play to collecting societies such as SoundExchange, ASCAP, BMI, SESAC, PRS and PPL. Stream Player PRO logs your plays and builds the reports for you.', 'stream-player' ) . '</p>' . PHP_EOL;
+	echo '<ul style="list-style:disc;padding-left:20px;max-width:760px;">' . PHP_EOL;
+	foreach ( $features as $feature ) {
+		echo '<li style="margin-bottom:8px;">' . esc_html( $feature ) . '</li>' . PHP_EOL;
+	}
+	echo '</ul>' . PHP_EOL;
+	echo '<p>';
+	echo '<a class="button button-primary button-hero" href="' . esc_url( $pricing_url ) . '">' . esc_html__( 'Upgrade to PRO', 'stream-player' ) . '</a> ';
+	echo '<a class="button button-hero" href="' . esc_url( STREAM_PLAYER_PRO_URL ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Learn More', 'stream-player' ) . '</a>';
+	echo '</p>' . PHP_EOL;
+	echo '</div>' . PHP_EOL;
+}
+
+// -----------------------------------
+// Music Reporting Tab Upgrade Notice
+// -----------------------------------
+// 2.7.1: upgrade box at the top of the Music Reporting settings tab
+// (points to Radio Station instead when Radio Station PRO does the reporting)
+add_action( 'stream_player_admin_page_tab_reporting_top', 'stream_player_reporting_upgrade_notice' );
+function stream_player_reporting_upgrade_notice() {
+
+	if ( stream_player_reporting_in_radio_station() ) {
+		$reporting_url = add_query_arg( array( 'page' => 'radio-station', 'tab' => 'reporting' ), admin_url( 'admin.php' ) );
+		echo '<div class="notice notice-info inline sp-reporting-upgrade"><p><strong>' . esc_html__( 'Music Reporting is handled by Radio Station PRO on this site.', 'stream-player' ) . '</strong> ';
+		echo esc_html__( 'Your plays are logged once, in Radio Station, so they are never counted twice.', 'stream-player' ) . '</p>' . PHP_EOL;
+		echo '<p><a class="button button-primary" href="' . esc_url( $reporting_url ) . '">' . esc_html__( 'Open Music Reporting in Radio Station', 'stream-player' ) . '</a></p></div>' . PHP_EOL;
+		return;
+	}
+	if ( stream_player_has_music_reporting() ) {
+		return;
+	}
+
+	$upgrade_url = add_query_arg( 'page', 'stream-player-pricing', admin_url( 'admin.php' ) );
+	$details_url = add_query_arg( 'page', 'stream-player-music-reporting', admin_url( 'admin.php' ) );
+	echo '<div class="notice notice-info inline sp-reporting-upgrade"><p><strong>' . esc_html__( 'Music Reporting is a Stream Player PRO feature.', 'stream-player' ) . '</strong> ';
+	echo esc_html__( 'Log every song you play and build royalty reports for SoundExchange, ASCAP, BMI, SESAC, GMR, PRS, PPL, APRA AMCOS and more. The settings below are a preview.', 'stream-player' ) . '</p>' . PHP_EOL;
+	echo '<p><a class="button button-primary" href="' . esc_url( $upgrade_url ) . '">' . esc_html__( 'Upgrade to PRO', 'stream-player' ) . '</a> ';
+	echo '<a class="button" href="' . esc_url( $details_url ) . '">' . esc_html__( "See What's Included", 'stream-player' ) . '</a></p></div>' . PHP_EOL;
+}
+
+// ----------------------------------------------------
+// Hide Teaser Options When Radio Station PRO Reports
+// ----------------------------------------------------
+// 2.7.1: the tab then only links to Radio Station, instead of offering an upgrade
+add_filter( 'stream_player_options', 'stream_player_reporting_teaser_options', 20 );
+function stream_player_reporting_teaser_options( $options ) {
+	if ( stream_player_reporting_in_radio_station() ) {
+		// note: keeps the Report Formats note, as the settings loader expects each tab to have an option
+		foreach ( array( 'reporting_enable', 'reporting_email_enable', 'reporting_retention' ) as $key ) {
+			unset( $options[$key] );
+		}
+	}
+	return $options;
 }
 
 // -----------------------------------------

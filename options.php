@@ -541,6 +541,56 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'pro'     => true,
 		),
 
+		// === Music Reporting (Pro) ===
+		// 2.7.1: added Pro teaser options for royalty play logging and reporting
+
+		// --- [Pro/Reporting] Enable Music Reporting ---
+		'reporting_enable' => array(
+			'type'    => 'checkbox',
+			'label'   => $admin ? __( 'Enable Music Reporting', 'stream-player' ) : '',
+			'default' => '',
+			'value'   => 'yes',
+			'helper'  => $admin ? __( 'Automatically log every track played on your Shoutcast or Icecast stream (artist, title, ISRC, listeners) for royalty reporting.', 'stream-player' ) : '',
+			'tab'     => 'reporting',
+			'section' => 'reporting_capture',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Reporting] Report Formats ---
+		'reporting_formats' => array(
+			'type'    => 'note',
+			'label'   => $admin ? __( 'Report Formats', 'stream-player' ) : '',
+			'helper'  => $admin ? __( 'Ready-made reports for SoundExchange (ATP and ATH), ASCAP, BMI, SESAC, GMR, PRS for Music, PPL, APRA AMCOS, and per-play logs for PPCA, Recorded Music NZ, GEMA, GVL, SACEM, ECAD, SADAIC, SACM, SOCAN and more.', 'stream-player' ) : '',
+			'tab'     => 'reporting',
+			'section' => 'reporting_capture',
+		),
+
+		// --- [Pro/Reporting] Email Reports ---
+		'reporting_email_enable' => array(
+			'type'    => 'checkbox',
+			'label'   => $admin ? __( 'Email Reports Automatically', 'stream-player' ) : '',
+			'default' => '',
+			'value'   => 'yes',
+			'helper'  => $admin ? __( 'Email weekly, monthly or quarterly reports as spreadsheet attachments to the addresses you choose.', 'stream-player' ) : '',
+			'tab'     => 'reporting',
+			'section' => 'reporting_email',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Reporting] Keep Play Logs ---
+		'reporting_retention' => array(
+			'type'    => 'select',
+			'label'   => $admin ? __( 'Keep Play Logs For', 'stream-player' ) : '',
+			'default' => '4',
+			'options' => array(
+				'4' => $admin ? __( '4 Years (Recommended)', 'stream-player' ) : '',
+			),
+			'helper'  => $admin ? __( 'Keep searchable play history to cross-check against society statements and audits.', 'stream-player' ) : '',
+			'tab'     => 'reporting',
+			'section' => 'reporting_capture',
+			'pro'     => true,
+		),
+
 		// === Tabs and Sections ===
 
 		// --- Tab Labels ---
@@ -548,6 +598,8 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'stream'    => $admin ? __( 'Stream', 'stream-player' ) : '',
 			'player'    => $admin ? __( 'Player', 'stream-player' ) : '',
 			'bar'       => $admin ? __( 'Bar', 'stream-player' ) : '',
+			// 2.7.1: added music reporting tab (Pro)
+			'reporting' => $admin ? __( 'Music Reporting', 'stream-player' ) : '',
 		),
 
 		// --- Section Labels ---
@@ -560,6 +612,9 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'display'     => $admin ? __( 'Bar Display', 'stream-player' ) : '',
 			'persistent'  => $admin ? __( 'Persistent Playback', 'stream-player' ) : '',
 			'metadata'    => $admin ? __( 'Metadata Display', 'stream-player' ) : '',
+			// 2.7.1: added music reporting sections (Pro)
+			'reporting_capture' => $admin ? __( 'Play Logging', 'stream-player' ) : '',
+			'reporting_email'   => $admin ? __( 'Scheduled Email Reports', 'stream-player' ) : '',
 		),
 	);
 
