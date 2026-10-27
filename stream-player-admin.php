@@ -60,6 +60,12 @@ function stream_player_enqueue_admin_scripts() {
 	$version = filemtime( $style_path );
 	wp_register_style( 'stream-player-admin', $style_url, array(), $version, 'all' );
 
+	// 2.7.1: enqueue admin styleguide on plugin settings page
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	if ( isset( $_REQUEST['page'] ) && ( STREAM_PLAYER_SLUG == sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ) ) ) {
+		wp_enqueue_style( 'stream-player-admin' );
+	}
+
 	// 2.5.0: maybe enqueue pricing page styles
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	if ( isset( $_REQUEST['page'] ) && ( 'stream-player-pricing' == sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ) ) ) {
