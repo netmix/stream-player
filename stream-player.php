@@ -73,6 +73,8 @@ define( 'STREAM_PLAYER_BASENAME', plugin_basename( __FILE__ ) );
 define( 'STREAM_PLAYER_HOME_URL', 'https://streamplayer.pro/stream-player/' );
 define( 'STREAM_PLAYER_DOCS_URL', 'https://streamplayer.pro/docs/' );
 define( 'STREAM_PLAYER_PRO_URL', 'https://streamplayer.pro/' );
+// 2.7.1: added Patreon constant for support prompts
+define( 'STREAM_PLAYER_PATREON', 'https://patreon.com/radiostation' );
 
 // -----------------------
 // Set Debug Mode Constant
@@ -132,7 +134,7 @@ $settings = array(
 	// 'ratetext'     => __( 'Rate on WordPress.org', 'stream-player' ),
 	'share'        => STREAM_PLAYER_HOME_URL . '#share',
 	// 'sharetext'    => __( 'Share the Plugin Love', 'stream-player' ),
-	'donate'       => 'https://patreon.com/radiostation',
+	'donate'       => STREAM_PLAYER_PATREON,
 	// 'donatetext'   => __( 'Support this Plugin', 'stream-player' ),
 	'readme'       => false,
 	'settingsmenu' => false,

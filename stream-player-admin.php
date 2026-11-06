@@ -33,6 +33,9 @@ if ( !defined( 'ABSPATH' ) ) exit;
 // - Admin Notice Dismiss Javascript
 // - Plugin Settings Page Top
 // - Plugin Settings Page Bottom
+// - Patreon Support Notice
+// - Patreon Support Content
+// - Dismiss Patreon Support Notice
 // - Launch Offer Notice
 // - Launch Offer Content
 // - Dismiss Launch Offer
@@ -371,7 +374,10 @@ function stream_player_plugin_docs_page() {
 	wp_add_inline_style( 'stream-player-admin', $css );
 
 	// --- output announcement content ---
-	// stream_player_announcement_content( false );
+	// 2.7.1: only show the Patreon banner in the free version
+	if ( stream_player_show_support_prompts() ) {
+		stream_player_announcement_content( false );
+	}
 
 }
 
@@ -1005,6 +1011,125 @@ function stream_player_settings_page_top() {
 add_action( 'stream_player_admin_page_bottom', 'stream_player_settings_page_bottom' );
 function stream_player_settings_page_bottom() {
 	// stream_player_mailchimp_form();
+	// 2.7.1: only show the Patreon banner in the free version
+	if ( stream_player_show_support_prompts() ) {
+		stream_player_announcement_content( false );
+	}
+}
+
+// ----------------------
+// Patreon Support Notice
+// ----------------------
+// 2.7.1: added Patreon support notice for the free version
+add_action( 'admin_notices', 'stream_player_announcement_notice' );
+function stream_player_announcement_notice() {
+
+	// --- only show the Patreon banner in the free version ---
+	if ( !stream_player_show_support_prompts() ) {
+		return;
+	}
+
+	// --- bug out if not admin ---
+	if ( !current_user_can( 'manage_options' ) && !current_user_can( 'update_plugins' ) ) {
+		return;
+	}
+
+	// --- bug out if already dismissed ---
+	if ( get_option( 'stream_player_announcement_dismissed' ) ) {
+		return;
+	}
+
+	// --- bug out on pages that already show the banner ---
+	$pages = array( STREAM_PLAYER_SLUG, STREAM_PLAYER_SLUG . '-docs' );
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	if ( isset( $_REQUEST['page'] ) && in_array( sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ), $pages ) ) {
+		return;
+	}
+
+	// --- display plugin announcement ---
+	echo '<div id="stream-player-announcement-notice" class="notice notice-info" style="position:relative;">' . "\n";
+		stream_player_announcement_content();
+	echo '</div>' . "\n";
+
+}
+
+// -----------------------
+// Patreon Support Content
+// -----------------------
+// 2.7.1: added Patreon supporter banner for the free version
+function stream_player_announcement_content( $dismissable = true ) {
+
+	echo '<ul style="list-style:none;">' . "\n";
+
+		// --- plugin image ---
+		$plugin_image = plugins_url( 'images/stream-player.png', STREAM_PLAYER_FILE );
+		echo '<li style="display:inline-block; vertical-align:middle;">' . "\n";
+			echo '<img src="' . esc_url( $plugin_image ) . '" height="100" width="100" alt="">' . "\n";
+		echo '</li>' . "\n";
+
+		// --- support message ---
+		echo '<li style="display:inline-block; vertical-align:middle; margin-left:40px; font-size:16px; line-height:24px;">' . "\n";
+			echo '<b style="font-size:17px;">' . esc_html( __( 'Help support the development of Stream Player!', 'stream-player' ) ) . '</b><br>' . "\n";
+			echo esc_html( __( 'Stream Player is a free, open-source audio player for your station, developed by', 'stream-player' ) ) . "\n";
+			echo ' <a href="https://netmix.com" target="_blank">Netmix</a>.<br>' . "\n";
+			echo esc_html( __( 'Your contribution helps fund the free version of Stream Player, including improvements and new features.', 'stream-player' ) ) . '<br>' . "\n";
+			echo esc_html( __( 'We invite you to', 'stream-player' ) ) . "\n";
+			echo ' <a href="' . esc_url( STREAM_PLAYER_PATREON ) . '" target="_blank">' . "\n";
+				echo esc_html( __( 'Become a Stream Player Patreon Supporter', 'stream-player' ) ) . "\n";
+			echo '</a> ' . esc_html( __( 'to make it better for everyone', 'stream-player' ) ) . '!' . "\n";
+		echo '</li>' . "\n";
+
+		// --- Patreon button ---
+		$button_image = plugins_url( 'images/patreon-button.jpg', STREAM_PLAYER_FILE );
+		echo '<li style="display:inline-block; text-align:center; vertical-align:middle; margin-left:40px;">' . "\n";
+			echo '<a href="' . esc_url( STREAM_PLAYER_PATREON ) . '" target="_blank">' . "\n";
+				echo '<img src="' . esc_url( $button_image ) . '" width="200" height="40" border="0" alt="' . esc_attr( __( 'Become a Patron', 'stream-player' ) ) . '">' . "\n";
+			echo '</a>' . "\n";
+
+			// --- WordPress.Org star rating link ---
+			if ( $dismissable ) {
+				echo '<br><br><span style="color:#FC5;" class="dashicons dashicons-star-filled"></span> ' . "\n";
+				echo '<a class="notice-link" href="https://wordpress.org/support/plugin/stream-player/reviews/#new-post" target="_blank">' . "\n";
+					echo esc_html( __( 'Rate on WordPress.Org', 'stream-player' ) ) . "\n";
+				echo '</a>' . "\n";
+			}
+		echo '</li>' . "\n";
+
+	echo '</ul>' . "\n";
+
+	// --- dismiss notice icon ---
+	if ( $dismissable ) {
+		$dismiss_url = admin_url( 'admin-ajax.php?action=stream_player_announcement_dismiss' );
+		$dismiss_url = add_query_arg( 'nonce', wp_create_nonce( 'stream_player_notice' ), $dismiss_url );
+		$onclick = "fetch(this.href,{credentials:'same-origin'});document.getElementById('stream-player-announcement-notice').style.display='none';return false;";
+		echo '<div style="position:absolute; top:20px; right: 20px;">' . "\n";
+			echo '<a href="' . esc_url( $dismiss_url ) . '" onclick="' . esc_attr( $onclick ) . '" style="text-decoration:none;">' . "\n";
+				echo '<span class="dashicons dashicons-dismiss" title="' . esc_attr( __( 'Dismiss this Notice', 'stream-player' ) ) . '"></span>' . "\n";
+			echo '</a>' . "\n";
+		echo '</div>' . "\n";
+	}
+
+}
+
+// ------------------------------
+// Dismiss Patreon Support Notice
+// ------------------------------
+// 2.7.1: added AJAX dismissal for the Patreon support notice
+add_action( 'wp_ajax_stream_player_announcement_dismiss', 'stream_player_announcement_dismiss' );
+function stream_player_announcement_dismiss() {
+
+	// --- bug out if no permissions ---
+	if ( !current_user_can( 'manage_options' ) && !current_user_can( 'update_plugins' ) ) {
+		exit;
+	}
+
+	if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['nonce'] ) ), 'stream_player_notice' ) ) {
+		exit;
+	}
+
+	// --- set option to dismissed ---
+	update_option( 'stream_player_announcement_dismissed', true );
+	exit;
 }
 
 // -------------------
