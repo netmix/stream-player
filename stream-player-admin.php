@@ -191,6 +191,24 @@ function stream_player_add_reporting_teaser_submenu() {
 	add_submenu_page( STREAM_PLAYER_SLUG, __( 'Music Reporting', 'stream-player' ), __( 'Music Reporting', 'stream-player' ), $settings_cap, 'stream-player-music-reporting', 'stream_player_reporting_teaser_page' );
 }
 
+// -------------------------
+// Check Show Support Prompts
+// -------------------------
+// 2.7.1: Patreon support prompts are only shown in the free version
+function stream_player_show_support_prompts() {
+	$show = !defined( 'STREAM_PLAYER_PRO_FILE' );
+	return apply_filters( 'stream_player_show_support_prompts', $show );
+}
+
+// -----------------------------
+// Hide Settings Page Donate Link
+// -----------------------------
+// 2.7.1: remove the Patreon link from the settings page when PRO is active
+add_filter( 'stream_player_donate_link', 'stream_player_hide_donate_link' );
+function stream_player_hide_donate_link( $link ) {
+	return stream_player_show_support_prompts() ? $link : '';
+}
+
 // --------------------------
 // Music Reporting Teaser Page
 // --------------------------
