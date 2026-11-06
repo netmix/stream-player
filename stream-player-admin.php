@@ -12,6 +12,11 @@ if ( !defined( 'ABSPATH' ) ) exit;
 // === Admin Menu ===
 // - Setting Page Capability Check
 // - Add Admin Menu and Submenu Items
+// - Check for Music Reporting
+// - Add Music Reporting Teaser Submenu
+// - Music Reporting Teaser Page
+// - Music Reporting Tab Upgrade Notice
+// - Hide Teaser Options When Radio Station PRO Reports
 // - Fix to Redirect Plugin Settings Menu Link
 // - Display Plugin Docs Page
 // - Parse Markdown Doc File
@@ -28,6 +33,9 @@ if ( !defined( 'ABSPATH' ) ) exit;
 // - Admin Notice Dismiss Javascript
 // - Plugin Settings Page Top
 // - Plugin Settings Page Bottom
+// - Patreon Support Notice
+// - Patreon Support Content
+// - Dismiss Patreon Support Notice
 // - Launch Offer Notice
 // - Launch Offer Content
 // - Dismiss Launch Offer
@@ -160,6 +168,123 @@ function stream_player_add_admin_menus() {
 
 }
 
+// --------------------------
+// Check for Music Reporting
+// --------------------------
+// 2.7.1: Music Reporting is provided by Stream Player PRO, or by Radio Station PRO when it is active
+// (checks the reporting files, as Radio Station Plus also defines the Radio Station PRO constants)
+function stream_player_has_music_reporting() {
+	$active = defined( 'STREAM_PLAYER_PRO_DIR' ) && file_exists( STREAM_PLAYER_PRO_DIR . '/includes/spp-reporting.php' );
+	return apply_filters( 'stream_player_has_music_reporting', $active || stream_player_reporting_in_radio_station() );
+}
+function stream_player_reporting_in_radio_station() {
+	return defined( 'RADIO_STATION_PRO_DIR' ) && file_exists( RADIO_STATION_PRO_DIR . '/includes/rsp-reporting.php' );
+}
+
+// ----------------------------------
+// Add Music Reporting Teaser Submenu
+// ----------------------------------
+// 2.7.1: added Pro feature teaser (Music Reporting is available in Stream Player PRO)
+add_action( 'stream_player_admin_submenu_bottom', 'stream_player_add_reporting_teaser_submenu', 14 );
+function stream_player_add_reporting_teaser_submenu() {
+	if ( stream_player_has_music_reporting() ) {
+		return;
+	}
+	$settings_cap = apply_filters( 'stream_player_manage_options_capability', 'manage_options' );
+	add_submenu_page( STREAM_PLAYER_SLUG, __( 'Music Reporting', 'stream-player' ), __( 'Music Reporting', 'stream-player' ), $settings_cap, 'stream-player-music-reporting', 'stream_player_reporting_teaser_page' );
+}
+
+// -------------------------
+// Check Show Support Prompts
+// -------------------------
+// 2.7.1: Patreon support prompts are only shown in the free version
+function stream_player_show_support_prompts() {
+	$show = !defined( 'STREAM_PLAYER_PRO_FILE' );
+	return apply_filters( 'stream_player_show_support_prompts', $show );
+}
+
+// -----------------------------
+// Hide Settings Page Donate Link
+// -----------------------------
+// 2.7.1: remove the Patreon link from the settings page when PRO is active
+add_filter( 'stream_player_donate_link', 'stream_player_hide_donate_link' );
+function stream_player_hide_donate_link( $link ) {
+	return stream_player_show_support_prompts() ? $link : '';
+}
+
+// --------------------------
+// Music Reporting Teaser Page
+// --------------------------
+// 2.7.1: describes the Pro royalty reporting feature with upgrade links
+function stream_player_reporting_teaser_page() {
+
+	$pricing_url = add_query_arg( 'page', 'stream-player-pricing', admin_url( 'admin.php' ) );
+	$features = array(
+		__( 'Automatically logs every track played on your Shoutcast or Icecast stream: artist, title, ISRC, play time, duration and listener counts.', 'stream-player' ),
+		__( 'Ready-made reports for SoundExchange (ATP and ATH), ASCAP, BMI, SESAC and GMR, PRS for Music, PPL and APRA AMCOS, plus per-play logs for PPCA, Recorded Music NZ, GEMA, GVL, SACEM, ECAD, SADAIC, SACM, SOCAN and other societies.', 'stream-player' ),
+		__( 'Download reports as spreadsheets or have them emailed weekly, monthly or quarterly.', 'stream-player' ),
+		__( 'Track catalog to add ISRCs, labels, composers and publishers, with CSV import from your music library and optional ISRC lookup.', 'stream-player' ),
+		__( 'Searchable play history kept for years, so you can cross-check society statements and lists against what you actually played.', 'stream-player' ),
+		__( 'Webhook for automation software (AzuraCast, LibreTime, RadioDJ, SAM Broadcaster, mAirList) to send full track details.', 'stream-player' ),
+	);
+
+	echo '<div class="wrap">' . PHP_EOL;
+	echo '<h1>' . esc_html__( 'Music Reporting', 'stream-player' ) . ' <span class="title-count">' . esc_html__( 'PRO', 'stream-player' ) . '</span></h1>' . PHP_EOL;
+	echo '<p style="font-size:15px;max-width:760px;">' . esc_html__( 'Stations and webcasters must report the music they play to collecting societies such as SoundExchange, ASCAP, BMI, SESAC, PRS and PPL. Stream Player PRO logs your plays and builds the reports for you.', 'stream-player' ) . '</p>' . PHP_EOL;
+	echo '<ul style="list-style:disc;padding-left:20px;max-width:760px;">' . PHP_EOL;
+	foreach ( $features as $feature ) {
+		echo '<li style="margin-bottom:8px;">' . esc_html( $feature ) . '</li>' . PHP_EOL;
+	}
+	echo '</ul>' . PHP_EOL;
+	echo '<p>';
+	echo '<a class="button button-primary button-hero" href="' . esc_url( $pricing_url ) . '">' . esc_html__( 'Upgrade to PRO', 'stream-player' ) . '</a> ';
+	echo '<a class="button button-hero" href="' . esc_url( STREAM_PLAYER_PRO_URL ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Learn More', 'stream-player' ) . '</a>';
+	echo '</p>' . PHP_EOL;
+	echo '</div>' . PHP_EOL;
+}
+
+// -----------------------------------
+// Music Reporting Tab Upgrade Notice
+// -----------------------------------
+// 2.7.1: upgrade box at the top of the Music Reporting settings tab
+// (points to Radio Station instead when Radio Station PRO does the reporting)
+add_action( 'stream_player_admin_page_tab_reporting_top', 'stream_player_reporting_upgrade_notice' );
+function stream_player_reporting_upgrade_notice() {
+
+	if ( stream_player_reporting_in_radio_station() ) {
+		$reporting_url = add_query_arg( array( 'page' => 'radio-station', 'tab' => 'reporting' ), admin_url( 'admin.php' ) );
+		echo '<div class="notice notice-info inline sp-reporting-upgrade"><p><strong>' . esc_html__( 'Music Reporting is handled by Radio Station PRO on this site.', 'stream-player' ) . '</strong> ';
+		echo esc_html__( 'Your plays are logged once, in Radio Station, so they are never counted twice.', 'stream-player' ) . '</p>' . PHP_EOL;
+		echo '<p><a class="button button-primary" href="' . esc_url( $reporting_url ) . '">' . esc_html__( 'Open Music Reporting in Radio Station', 'stream-player' ) . '</a></p></div>' . PHP_EOL;
+		return;
+	}
+	if ( stream_player_has_music_reporting() ) {
+		return;
+	}
+
+	$upgrade_url = add_query_arg( 'page', 'stream-player-pricing', admin_url( 'admin.php' ) );
+	$details_url = add_query_arg( 'page', 'stream-player-music-reporting', admin_url( 'admin.php' ) );
+	echo '<div class="notice notice-info inline sp-reporting-upgrade"><p><strong>' . esc_html__( 'Music Reporting is a Stream Player PRO feature.', 'stream-player' ) . '</strong> ';
+	echo esc_html__( 'Log every song you play and build royalty reports for SoundExchange, ASCAP, BMI, SESAC, GMR, PRS, PPL, APRA AMCOS and more. The settings below are a preview.', 'stream-player' ) . '</p>' . PHP_EOL;
+	echo '<p><a class="button button-primary" href="' . esc_url( $upgrade_url ) . '">' . esc_html__( 'Upgrade to PRO', 'stream-player' ) . '</a> ';
+	echo '<a class="button" href="' . esc_url( $details_url ) . '">' . esc_html__( "See What's Included", 'stream-player' ) . '</a></p></div>' . PHP_EOL;
+}
+
+// ----------------------------------------------------
+// Hide Teaser Options When Radio Station PRO Reports
+// ----------------------------------------------------
+// 2.7.1: the tab then only links to Radio Station, instead of offering an upgrade
+add_filter( 'stream_player_options', 'stream_player_reporting_teaser_options', 20 );
+function stream_player_reporting_teaser_options( $options ) {
+	if ( stream_player_reporting_in_radio_station() ) {
+		// note: keeps the Report Formats note, as the settings loader expects each tab to have an option
+		foreach ( array( 'reporting_enable', 'reporting_email_enable', 'reporting_retention' ) as $key ) {
+			unset( $options[$key] );
+		}
+	}
+	return $options;
+}
+
 // -----------------------------------------
 // Fix to Redirect Plugin Settings Menu Link
 // -----------------------------------------
@@ -249,7 +374,10 @@ function stream_player_plugin_docs_page() {
 	wp_add_inline_style( 'stream-player-admin', $css );
 
 	// --- output announcement content ---
-	// stream_player_announcement_content( false );
+	// 2.7.1: only show the Patreon banner in the free version
+	if ( stream_player_show_support_prompts() ) {
+		stream_player_announcement_content( false );
+	}
 
 }
 
@@ -883,6 +1011,125 @@ function stream_player_settings_page_top() {
 add_action( 'stream_player_admin_page_bottom', 'stream_player_settings_page_bottom' );
 function stream_player_settings_page_bottom() {
 	// stream_player_mailchimp_form();
+	// 2.7.1: only show the Patreon banner in the free version
+	if ( stream_player_show_support_prompts() ) {
+		stream_player_announcement_content( false );
+	}
+}
+
+// ----------------------
+// Patreon Support Notice
+// ----------------------
+// 2.7.1: added Patreon support notice for the free version
+add_action( 'admin_notices', 'stream_player_announcement_notice' );
+function stream_player_announcement_notice() {
+
+	// --- only show the Patreon banner in the free version ---
+	if ( !stream_player_show_support_prompts() ) {
+		return;
+	}
+
+	// --- bug out if not admin ---
+	if ( !current_user_can( 'manage_options' ) && !current_user_can( 'update_plugins' ) ) {
+		return;
+	}
+
+	// --- bug out if already dismissed ---
+	if ( get_option( 'stream_player_announcement_dismissed' ) ) {
+		return;
+	}
+
+	// --- bug out on pages that already show the banner ---
+	$pages = array( STREAM_PLAYER_SLUG, STREAM_PLAYER_SLUG . '-docs' );
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	if ( isset( $_REQUEST['page'] ) && in_array( sanitize_text_field( wp_unslash( $_REQUEST['page'] ) ), $pages ) ) {
+		return;
+	}
+
+	// --- display plugin announcement ---
+	echo '<div id="stream-player-announcement-notice" class="notice notice-info" style="position:relative;">' . "\n";
+		stream_player_announcement_content();
+	echo '</div>' . "\n";
+
+}
+
+// -----------------------
+// Patreon Support Content
+// -----------------------
+// 2.7.1: added Patreon supporter banner for the free version
+function stream_player_announcement_content( $dismissable = true ) {
+
+	echo '<ul style="list-style:none;">' . "\n";
+
+		// --- plugin image ---
+		$plugin_image = plugins_url( 'images/stream-player.png', STREAM_PLAYER_FILE );
+		echo '<li style="display:inline-block; vertical-align:middle;">' . "\n";
+			echo '<img src="' . esc_url( $plugin_image ) . '" height="100" width="100" alt="">' . "\n";
+		echo '</li>' . "\n";
+
+		// --- support message ---
+		echo '<li style="display:inline-block; vertical-align:middle; margin-left:40px; font-size:16px; line-height:24px;">' . "\n";
+			echo '<b style="font-size:17px;">' . esc_html( __( 'Help support the development of Stream Player!', 'stream-player' ) ) . '</b><br>' . "\n";
+			echo esc_html( __( 'Stream Player is a free, open-source audio player for your station, developed by', 'stream-player' ) ) . "\n";
+			echo ' <a href="https://netmix.com" target="_blank">Netmix</a>.<br>' . "\n";
+			echo esc_html( __( 'Your contribution helps fund the free version of Stream Player, including improvements and new features.', 'stream-player' ) ) . '<br>' . "\n";
+			echo esc_html( __( 'We invite you to', 'stream-player' ) ) . "\n";
+			echo ' <a href="' . esc_url( STREAM_PLAYER_PATREON ) . '" target="_blank">' . "\n";
+				echo esc_html( __( 'Become a Stream Player Patreon Supporter', 'stream-player' ) ) . "\n";
+			echo '</a> ' . esc_html( __( 'to make it better for everyone', 'stream-player' ) ) . '!' . "\n";
+		echo '</li>' . "\n";
+
+		// --- Patreon button ---
+		$button_image = plugins_url( 'images/patreon-button.jpg', STREAM_PLAYER_FILE );
+		echo '<li style="display:inline-block; text-align:center; vertical-align:middle; margin-left:40px;">' . "\n";
+			echo '<a href="' . esc_url( STREAM_PLAYER_PATREON ) . '" target="_blank">' . "\n";
+				echo '<img src="' . esc_url( $button_image ) . '" width="200" height="40" border="0" alt="' . esc_attr( __( 'Become a Patron', 'stream-player' ) ) . '">' . "\n";
+			echo '</a>' . "\n";
+
+			// --- WordPress.Org star rating link ---
+			if ( $dismissable ) {
+				echo '<br><br><span style="color:#FC5;" class="dashicons dashicons-star-filled"></span> ' . "\n";
+				echo '<a class="notice-link" href="https://wordpress.org/support/plugin/stream-player/reviews/#new-post" target="_blank">' . "\n";
+					echo esc_html( __( 'Rate on WordPress.Org', 'stream-player' ) ) . "\n";
+				echo '</a>' . "\n";
+			}
+		echo '</li>' . "\n";
+
+	echo '</ul>' . "\n";
+
+	// --- dismiss notice icon ---
+	if ( $dismissable ) {
+		$dismiss_url = admin_url( 'admin-ajax.php?action=stream_player_announcement_dismiss' );
+		$dismiss_url = add_query_arg( 'nonce', wp_create_nonce( 'stream_player_notice' ), $dismiss_url );
+		$onclick = "fetch(this.href,{credentials:'same-origin'});document.getElementById('stream-player-announcement-notice').style.display='none';return false;";
+		echo '<div style="position:absolute; top:20px; right: 20px;">' . "\n";
+			echo '<a href="' . esc_url( $dismiss_url ) . '" onclick="' . esc_attr( $onclick ) . '" style="text-decoration:none;">' . "\n";
+				echo '<span class="dashicons dashicons-dismiss" title="' . esc_attr( __( 'Dismiss this Notice', 'stream-player' ) ) . '"></span>' . "\n";
+			echo '</a>' . "\n";
+		echo '</div>' . "\n";
+	}
+
+}
+
+// ------------------------------
+// Dismiss Patreon Support Notice
+// ------------------------------
+// 2.7.1: added AJAX dismissal for the Patreon support notice
+add_action( 'wp_ajax_stream_player_announcement_dismiss', 'stream_player_announcement_dismiss' );
+function stream_player_announcement_dismiss() {
+
+	// --- bug out if no permissions ---
+	if ( !current_user_can( 'manage_options' ) && !current_user_can( 'update_plugins' ) ) {
+		exit;
+	}
+
+	if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['nonce'] ) ), 'stream_player_notice' ) ) {
+		exit;
+	}
+
+	// --- set option to dismissed ---
+	update_option( 'stream_player_announcement_dismissed', true );
+	exit;
 }
 
 // -------------------
