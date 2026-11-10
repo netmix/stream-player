@@ -694,12 +694,54 @@
 												{ label: sp__( 'Prism', 'stream-player' ), value: 'prism' },
 												{ label: sp__( 'Rainbow', 'stream-player' ), value: 'rainbow' },
 												{ label: sp__( 'Steel Blue', 'stream-player' ), value: 'steelblue' },
+												/* 2.7.0: custom colors */
+												{ label: sp__( 'Custom Colors', 'stream-player' ), value: 'custom' },
 											],
 											onChange: ( value ) => {
 												props.setAttributes( { analyzer_gradient: value } );
 											},
 											value: atts.analyzer_gradient
 										})
+									),
+									/* 2.7.0: custom analyzer colors, empty = inherit plugin setting */
+									( ( 'custom' === atts.analyzer_gradient ) &&
+										sp_el( PanelRow, {},
+											sp_el( TextControl, {
+												type: 'color',
+												label: sp__( 'Analyzer Top Color', 'stream-player' ),
+												help: ( '' == atts.analyzer_color_top ) ? sp__( 'Plugin Setting', 'stream-player' ) : atts.analyzer_color_top,
+												onChange: ( value ) => {
+													props.setAttributes( { analyzer_color_top: value } );
+												},
+												value: atts.analyzer_color_top ? atts.analyzer_color_top : '#000000'
+											})
+										)
+									),
+									( ( 'custom' === atts.analyzer_gradient ) &&
+										sp_el( PanelRow, {},
+											sp_el( TextControl, {
+												type: 'color',
+												label: sp__( 'Analyzer Middle Color', 'stream-player' ),
+												help: ( '' == atts.analyzer_color_middle ) ? sp__( 'Plugin Setting', 'stream-player' ) : atts.analyzer_color_middle,
+												onChange: ( value ) => {
+													props.setAttributes( { analyzer_color_middle: value } );
+												},
+												value: atts.analyzer_color_middle ? atts.analyzer_color_middle : '#000000'
+											})
+										)
+									),
+									( ( 'custom' === atts.analyzer_gradient ) &&
+										sp_el( PanelRow, {},
+											sp_el( TextControl, {
+												type: 'color',
+												label: sp__( 'Analyzer Bottom Color', 'stream-player' ),
+												help: ( '' == atts.analyzer_color_bottom ) ? sp__( 'Plugin Setting', 'stream-player' ) : atts.analyzer_color_bottom,
+												onChange: ( value ) => {
+													props.setAttributes( { analyzer_color_bottom: value } );
+												},
+												value: atts.analyzer_color_bottom ? atts.analyzer_color_bottom : '#000000'
+											})
+										)
 									),
 									sp_el( PanelRow, {},
 										sp_el( SelectControl, {
