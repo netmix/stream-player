@@ -828,11 +828,11 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'type'    => 'select',
 			'label'   => $admin ? __( 'Analyzer Placement', 'stream-player' ) : '',
 			'options' => array(
-				'attached'   => $admin ? __( 'Attached Above Bar', 'stream-player' ) : '',
+				'attached'   => $admin ? __( 'Attached to Bar Edge', 'stream-player' ) : '',
 				'background' => $admin ? __( 'Background (Behind Bar Content)', 'stream-player' ) : '',
 			),
 			'default' => 'attached',
-			'helper'  => $admin ? __( 'Whether the analyzer sits as a strip above the Player Bar, or fills the bar as a background behind the text and controls.', 'stream-player' ) : '',
+			'helper'  => $admin ? __( 'Whether the analyzer sits as a strip along the page edge of the Player Bar (below a top bar, above a bottom bar), or fills the bar as a background behind the text and controls.', 'stream-player' ) : '',
 			'tab'     => 'bar',
 			'section' => 'analyzer',
 			'pro'     => true,
