@@ -150,6 +150,9 @@ function stream_player_block_editor_assets() {
 	$js = "var stream_player_script = '" . esc_js( plugins_url( '/player/js/radio-player.js', STREAM_PLAYER_FILE ) ) . "';";
 	// 2.5.12: add stream player settings
 	$js .= stream_player_get_player_settings();
+	// 2.7.1: pass the default stream URL so the block can show it as a placeholder
+	$stream_url = function_exists( 'stream_player_get_stream_url' ) ? stream_player_get_stream_url() : '';
+	$js .= 'var stream_player_block_defaults = ' . wp_json_encode( array( 'url' => $stream_url ) ) . ';';
 	wp_add_inline_script( 'stream-blockedit-js', $js, 'before' );
 
 	// --- add block control style fix inline ---

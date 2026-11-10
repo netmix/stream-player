@@ -68,6 +68,8 @@
 									sp_el( TextControl, {
 										label: sp__( 'Stream URL', 'stream-player' ),
 										help: sp__( 'Leave blank to use default stream.', 'stream-player' ),
+										/* 2.7.1: show the default stream URL from the settings page */
+										placeholder: ( ( typeof stream_player_block_defaults !== 'undefined' ) && stream_player_block_defaults.url ) ? stream_player_block_defaults.url : '',
 										onChange: ( value ) => {
 											props.setAttributes( { url: value } );
 										},
