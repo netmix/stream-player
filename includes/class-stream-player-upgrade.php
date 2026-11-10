@@ -324,6 +324,11 @@ class Stream_Player_Upgrade {
 			__( 'Now Playing – live stream metadata (song/artist) in the bar', 'stream-player' ),
 			__( 'Metadata URL – custom endpoint for now-playing data', 'stream-player' ),
 			__( 'Track Animation – scrolling ticker for long track titles', 'stream-player' ),
+			__( 'Album Artwork – look up current track artwork (iTunes, with Spotify fallback)', 'stream-player' ),
+			__( 'Spectrum Analyzer – animated audio visualizer in the sitewide bar', 'stream-player' ),
+			__( 'Spectrum Analyzer – animated audio visualizer in the widget player', 'stream-player' ),
+			__( 'Load Fail Prompt – prompt visitors when a page times out or errors during continuous playback', 'stream-player' ),
+			__( 'StreamGuys Rewind – stream support for the StreamGuys Rewind service', 'stream-player' ),
 		);
 
 		?>
