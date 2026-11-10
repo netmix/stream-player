@@ -3506,6 +3506,16 @@ function stream_player_control_styles( $instance, $overrides = false ) {
 	// 2.5.18: add check for solid/semisolid play/pause buttons
 	if ( !isset( $atts ) || !strstr( $atts['buttons'], 'solid' ) ) {
 		$css .= "/* Playing Button */" . "\n";
+		// 2.7.1: generic container colors must not apply to solid/semisolid buttons
+		if ( !isset( $atts ) ) {
+			$selectors = array();
+			foreach ( array( 'solid', 'semisolid' ) as $style ) {
+				foreach ( array( 'loaded', 'loading', 'playing', 'playing.loaded', 'error' ) as $state ) {
+					$selectors[] = $container . '.' . $style . '.' . $state . ' .rp-play-pause-button-bg';
+				}
+			}
+			$css .= implode( ', ', $selectors ) . " {background-color: transparent; animation: none;}" . "\n";
+		}
 		$css .= esc_attr( $container ) . ".error .rp-play-pause-button-bg {background-color: #CC0000;}" . "\n";
 		if ( '' != $colors['buttons'] ) {
 			$css .= esc_attr( $container ) . ".loaded .rp-play-pause-button-bg {background-color: " . esc_attr( $colors['buttons'] ) . ";}" . "\n";
