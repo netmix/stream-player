@@ -535,8 +535,9 @@ function stream_player_get_plugin_options( $admin = false ) {
 				'righttoleft'  => $admin ? __( 'Right to Left Ticker', 'stream-player' ) : '',
 				'backandforth' => $admin ? __( 'Back and Forth', 'stream-player' ) : '',
 			),
-			'tab'     => 'player',
-			'section' => 'bar',
+			// 2.7.1: fix to show in Bar tab Metadata section (Player tab has no Bar section)
+			'tab'     => 'bar',
+			'section' => 'metadata',
 			'helper'  => $admin ? __( 'How to animate the currently playing track display.', 'stream-player' ) : '',
 			'pro'     => true,
 		),
