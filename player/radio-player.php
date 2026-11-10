@@ -213,7 +213,7 @@ function stream_player_set_debug_mode() {
 // 'script'  | 'amplitude' (default), 'jplayer', 'howler', 'audio5' // , 'mediaelements'
 // 'layout'  | 'horizontal', 'vertical'
 // 'theme'   | 'light', 'dark'
-// 'buttons' | 'circular', 'rounded', 'square'
+// 'buttons' | 'solid', 'semisolid', 'circular', 'rounded', 'square'
 // 'skin'    | [not implemented] Media Elements: wordpress, minimal
 // 'volume'  | [Integer: 0 to 100]: Initial Player Volume - default: 77
 // 'default' | Default Player flag

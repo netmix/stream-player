@@ -211,7 +211,10 @@ class Stream_Player_Widget extends WP_Widget {
 			' . esc_html( __( 'Buttons Style', 'stream-player' ) ) . '</label><br>
 			<select id="' . esc_attr( $this->get_field_id( 'buttons' ) ) . '" name="' . esc_attr( $this->get_field_name( 'buttons' ) ) . '">';
 			$options = array(
-				'default'  => __( 'Plugin Setting', 'stream-player' ),
+				'default'   => __( 'Plugin Setting', 'stream-player' ),
+				// 2.7.1: added solid button options
+				'solid'     => __( 'Solid', 'stream-player' ),
+				'semisolid' => __( 'Semi-solid', 'stream-player' ),
 				'circular' => __( 'Circular', 'stream-player' ),
 				'rounded'  => __( 'Rounded', 'stream-player' ),
 				'square'   => __( 'Square', 'stream-player' ),
