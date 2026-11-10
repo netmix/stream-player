@@ -30,7 +30,7 @@
 			/* --- Player Options --- */
 			script: { type: 'string', default: 'default' },
 			volume: { type: 'number', default: 77 },
-			volumes: { type: 'array', default: ['slider'] },
+			volumes: { type: 'array', default: ['slider', 'updown', 'mute'] },
 			default: { type: 'boolean', default: false },
 			/* --- Player Styles --- */
 			layout: { type: 'string', default: 'vertical' },

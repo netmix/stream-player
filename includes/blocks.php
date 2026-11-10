@@ -50,7 +50,7 @@ function stream_player_get_block_attributes() {
 			'script' => array( 'type' => 'string', 'default' => 'default' ),
 			'volume' => array( 'type' => 'number', 'default' => 77 ),
 			// 2.5.14: added missing volumes attribute
-			'volumes' => array( 'type' => 'array', 'default' => array( 'slider' ) ),			
+			'volumes' => array( 'type' => 'array', 'default' => array( 'slider', 'updown', 'mute' ) ),			
 			'default' => array( 'type' => 'boolean', 'default' => false ),
 			// --- Player Styles ---
 			// 2.7.1: default to stacked layout (horizontal layout is a Pro option)
