@@ -637,15 +637,10 @@ function stream_player_bar_styles() {
 #stream-player-bar .rp-now-playing {
 	display: none;
 }
-@media (max-width: 600px) {
-	#stream-player-bar .rp-station-info, #stream-player-bar .rp-show-info {
-		display: none;
-	}
-}
-@media (max-width: 415px) {
-	#stream-player-bar .rp-mute, #stream-player-bar .rp-volume-max, #stream-player-bar .rp-volume-up, #stream-player-bar .rp-volume-down {
-		display: none;
-	}
+/* 2.7.1: the free bar is play and volume only -- station display, show info and extra volume buttons are Pro bar features */
+#stream-player-bar .rp-station-info, #stream-player-bar .rp-show-info,
+#stream-player-bar .rp-mute, #stream-player-bar .rp-volume-max, #stream-player-bar .rp-volume-up, #stream-player-bar .rp-volume-down {
+	display: none;
 }
 /* Push page content up so the bar does not overlap the footer */
 body.stream-player-bar-active {
