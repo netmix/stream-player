@@ -176,6 +176,10 @@
 	display: block; margin: 0 auto 8px auto;
 }
 .radio-container.vertical .rp-station-info .rp-station-text {display: block;}
+/* 2.7.1: keep the now playing track text centered and only as wide as its text */
+.radio-container.vertical .rp-now-playing {
+	width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; justify-content: center;
+}
 /* @end */
 
 /* @group No Solution error */
