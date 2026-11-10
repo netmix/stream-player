@@ -898,8 +898,8 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'label'   => $admin ? __( 'Analyzer Top Color', 'stream-player' ) : '',
 			'default' => '#ff0000',
 			'helper'  => $admin ? __( 'Used when the Analyzer Color Theme is set to Custom Colors.', 'stream-player' ) : '',
-			'tab'     => 'player',
-			'section' => 'bar',
+			'tab'     => 'bar',
+			'section' => 'analyzer',
 			'pro'     => true,
 		),
 
@@ -909,8 +909,8 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'label'   => $admin ? __( 'Analyzer Middle Color', 'stream-player' ) : '',
 			'default' => '#ffff00',
 			'helper'  => $admin ? __( 'Used when the Analyzer Color Theme is set to Custom Colors.', 'stream-player' ) : '',
-			'tab'     => 'player',
-			'section' => 'bar',
+			'tab'     => 'bar',
+			'section' => 'analyzer',
 			'pro'     => true,
 		),
 
@@ -920,8 +920,8 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'label'   => $admin ? __( 'Analyzer Bottom Color', 'stream-player' ) : '',
 			'default' => '#00ff00',
 			'helper'  => $admin ? __( 'Used when the Analyzer Color Theme is set to Custom Colors.', 'stream-player' ) : '',
-			'tab'     => 'player',
-			'section' => 'bar',
+			'tab'     => 'bar',
+			'section' => 'analyzer',
 			'pro'     => true,
 		),
 
