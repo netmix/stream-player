@@ -602,6 +602,38 @@ function stream_player_bar_styles() {
 	max-width: 900px;
 	margin: 0 auto;
 }
+/* 2.7.1: keep the bar at 80px with readable text and vertically centered sections */
+#stream-player-bar {
+	height: 80px;
+	padding: 0 16px;
+	box-sizing: border-box;
+	overflow: hidden;
+	color: #FFFFFF;
+}
+#stream-player-bar .radio-container, #stream-player-bar a {
+	color: #FFFFFF;
+}
+#stream-player-bar .rp-type-single {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 80px;
+}
+#stream-player-bar .rp-station-info, #stream-player-bar .rp-interface, #stream-player-bar .rp-show-info {
+	margin-top: 0;
+	padding-top: 0;
+}
+#stream-player-bar .rp-interface {
+	height: auto;
+}
+#stream-player-bar .rp-now-playing {
+	display: none;
+}
+@media (max-width: 600px) {
+	#stream-player-bar .rp-station-info, #stream-player-bar .rp-show-info {
+		display: none;
+	}
+}
 /* Push page content up so the bar does not overlap the footer */
 body.stream-player-bar-active {
 	padding-bottom: 80px;
