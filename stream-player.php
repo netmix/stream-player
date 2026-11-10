@@ -625,12 +625,25 @@ function stream_player_bar_styles() {
 }
 #stream-player-bar .rp-interface {
 	height: auto;
+	flex: 0 0 auto;
+	width: max-content;
+	max-width: none;
+	min-width: 0;
+	white-space: nowrap;
+}
+#stream-player-bar .rp-volume-slider-bg {
+	background-color: rgba(255,255,255,0.25);
 }
 #stream-player-bar .rp-now-playing {
 	display: none;
 }
 @media (max-width: 600px) {
 	#stream-player-bar .rp-station-info, #stream-player-bar .rp-show-info {
+		display: none;
+	}
+}
+@media (max-width: 415px) {
+	#stream-player-bar .rp-mute, #stream-player-bar .rp-volume-max, #stream-player-bar .rp-volume-up, #stream-player-bar .rp-volume-down {
 		display: none;
 	}
 }
