@@ -578,8 +578,11 @@ function stream_player_maybe_add_bar() {
 	}
 	$enabled = stream_player_get_setting( 'player_bar_active' );
 	if ( 'yes' === $enabled ) {
-		add_action( 'wp_footer', 'stream_player_output_bar', 100 );
+		// 2.7.1: output before footer scripts print (priority 20) so the player's
+		// scripts and styles, enqueued by the shortcode, are loaded on the page
+		add_action( 'wp_footer', 'stream_player_output_bar', 4 );
 		add_action( 'wp_head', 'stream_player_bar_styles' );
+		add_filter( 'body_class', 'stream_player_bar_body_class' );
 	}
 }
 
@@ -605,8 +608,12 @@ body.stream-player-bar-active {
 }
 </style>' . "
 ";
-	echo '<script>document.body.classList.add("stream-player-bar-active");</script>' . "
-";
+}
+
+// 2.7.1: add body class server-side (the inline script ran in head before body existed)
+function stream_player_bar_body_class( $classes ) {
+	$classes[] = 'stream-player-bar-active';
+	return $classes;
 }
 
 function stream_player_output_bar() {
