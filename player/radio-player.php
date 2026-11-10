@@ -3504,7 +3504,8 @@ function stream_player_control_styles( $instance, $overrides = false ) {
 	// --- Play Button ---
 	// 2.4.0.2: fix to glowingloading animation reference
 	// 2.5.18: add check for solid/semisolid play/pause buttons
-	if ( !isset( $atts ) || !strstr( $atts['buttons'], 'solid' ) ) {
+	// 2.7.1: guard against instance props without a buttons value
+	if ( !isset( $atts ) || !isset( $atts['buttons'] ) || !strstr( $atts['buttons'], 'solid' ) ) {
 		$css .= "/* Playing Button */" . "\n";
 		// 2.7.1: generic container colors must not apply to solid/semisolid buttons
 		if ( !isset( $atts ) ) {

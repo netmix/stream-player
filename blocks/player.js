@@ -33,7 +33,7 @@
 			volumes: { type: 'array', default: ['slider'] },
 			default: { type: 'boolean', default: false },
 			/* --- Player Styles --- */
-			layout: { type: 'string', default: 'horizontal' },
+			layout: { type: 'string', default: 'vertical' },
 			theme: { type: 'string', default: 'default' },
 			buttons: { type: 'string', default: 'default' },
 			/* --- Hidden Switches --- */
@@ -190,7 +190,9 @@
 							/* === Player Styles === */
 							sp_el( PanelBody, { title: sp__( 'Player Design', 'stream-player' ), className: 'stream-block-controls', initialOpen: true },
 								/* --- Player Layout --- */
+								/* 2.7.1: layout choice is a Pro option (free is stacked) */
 								sp_el( PanelRow, {},
+									( ( atts.pro ) &&
 									sp_el( RadioControl, {
 										label: sp__( 'Player Layout', 'stream-player' ),
 										options : [
@@ -202,6 +204,12 @@
 										},
 										checked: atts.layout
 									})
+									), ( ( !atts.pro ) &&
+										sp_el( BaseControl, {
+											label: sp__( 'Player Layout', 'stream-player' ),
+											help: sp__( 'Horizontal (Inline) layout available in Pro.', 'stream-player' ),
+										})
+									)
 								),
 								/* --- Player Theme --- */
 								( ( !atts.pro ) &&
@@ -626,6 +634,18 @@
 											value: atts.metadata
 										})
 									),
+								)
+							),
+
+							/* 2.7.1: Spectrum Analyzer upsell */
+							( ( !atts.pro ) &&
+								sp_el( PanelBody, { title: sp__( 'Spectrum Analyzer', 'stream-player' ), className: 'stream-block-controls', initialOpen: false },
+									sp_el( PanelRow, {},
+										sp_el( BaseControl, {
+											label: sp__( 'Spectrum Analyzer', 'stream-player' ),
+											help: sp__( 'Real-time spectrum analyzer available in Pro.', 'stream-player' ),
+										})
+									)
 								)
 							),
 
