@@ -252,43 +252,41 @@ class Stream_Player_Upgrade {
 			gap: 10px;
 			margin-top: 4px;
 		}
-		.sp-upgrade-card .sp-btn-primary {
+		/* 2.7.1: brand-colored buttons. The #wpbody #upgrade-tab prefix
+		   outranks the admin rule that colors every upgrade/pricing link. */
+		#wpbody #upgrade-tab .sp-card-actions a.sp-btn-primary,
+		#wpbody #upgrade-tab .sp-card-actions a.sp-btn-secondary {
 			display: inline-block;
-			background: #2271b1;
+			font-size: 13px;
+			font-weight: 600;
+			padding: 8px 18px;
+			border-radius: 4px;
+			cursor: pointer;
+			line-height: 1.4;
+			text-decoration: none !important;
+			transition: background-color .15s, border-color .15s, color .15s;
+		}
+		#wpbody #upgrade-tab .sp-card-actions a.sp-btn-primary {
+			background: #bf003d;
+			border: 1px solid #bf003d;
 			color: #fff !important;
-			text-decoration: none !important;
-			font-size: 13px;
-			font-weight: 600;
-			padding: 8px 18px;
-			border-radius: 4px;
-			border: none;
-			cursor: pointer;
-			line-height: 1.4;
 		}
-		.sp-upgrade-card .sp-btn-primary:hover {
-			background: #135e96;
+		#wpbody #upgrade-tab .sp-card-actions a.sp-btn-primary:hover,
+		#wpbody #upgrade-tab .sp-card-actions a.sp-btn-primary:focus {
+			background: #980031;
+			border-color: #980031;
+			color: #fff !important;
 		}
-		.sp-card-rsp .sp-btn-primary {
-			background: #e8832a;
+		#wpbody #upgrade-tab .sp-card-actions a.sp-btn-secondary {
+			background: #fff;
+			border: 1px solid #f5c2cb;
+			color: #bf003d !important;
 		}
-		.sp-card-rsp .sp-btn-primary:hover {
-			background: #c7621a;
-		}
-		.sp-upgrade-card .sp-btn-secondary {
-			display: inline-block;
-			background: #f6f7f7;
-			color: #2271b1 !important;
-			text-decoration: none !important;
-			font-size: 13px;
-			font-weight: 600;
-			padding: 8px 18px;
-			border-radius: 4px;
-			border: 1px solid #c3c4c7;
-			cursor: pointer;
-			line-height: 1.4;
-		}
-		.sp-upgrade-card .sp-btn-secondary:hover {
-			background: #e5e5e5;
+		#wpbody #upgrade-tab .sp-card-actions a.sp-btn-secondary:hover,
+		#wpbody #upgrade-tab .sp-card-actions a.sp-btn-secondary:focus {
+			background: #fdf0f4;
+			border-color: #bf003d;
+			color: #980031 !important;
 		}
 
 		/* ---- Already-active notice ---- */
