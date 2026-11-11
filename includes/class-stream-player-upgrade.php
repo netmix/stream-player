@@ -368,7 +368,7 @@ class Stream_Player_Upgrade {
 		<div class="sp-upgrade-card sp-card-pro">
 
 			<div class="sp-card-header">
-				<img src="<?php echo esc_url( plugins_url( 'images/stream-player.png', STREAM_PLAYER_FILE ) ); ?>" alt="<?php esc_attr_e( 'Stream Player PRO', 'stream-player' ); ?>" class="sp-card-logo" />
+				<img src="<?php echo esc_url( plugins_url( 'images/stream-player-pro.png', STREAM_PLAYER_FILE ) ); ?>" alt="<?php esc_attr_e( 'Stream Player PRO', 'stream-player' ); ?>" class="sp-card-logo" />
 				<span class="sp-card-badge"><?php esc_html_e( 'PRO', 'stream-player' ); ?></span>
 				<h2><?php esc_html_e( 'Stream Player PRO', 'stream-player' ); ?></h2>
 			</div>
