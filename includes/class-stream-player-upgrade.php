@@ -53,8 +53,9 @@ class Stream_Player_Upgrade {
 		add_filter( 'stream_player_options', array( __CLASS__, 'maybe_remove_upgrade_tab' ) );
 
 		// 2.7.1: register the Upgrade tab (and the placeholder option the loader
-		// needs before it will render a tab), ahead of maybe_remove_upgrade_tab.
-		add_filter( 'stream_player_options', array( __CLASS__, 'add_upgrade_tab' ), 5 );
+		// needs before it will render a tab). Priority 15 runs after
+		// stream_player_admin_options() rebuilds the options array at 10.
+		add_filter( 'stream_player_options', array( __CLASS__, 'add_upgrade_tab' ), 15 );
 	}
 
 	/**
