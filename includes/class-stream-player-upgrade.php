@@ -51,6 +51,35 @@ class Stream_Player_Upgrade {
 		// However, if another plugin or mu-plugin loads PRO after our options array
 		// is built, filter it out defensively.
 		add_filter( 'stream_player_options', array( __CLASS__, 'maybe_remove_upgrade_tab' ) );
+
+		// 2.7.1: register the Upgrade tab (and the placeholder option the loader
+		// needs before it will render a tab), ahead of maybe_remove_upgrade_tab.
+		add_filter( 'stream_player_options', array( __CLASS__, 'add_upgrade_tab' ), 5 );
+	}
+
+	/**
+	 * Add the Upgrade tab label and a text-only placeholder option.
+	 * The settings loader drops tabs that have no options, so the
+	 * placeholder is what makes the tab render.
+	 *
+	 * @param  array $options
+	 * @return array
+	 */
+	public static function add_upgrade_tab( $options ) {
+		if ( defined( 'STREAM_PLAYER_PRO_FILE' ) || defined( 'RADIO_STATION_PRO_FILE' ) ) {
+			return $options;
+		}
+		if ( isset( $options['tabs'] ) && is_array( $options['tabs'] ) ) {
+			$options['tabs']['upgrade'] = __( 'Upgrade', 'stream-player' );
+		}
+		$options['upgrade_tab_placeholder'] = array(
+			'type'    => 'note',
+			'label'   => '',
+			'helper'  => '',
+			'tab'     => 'upgrade',
+			'section' => 'general',
+		);
+		return $options;
 	}
 
 	/**
@@ -91,6 +120,9 @@ class Stream_Player_Upgrade {
 			padding: 24px 0 8px;
 			align-items: flex-start;
 		}
+
+		/* ---- Hide the empty placeholder row under the cards ---- */
+		#upgrade-tab table { display: none; }
 
 		/* ---- Individual card ---- */
 		.sp-upgrade-card {
