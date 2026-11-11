@@ -51,6 +51,36 @@ class Stream_Player_Upgrade {
 		// However, if another plugin or mu-plugin loads PRO after our options array
 		// is built, filter it out defensively.
 		add_filter( 'stream_player_options', array( __CLASS__, 'maybe_remove_upgrade_tab' ) );
+
+		// 2.7.1: register the Upgrade tab (and the placeholder option the loader
+		// needs before it will render a tab). Priority 15 runs after
+		// stream_player_admin_options() rebuilds the options array at 10.
+		add_filter( 'stream_player_options', array( __CLASS__, 'add_upgrade_tab' ), 15 );
+	}
+
+	/**
+	 * Add the Upgrade tab label and a text-only placeholder option.
+	 * The settings loader drops tabs that have no options, so the
+	 * placeholder is what makes the tab render.
+	 *
+	 * @param  array $options
+	 * @return array
+	 */
+	public static function add_upgrade_tab( $options ) {
+		if ( defined( 'STREAM_PLAYER_PRO_FILE' ) || defined( 'RADIO_STATION_PRO_FILE' ) ) {
+			return $options;
+		}
+		if ( isset( $options['tabs'] ) && is_array( $options['tabs'] ) ) {
+			$options['tabs']['upgrade'] = __( 'Upgrade', 'stream-player' );
+		}
+		$options['upgrade_tab_placeholder'] = array(
+			'type'    => 'note',
+			'label'   => '',
+			'helper'  => '',
+			'tab'     => 'upgrade',
+			'section' => 'general',
+		);
+		return $options;
 	}
 
 	/**
@@ -92,6 +122,9 @@ class Stream_Player_Upgrade {
 			align-items: flex-start;
 		}
 
+		/* ---- Hide the empty placeholder row under the cards ---- */
+		#upgrade-tab table { display: none; }
+
 		/* ---- Individual card ---- */
 		.sp-upgrade-card {
 			background: #fff;
@@ -121,6 +154,12 @@ class Stream_Player_Upgrade {
 			align-items: center;
 			gap: 12px;
 			margin-bottom: 10px;
+		}
+		/* 2.7.1: logo images are 300px; show them at half size */
+		.sp-upgrade-card .sp-card-logo {
+			width: 150px;
+			height: auto;
+			flex-shrink: 0;
 		}
 		.sp-upgrade-card .sp-card-badge {
 			display: inline-block;
@@ -213,43 +252,41 @@ class Stream_Player_Upgrade {
 			gap: 10px;
 			margin-top: 4px;
 		}
-		.sp-upgrade-card .sp-btn-primary {
+		/* 2.7.1: brand-colored buttons. The #wpbody #upgrade-tab prefix
+		   outranks the admin rule that colors every upgrade/pricing link. */
+		#wpbody #upgrade-tab .sp-card-actions a.sp-btn-primary,
+		#wpbody #upgrade-tab .sp-card-actions a.sp-btn-secondary {
 			display: inline-block;
-			background: #2271b1;
+			font-size: 13px;
+			font-weight: 600;
+			padding: 8px 18px;
+			border-radius: 4px;
+			cursor: pointer;
+			line-height: 1.4;
+			text-decoration: none !important;
+			transition: background-color .15s, border-color .15s, color .15s;
+		}
+		#wpbody #upgrade-tab .sp-card-actions a.sp-btn-primary {
+			background: #bf003d;
+			border: 1px solid #bf003d;
 			color: #fff !important;
-			text-decoration: none !important;
-			font-size: 13px;
-			font-weight: 600;
-			padding: 8px 18px;
-			border-radius: 4px;
-			border: none;
-			cursor: pointer;
-			line-height: 1.4;
 		}
-		.sp-upgrade-card .sp-btn-primary:hover {
-			background: #135e96;
+		#wpbody #upgrade-tab .sp-card-actions a.sp-btn-primary:hover,
+		#wpbody #upgrade-tab .sp-card-actions a.sp-btn-primary:focus {
+			background: #980031;
+			border-color: #980031;
+			color: #fff !important;
 		}
-		.sp-card-rsp .sp-btn-primary {
-			background: #e8832a;
+		#wpbody #upgrade-tab .sp-card-actions a.sp-btn-secondary {
+			background: #fff;
+			border: 1px solid #f5c2cb;
+			color: #bf003d !important;
 		}
-		.sp-card-rsp .sp-btn-primary:hover {
-			background: #c7621a;
-		}
-		.sp-upgrade-card .sp-btn-secondary {
-			display: inline-block;
-			background: #f6f7f7;
-			color: #2271b1 !important;
-			text-decoration: none !important;
-			font-size: 13px;
-			font-weight: 600;
-			padding: 8px 18px;
-			border-radius: 4px;
-			border: 1px solid #c3c4c7;
-			cursor: pointer;
-			line-height: 1.4;
-		}
-		.sp-upgrade-card .sp-btn-secondary:hover {
-			background: #e5e5e5;
+		#wpbody #upgrade-tab .sp-card-actions a.sp-btn-secondary:hover,
+		#wpbody #upgrade-tab .sp-card-actions a.sp-btn-secondary:focus {
+			background: #fdf0f4;
+			border-color: #bf003d;
+			color: #980031 !important;
 		}
 
 		/* ---- Already-active notice ---- */
@@ -324,13 +361,18 @@ class Stream_Player_Upgrade {
 			__( 'Now Playing – live stream metadata (song/artist) in the bar', 'stream-player' ),
 			__( 'Metadata URL – custom endpoint for now-playing data', 'stream-player' ),
 			__( 'Track Animation – scrolling ticker for long track titles', 'stream-player' ),
+			__( 'Album Artwork – look up current track artwork (iTunes, with Spotify fallback)', 'stream-player' ),
+			__( 'Spectrum Analyzer – animated audio visualizer in the sitewide bar', 'stream-player' ),
+			__( 'Spectrum Analyzer – animated audio visualizer in the widget player', 'stream-player' ),
+			__( 'Load Fail Prompt – prompt visitors when a page times out or errors during continuous playback', 'stream-player' ),
+			__( 'StreamGuys Rewind – stream support for the StreamGuys Rewind service', 'stream-player' ),
 		);
 
 		?>
 		<div class="sp-upgrade-card sp-card-pro">
 
 			<div class="sp-card-header">
-				<img src="<?php echo esc_url( plugins_url( 'images/stream-player.png', STREAM_PLAYER_FILE ) ); ?>" alt="<?php esc_attr_e( 'Stream Player PRO', 'stream-player' ); ?>" class="sp-card-logo" />
+				<img src="<?php echo esc_url( plugins_url( 'images/stream-player-pro.png', STREAM_PLAYER_FILE ) ); ?>" alt="<?php esc_attr_e( 'Stream Player PRO', 'stream-player' ); ?>" class="sp-card-logo" />
 				<span class="sp-card-badge"><?php esc_html_e( 'PRO', 'stream-player' ); ?></span>
 				<h2><?php esc_html_e( 'Stream Player PRO', 'stream-player' ); ?></h2>
 			</div>
