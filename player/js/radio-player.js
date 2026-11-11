@@ -1075,6 +1075,12 @@ function radio_player_amplitude(instance, url, format, fallback, fformat) {
 	audio = radio_player_instance.getAudio();
 	if (radio_player.debug) {console.log('Amplitude Audio Element:'); console.log(audio);}
 	audio.setAttribute('instance-id', instance);
+	/* 2.7.1: fire an event with the freshly-created element so the Pro spectrum
+	   analyzer (or any other add-on doing Web Audio API analysis) can opt in to
+	   setting crossOrigin on it. This is NOT set here unconditionally: it switches
+	   the browser to a CORS fetch, and if the streaming host doesn't send
+	   Access-Control-Allow-Origin, that breaks playback outright. */
+	document.dispatchEvent( new CustomEvent( 'rp-audio-element-ready', { detail: { instance: instance, script: 'amplitude', audio: audio } } ) );
 
 	/* amp 5.0.3 bind loaded to canplay event (as initialized callback not firing!) */
 	/* amp 5.3.2 initialized callback is now firing */
@@ -1203,6 +1209,8 @@ function radio_player_jplayer(instance, url, format, fallback, fformat) {
 	audio = radio_player_instance.data('jPlayer').htmlElement.audio;
 	if (radio_player.debug) {console.log('jPlayer Audio Element:'); console.log(audio);}
 	audio.setAttribute('instance-id', instance);
+	/* 2.7.1: see matching comment in radio_player_amplitude() above */
+	document.dispatchEvent( new CustomEvent( 'rp-audio-element-ready', { detail: { instance: instance, script: 'jplayer', audio: audio } } ) );
 
 	/* bind load event */
 	jQuery('#'+player_id).bind(jQuery.jPlayer.event.load, function(e) {

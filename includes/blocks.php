@@ -50,10 +50,11 @@ function stream_player_get_block_attributes() {
 			'script' => array( 'type' => 'string', 'default' => 'default' ),
 			'volume' => array( 'type' => 'number', 'default' => 77 ),
 			// 2.5.14: added missing volumes attribute
-			'volumes' => array( 'type' => 'array', 'default' => array( 'slider' ) ),			
+			'volumes' => array( 'type' => 'array', 'default' => array( 'slider', 'updown', 'mute' ) ),			
 			'default' => array( 'type' => 'boolean', 'default' => false ),
 			// --- Player Styles ---
-			'layout' => array( 'type' => 'string', 'default' => 'horizontal' ),
+			// 2.7.1: default to stacked layout (horizontal layout is a Pro option)
+			'layout' => array( 'type' => 'string', 'default' => 'vertical' ),
 			'theme' => array( 'type' => 'string', 'default' => 'default' ),
 			'buttons' => array( 'type' => 'string', 'default' => 'default' ),
 		),
@@ -149,6 +150,9 @@ function stream_player_block_editor_assets() {
 	$js = "var stream_player_script = '" . esc_js( plugins_url( '/player/js/radio-player.js', STREAM_PLAYER_FILE ) ) . "';";
 	// 2.5.12: add stream player settings
 	$js .= stream_player_get_player_settings();
+	// 2.7.1: pass the default stream URL so the block can show it as a placeholder
+	$stream_url = function_exists( 'stream_player_get_stream_url' ) ? stream_player_get_stream_url() : '';
+	$js .= 'var stream_player_block_defaults = ' . wp_json_encode( array( 'url' => $stream_url ) ) . ';';
 	wp_add_inline_script( 'stream-blockedit-js', $js, 'before' );
 
 	// --- add block control style fix inline ---
@@ -171,6 +175,34 @@ function stream_player_block_editor_assets() {
 		wp_enqueue_style( 'radio-player', $style_url, array(), $version, 'all' );
 
 		// --- enqueue player control styles inline ---
+		$control_styles = stream_player_control_styles( false );
+		wp_add_inline_style( 'radio-player', $control_styles );
+	}
+}
+
+// ----------------------------------
+// Enqueue Block Editor Canvas Styles
+// ----------------------------------
+// 2.7.1: the block editor canvas is an iframe (WP 6.3+), which only receives
+// styles enqueued on enqueue_block_assets, so load player styles there too
+add_action( 'enqueue_block_assets', 'stream_player_block_canvas_styles' );
+function stream_player_block_canvas_styles() {
+
+	if ( !is_admin() ) {
+		return;
+	}
+
+	global $radio_player;
+	$plugin_dir = defined( 'STREAM_PLAYER_DIR' ) ? STREAM_PLAYER_DIR : dirname( __DIR__ );
+	$plugin_file = defined( 'STREAM_PLAYER_FILE' ) ? STREAM_PLAYER_FILE : $plugin_dir . '/stream-player.php';
+	$style_path = $plugin_dir . '/player/css/radio-player.css';
+	$style_url = plugins_url( '/player/css/radio-player.css', $plugin_file );
+	$version = file_exists( $style_path ) ? filemtime( $style_path ) : false;
+	wp_enqueue_style( 'radio-player', $style_url, array(), $version, 'all' );
+
+	// --- generic control styles (bypass the once-only check for the canvas) ---
+	if ( function_exists( 'stream_player_control_styles' ) ) {
+		unset( $radio_player['control-styles'] );
 		$control_styles = stream_player_control_styles( false );
 		wp_add_inline_style( 'radio-player', $control_styles );
 	}

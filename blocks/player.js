@@ -30,10 +30,10 @@
 			/* --- Player Options --- */
 			script: { type: 'string', default: 'default' },
 			volume: { type: 'number', default: 77 },
-			volumes: { type: 'array', default: ['slider'] },
+			volumes: { type: 'array', default: ['slider', 'updown', 'mute'] },
 			default: { type: 'boolean', default: false },
 			/* --- Player Styles --- */
-			layout: { type: 'string', default: 'horizontal' },
+			layout: { type: 'string', default: 'vertical' },
 			theme: { type: 'string', default: 'default' },
 			buttons: { type: 'string', default: 'default' },
 			/* --- Hidden Switches --- */
@@ -68,6 +68,8 @@
 									sp_el( TextControl, {
 										label: sp__( 'Stream URL', 'stream-player' ),
 										help: sp__( 'Leave blank to use default stream.', 'stream-player' ),
+										/* 2.7.1: show the default stream URL from the settings page */
+										placeholder: ( ( typeof stream_player_block_defaults !== 'undefined' ) && stream_player_block_defaults.url ) ? stream_player_block_defaults.url : '',
 										onChange: ( value ) => {
 											props.setAttributes( { url: value } );
 										},
@@ -190,7 +192,9 @@
 							/* === Player Styles === */
 							sp_el( PanelBody, { title: sp__( 'Player Design', 'stream-player' ), className: 'stream-block-controls', initialOpen: true },
 								/* --- Player Layout --- */
+								/* 2.7.1: layout choice is a Pro option (free is stacked) */
 								sp_el( PanelRow, {},
+									( ( atts.pro ) &&
 									sp_el( RadioControl, {
 										label: sp__( 'Player Layout', 'stream-player' ),
 										options : [
@@ -202,6 +206,12 @@
 										},
 										checked: atts.layout
 									})
+									), ( ( !atts.pro ) &&
+										sp_el( BaseControl, {
+											label: sp__( 'Player Layout', 'stream-player' ),
+											help: sp__( 'Horizontal (Inline) layout available in Pro.', 'stream-player' ),
+										})
+									)
 								),
 								/* --- Player Theme --- */
 								( ( !atts.pro ) &&
@@ -253,6 +263,9 @@
 										label: sp__( 'Player Buttons', 'stream-player' ),
 										options : [
 											{ label: sp__( 'Plugin Setting', 'stream-player' ), value: 'default' },
+											/* 2.7.1: added solid button options */
+											{ label: sp__( 'Solid', 'stream-player' ), value: 'solid' },
+											{ label: sp__( 'Semi-solid', 'stream-player' ), value: 'semisolid' },
 											{ label: sp__( 'Circular', 'stream-player' ), value: 'circular' },
 											{ label: sp__( 'Rounded', 'stream-player' ), value: 'rounded' },
 											{ label: sp__( 'Square', 'stream-player' ), value: 'square' },
@@ -621,6 +634,147 @@
 												props.setAttributes( { metadata: value } );
 											},
 											value: atts.metadata
+										})
+									),
+								)
+							),
+
+							/* 2.7.1: Spectrum Analyzer upsell */
+							( ( !atts.pro ) &&
+								sp_el( PanelBody, { title: sp__( 'Spectrum Analyzer', 'stream-player' ), className: 'stream-block-controls', initialOpen: false },
+									sp_el( PanelRow, {},
+										sp_el( BaseControl, {
+											label: sp__( 'Spectrum Analyzer', 'stream-player' ),
+											help: sp__( 'Real-time spectrum analyzer available in Pro.', 'stream-player' ),
+										})
+									)
+								)
+							),
+
+							/* === Spectrum Analyzer === */
+							/* 2.7.1: per-instance override of the Widget Player Settings
+							   section; 'default'/'' means inherit the global setting */
+							( ( atts.pro ) &&
+								sp_el( PanelBody, { title: sp__( 'Spectrum Analyzer', 'stream-player' ), className: 'stream-block-controls', initialOpen: false },
+									sp_el( PanelRow, {},
+										sp_el( SelectControl, {
+											label: sp__( 'Spectrum Analyzer', 'stream-player' ),
+											options : [
+												{ label: sp__( 'Plugin Setting', 'stream-player' ), value: 'default' },
+												{ label: sp__( 'On', 'stream-player' ), value: 'on' },
+												{ label: sp__( 'Off', 'stream-player' ), value: 'off' },
+											],
+											onChange: ( value ) => {
+												props.setAttributes( { analyzer: value } );
+											},
+											value: atts.analyzer
+										})
+									),
+									sp_el( PanelRow, {},
+										sp_el( SelectControl, {
+											label: sp__( 'Analyzer Placement', 'stream-player' ),
+											options : [
+												{ label: sp__( 'Plugin Setting', 'stream-player' ), value: 'default' },
+												{ label: sp__( 'Top (Above Widget)', 'stream-player' ), value: 'top' },
+												{ label: sp__( 'Background (Behind Widget Content)', 'stream-player' ), value: 'background' },
+											],
+											onChange: ( value ) => {
+												props.setAttributes( { analyzer_placement: value } );
+											},
+											value: atts.analyzer_placement
+										})
+									),
+									sp_el( PanelRow, {},
+										sp_el( SelectControl, {
+											label: sp__( 'Analyzer Color Theme', 'stream-player' ),
+											options : [
+												{ label: sp__( 'Plugin Setting', 'stream-player' ), value: 'default' },
+												{ label: sp__( 'Classic', 'stream-player' ), value: 'classic' },
+												{ label: sp__( 'Orange Red', 'stream-player' ), value: 'orangered' },
+												{ label: sp__( 'Prism', 'stream-player' ), value: 'prism' },
+												{ label: sp__( 'Rainbow', 'stream-player' ), value: 'rainbow' },
+												{ label: sp__( 'Steel Blue', 'stream-player' ), value: 'steelblue' },
+											],
+											onChange: ( value ) => {
+												props.setAttributes( { analyzer_gradient: value } );
+											},
+											value: atts.analyzer_gradient
+										})
+									),
+									sp_el( PanelRow, {},
+										sp_el( SelectControl, {
+											label: sp__( 'Analyzer Style', 'stream-player' ),
+											options : [
+												{ label: sp__( 'Plugin Setting', 'stream-player' ), value: 'default' },
+												{ label: sp__( 'Bars', 'stream-player' ), value: 'bars' },
+												{ label: sp__( 'Fine Bars', 'stream-player' ), value: 'finebars' },
+												{ label: sp__( 'Line Graph', 'stream-player' ), value: 'graph' },
+											],
+											onChange: ( value ) => {
+												props.setAttributes( { analyzer_style: value } );
+											},
+											value: atts.analyzer_style
+										})
+									),
+									sp_el( PanelRow, {},
+										sp_el( SelectControl, {
+											label: sp__( 'Analyzer Sensitivity', 'stream-player' ),
+											options : [
+												{ label: sp__( 'Plugin Setting', 'stream-player' ), value: 'default' },
+												{ label: sp__( 'Low', 'stream-player' ), value: 'low' },
+												{ label: sp__( 'Medium', 'stream-player' ), value: 'medium' },
+												{ label: sp__( 'High', 'stream-player' ), value: 'high' },
+											],
+											onChange: ( value ) => {
+												props.setAttributes( { analyzer_sensitivity: value } );
+											},
+											value: atts.analyzer_sensitivity
+										})
+									),
+									sp_el( PanelRow, {},
+										sp_el( SelectControl, {
+											label: sp__( 'Enable Analyzer on Mobile', 'stream-player' ),
+											options : [
+												{ label: sp__( 'Plugin Setting', 'stream-player' ), value: 'default' },
+												{ label: sp__( 'On', 'stream-player' ), value: 'on' },
+												{ label: sp__( 'Off', 'stream-player' ), value: 'off' },
+											],
+											onChange: ( value ) => {
+												props.setAttributes( { analyzer_mobile: value } );
+											},
+											value: atts.analyzer_mobile
+										})
+									),
+									/* --- Opacity: 0 means "not set" -- RangeControl has no native
+									   empty state, so 0 is used as the inherit sentinel and mapped
+									   to/from '' on the attribute (opacity's own valid range starts
+									   at 10, so 0 is otherwise unused) --- */
+									sp_el( PanelRow, {},
+										sp_el( RangeControl, {
+											label: sp__( 'Analyzer Opacity (%)', 'stream-player' ),
+											help: sp__( '0 = Plugin Setting.', 'stream-player' ),
+											min: 0,
+											max: 100,
+											step: 5,
+											allowReset: true,
+											onChange: ( value ) => {
+												props.setAttributes( { analyzer_opacity: ( value ? String( value ) : '' ) } );
+											},
+											value: atts.analyzer_opacity ? parseInt( atts.analyzer_opacity, 10 ) : 0
+										})
+									),
+									sp_el( PanelRow, {},
+										sp_el( RangeControl, {
+											label: sp__( 'Analyzer Height (%)', 'stream-player' ),
+											help: sp__( '0 = Plugin Setting.', 'stream-player' ),
+											min: 0,
+											max: 100,
+											step: 5,
+											allowReset: true,
+											onChange: ( value ) => {
+												props.setAttributes( { analyzer_height: ( value ? String( value ) : '' ) } );
+											},
+											value: atts.analyzer_height ? parseInt( atts.analyzer_height, 10 ) : 0
 										})
 									),
 								)

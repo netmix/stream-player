@@ -213,7 +213,7 @@ function stream_player_set_debug_mode() {
 // 'script'  | 'amplitude' (default), 'jplayer', 'howler', 'audio5' // , 'mediaelements'
 // 'layout'  | 'horizontal', 'vertical'
 // 'theme'   | 'light', 'dark'
-// 'buttons' | 'circular', 'rounded', 'square'
+// 'buttons' | 'solid', 'semisolid', 'circular', 'rounded', 'square'
 // 'skin'    | [not implemented] Media Elements: wordpress, minimal
 // 'volume'  | [Integer: 0 to 100]: Initial Player Volume - default: 77
 // 'default' | Default Player flag
@@ -3504,8 +3504,19 @@ function stream_player_control_styles( $instance, $overrides = false ) {
 	// --- Play Button ---
 	// 2.4.0.2: fix to glowingloading animation reference
 	// 2.5.18: add check for solid/semisolid play/pause buttons
-	if ( !isset( $atts ) || !strstr( $atts['buttons'], 'solid' ) ) {
+	// 2.7.1: guard against instance props without a buttons value
+	if ( !isset( $atts ) || !isset( $atts['buttons'] ) || !strstr( $atts['buttons'], 'solid' ) ) {
 		$css .= "/* Playing Button */" . "\n";
+		// 2.7.1: generic container colors must not apply to solid/semisolid buttons
+		if ( !isset( $atts ) ) {
+			$selectors = array();
+			foreach ( array( 'solid', 'semisolid' ) as $style ) {
+				foreach ( array( 'loaded', 'loading', 'playing', 'playing.loaded', 'error' ) as $state ) {
+					$selectors[] = $container . '.' . $style . '.' . $state . ' .rp-play-pause-button-bg';
+				}
+			}
+			$css .= implode( ', ', $selectors ) . " {background-color: transparent; animation: none;}" . "\n";
+		}
 		$css .= esc_attr( $container ) . ".error .rp-play-pause-button-bg {background-color: #CC0000;}" . "\n";
 		if ( '' != $colors['buttons'] ) {
 			$css .= esc_attr( $container ) . ".loaded .rp-play-pause-button-bg {background-color: " . esc_attr( $colors['buttons'] ) . ";}" . "\n";

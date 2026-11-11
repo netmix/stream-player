@@ -13,6 +13,63 @@ function stream_player_get_plugin_options( $admin = false ) {
 
 	$formats = stream_player_get_stream_formats();
 
+	// 2.7.1: check pro defines for player preview URLs (ported from Radio Station)
+	if ( defined( 'STREAM_PLAYER_PRO_FILE' ) ) {
+		$pro_file = STREAM_PLAYER_PRO_FILE;
+	} elseif ( defined( 'RADIO_STATION_PRO_FILE' ) ) {
+		$pro_file = RADIO_STATION_PRO_FILE;
+	} else {
+		$pro_file = STREAM_PLAYER_FILE;
+	}
+
+	// 2.7.1: set player preview HTML
+	$player_preview_html = $admin ? '<div class="play-pause-button preview-image"></div><div class="volume-controls"><div class="preview-button volume-button mute-button"></div><div class="volume-button minus-button"></div><div class="volume-slider-wrapper"><div class="volume-slider-bg"></div><input type="range" class="volume-slider" max="100" min="0" value="%%player_volume%%"><div class="volume-thumb"></div></div><div class="volume-button plus-button"></div><div class="preview-button volume-button max-button"></div></div></div>' : '';
+
+	// 2.7.1: set player preview CSS
+	$player_preview_css = $admin ? '/* Play/Pause Button */
+	%%target%% .play-pause-button {display: inline-block; vertical-align: middle; width: 64px; height: 64px; background-size: 100% 100%; cursor: pointer;}
+	%%target%%.light .play-pause-button, %%target%%.dark .play-pause-button {background-image: url("' . esc_url( plugins_url( '/player/images/%%player_theme%%-play-%%player_buttons%%.png', STREAM_PLAYER_FILE ) ) . '");}
+	%%target%%.light .play-pause-button.active, %%target%%.dark .play-pause-button.active {background-image: url("' . esc_url( plugins_url( '/player/images/%%player_theme%%-pause-%%player_buttons%%.png', STREAM_PLAYER_FILE ) ) . '");}
+	%%target%% .play-pause-button {background-image: url("' . esc_url( plugins_url( '/images/%%player_theme%%-play-%%player_buttons%%.png', $pro_file ) ) . '");}
+	%%target%% .play-pause-button.active {background-image: url("' . esc_url( plugins_url( '/images/%%player_theme%%-pause-%%player_buttons%%.png', $pro_file ) ) . '");}
+	/* Volume Controls */
+	%%target%% .volume-controls {display: inline-block; vertical-align: middle; margin-left: 40px;}
+	%%target%% .volume-button {width: 18px; height: 18px; padding: 0; margin: 0; background-size: 36px; background-repeat: no-repeat; background-image: url("' . esc_url( plugins_url( '/images/volume-controls-%%player_theme%%.png', $pro_file ) ) . '");}
+	%%target%%.solid .volume-button, %%target%%.semisolid .volume-button {background-image: url("' . esc_url( plugins_url( '/images/volume-controls-%%player_theme%%-solid.png', $pro_file ) ) . '");}
+	%%target%%.light .volume-button, %%target%%.dark .volume-button {background-image: url("' . esc_url( plugins_url( '/player/images/volume-controls-%%player_theme%%.png', STREAM_PLAYER_FILE ) ) . '");}
+	%%target%%.light.solid .volume-button, %%target%%.dark.solid .volume-button, %%target%%.light.semisolid .volume-button, %%target%%.dark.semisolid .volume-button {background-image: url("' . esc_url( plugins_url( '/player/images/volume-controls-%%player_theme%%-solid.png', STREAM_PLAYER_FILE ) ) . '");}
+	%%target%% .volume-button:hover {opacity: 0.99; scale: 1.1;}
+	%%target%% .mute-button {display: none;} %%target%%.mute .mute-button {display: inline-block; vertical-align: middle; background-position: 0 0;}
+	%%target%%.mute .mute-button.active, %%target%%.mute .mute-button:hover {background-position: -18px -18px;}
+	%%target%% .minus-button {display: none;} %%target%%.updown .minus-button {display: inline-block; vertical-align: middle; background-position: 0 -72px;}
+	%%target%%.updown .minus-button:hover {background-position: -18px -72px;}
+	%%target%% .volume-slider-bg {display: none;} %%target%%.slider .volume-slider-bg {display: inline-block; vertical-align: middle; }
+	%%target%% .plus-button {display: none;} %%target%%.updown .plus-button {display: inline-block; vertical-align: middle; background-position: 0 -54px;}
+	%%target%%.updown .plus-button:hover {background-position: -18px -54px;}
+	%%target%% .max-button {display: none;} %%target%%.max .max-button {display: inline-block; vertical-align: middle; background-position: 0 -36px;}
+	%%target%%.max .max-button.active, %%target%%.max .max-button:hover {background-position: -18px -36px;}
+	/* Volume Slider */
+	%%target%% .volume-slider-wrapper {position: relative; height: 30px; opacity: 0.85; display: none; vertical-align: middle; width: 150px;}
+	%%target%%.slider .volume-slider-wrapper {display: inline-block;}
+	%%target%% .volume-slider-bg {width: calc((%%player_volume%% / 100) * 130px);}
+	%%target%% .volume-slider-wrapper:hover {opacity: 0.99;}
+	%%target%% .volume-slider {width: 100%;}
+	%%target%% .volume-thumb {display: none; width: 18px;}
+	/* Range Input */
+	%%target%% input[type=range] {height: 100%; margin: 0; background-color: transparent; vertical-align: middle; -webkit-appearance: none; border: none;}
+	%%target%% input[type=range]:focus {outline: none; box-shadow: none;}
+	%%target%% input[type=range]::-moz-focus-inner, %%target%% .volume-controls input[type=range]::-moz-focus-outer {outline: none; box-shadow: none;}
+	/* Range Thumb */
+	%%target%% input[type=range]::-webkit-slider-thumb {width: 18px; height: 18px; cursor: pointer; border: 1px solid rgba(128, 128, 128, 0.5); border-radius: 9px; z-index: 2; -webkit-appearance: none; background: %%player_thumb_color%%;}
+	%%target%% input[type=range]::-moz-range-thumb {width: 18px; height: 18px; cursor: pointer; border: 1px solid rgba(128, 128, 128, 0.5); border-radius: 9px; z-index: 2; background: %%player_thumb_color%%;}
+	%%target%%.rounded input[type=range]::-webkit-slider-thumb {border-radius: 5px !important;}
+	%%target%%.square input[type=range]::-webkit-slider-thumb {border-radius: 0px !important;}
+	/* Range Track */
+	%%target%% .volume-slider-bg {position: absolute; top: 10px; bottom: 10px; overflow: hidden; height: 10px; margin-left: 9px; z-index: 1; border: 1px solid rgba(128, 128, 128, 0.5); border-radius: 3px; background: %%player_range_color%%;}
+	%%target%% input[type=range]::-webkit-slider-runnable-track {height: 9px; background: transparent; -webkit-appearance: none; color: transparent}
+	%%target%% input[type=range]::-moz-range-track {height: 9px; background: transparent; color: transparent;}
+	' : '';
+
 	$options = array(
 
 		// --------------
@@ -77,6 +134,31 @@ function stream_player_get_plugin_options( $admin = false ) {
 			),
 			'default' => '',
 			'helper'  => $admin ? __( 'Block streaming according to country, detected by user IP address.', 'radio-station' ) : '',
+			'tab'     => 'stream',
+			'section' => 'source',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Stream] StreamGuys Rewind ---
+		// 2.7.1: added for parity with Radio Station (Pro)
+		'stream_sg_rewind' => array(
+			'label'   => $admin ? __( 'SG Rewind', 'stream-player' ) : '',
+			'type'    => 'checkbox',
+			'value'   => 'yes',
+			'default' => '',
+			'helper'  => $admin ? __( 'Enable stream support for StreamGuys Rewind service.', 'stream-player' ) : '',
+			'tab'     => 'stream',
+			'section' => 'source',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Stream] StreamGuys Endpoint ---
+		// 2.7.1: added for parity with Radio Station (Pro)
+		'stream_sg_endpoint' => array(
+			'label'   => $admin ? __( 'Rewind Endpoint', 'stream-player' ) : '',
+			'type'    => 'text',
+			'default' => '',
+			'helper'  => $admin ? __( 'Endpoint URL for StreamGuys Rewind service.', 'stream-player' ) : '',
 			'tab'     => 'stream',
 			'section' => 'source',
 			'pro'     => true,
@@ -170,6 +252,18 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'section' => 'basic',
 		),
 
+		// --- [Player] Preview Display ---
+		// 2.7.1: added player preview (ported from Radio Station)
+		'player_preview' => array(
+			'type'    => 'preview',
+			'label'   => $admin ? __( 'Player Preview', 'stream-player' ) : '',
+			'html'    => $player_preview_html,
+			'css'     => $player_preview_css,
+			'classes' => '%%player_theme%%,%%player_buttons%%,%%player_volumes%%',
+			'tab'     => 'player',
+			'section' => 'basic',
+		),
+
 		// --- [Player] Player Script ---
 		// 2.5.18: disabled howler script
 		'player_script'       => array(
@@ -190,7 +284,8 @@ function stream_player_get_plugin_options( $admin = false ) {
 		'player_fallbacks' => array(
 			'type'    => 'multicheck',
 			'label'   => $admin ? __( 'Fallback Scripts', 'stream-player' ) : '',
-			'default' => array( 'amplitude', 'howler', 'jplayer' ),
+			// 2.7.1: fix to remove disabled howler script from default
+			'default' => array( 'amplitude', 'jplayer' ),
 			'options' => array(
 				'jplayer'   => $admin ? __( 'jPlayer', 'stream-player' ) : '',
 				'amplitude' => $admin ? __( 'Amplitude', 'stream-player' ) : '',
@@ -211,6 +306,25 @@ function stream_player_get_plugin_options( $admin = false ) {
 				'dark'  => $admin ? __( 'Dark', 'stream-player' ) : '',
 			),
 			'helper'  => $admin ? __( 'Default Player Controls theme style.', 'stream-player' ) : '',
+			// 2.7.1: added play/pause image preview
+			'preview' => array(
+				'type'     => 'image',
+				'width'    => 32,
+				'height'   => 32,
+				'sources'  => array(
+					'light' => plugins_url( 'player/images/light-play-%%player_buttons%%.png', STREAM_PLAYER_FILE ),
+					'dark'  => plugins_url( 'player/images/dark-play-%%player_buttons%%.png', STREAM_PLAYER_FILE ),
+				),
+				'sources-alt' => array(
+					'light' => plugins_url( 'player/images/light-pause-%%player_buttons%%.png', STREAM_PLAYER_FILE ),
+					'dark'  => plugins_url( 'player/images/dark-pause-%%player_buttons%%.png', STREAM_PLAYER_FILE ),
+				),
+				'css'      => '#preview-player_preview .play-pause-button {background-image: url("%%images_url%%/%%player_theme%%-play-%%player_buttons%%.png") !important;}
+				#preview-player_preview .play-pause-button.active, #preview-player_preview .play-pause-button:hover {background-image: url("%%images_url%%/%%player_theme%%-pause-%%player_buttons%%.png") !important;}
+				#preview-player_theme {background-image: url("%%images_url%%/%%player_theme%%-play-%%player_buttons%%.png") !important;}
+				#preview-player_theme.active, #preview-player_theme:hover {background-image: url("%%images_url%%/%%player_theme%%-pause-%%player_buttons%%.png") !important;}',
+				'settings' => 'player_theme,player_buttons',
+			),
 			'tab'     => 'player',
 			'section' => 'basic',
 		),
@@ -220,12 +334,18 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'type'    => 'select',
 			'label'   => $admin ? __( 'Default Player Buttons', 'stream-player' ) : '',
 			'default' => 'rounded',
+			// 2.7.1: added solid button image options (matching Radio Station)
 			'options' => array(
-				'circular' => $admin ? __( 'Circular Buttons', 'stream-player' ) : '',
-				'rounded'  => $admin ? __( 'Rounded Buttons', 'stream-player' ) : '',
-				'square'   => $admin ? __( 'Square Buttons', 'stream-player' ) : '',
+				'solid'     => $admin ? __( 'Solid Buttons (No Outline)', 'stream-player' ) : '',
+				'semisolid' => $admin ? __( 'Solid Buttons (Transparent Outline)', 'stream-player' ) : '',
+				'circular'  => $admin ? __( 'Hollow Circular Buttons', 'stream-player' ) : '',
+				'rounded'   => $admin ? __( 'Hollow Rounded Buttons', 'stream-player' ) : '',
+				'square'    => $admin ? __( 'Hollow Square Buttons', 'stream-player' ) : '',
 			),
 			'helper'  => $admin ? __( 'Default Player Buttons shape style.', 'stream-player' ) : '',
+			'preview' => array(
+				'linked' => 'player_theme',
+			),
 			'tab'     => 'player',
 			'section' => 'basic',
 		),
@@ -288,6 +408,10 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'label'   => $admin ? __( 'Volume Knob Color', 'stream-player' ) : '',
 			'default' => '#80C080',
 			'helper'  => $admin ? __( 'Default Knob Color for Player Volume Slider.', 'stream-player' ) : '',
+			'preview' => array(
+				'css' => '#preview-player_preview .volume-slider-wrapper input[type=range]::-webkit-slider-thumb {background: %%player_thumb_color%% !important;}
+				#preview-player_preview .volume-slider-wrapper input[type=range]::-moz-range-thumb {background: %%player_thumb_color%% !important;}',
+			),
 			'tab'     => 'player',
 			'section' => 'colors',
 			'pro'     => true,
@@ -299,6 +423,9 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'label'   => $admin ? __( 'Volume Track Color', 'stream-player' ) : '',
 			'default' => '#80C080',
 			'helper'  => $admin ? __( 'Default Track Color for Player Volume Slider.', 'stream-player' ) : '',
+			'preview' => array(
+				'css' => '#preview-player_preview .volume-slider-bg {background: %%player_range_color%% !important;}',
+			),
 			'tab'     => 'player',
 			'section' => 'colors',
 			'pro'     => true,
@@ -357,6 +484,126 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'pro'     => true,
 		),
 
+
+		// === Widget Player Settings ===
+
+		// --- [Pro/Widget] Spectrum Analyzer ---
+		// 2.7.1: added spectrum analyzer settings (ported from Radio Station)
+		'player_widget_analyzer' => array(
+			'type'    => 'checkbox',
+			'label'   => $admin ? __( 'Spectrum Analyzer', 'stream-player' ) : '',
+			'value'   => 'yes',
+			'default' => '',
+			'helper'  => $admin ? __( 'Show a real-time audio spectrum visualization in the Stream Player Widget. Requires the streaming server to send CORS headers -- if the analyzer stays flat once enabled, check with your streaming host.', 'stream-player' ) : '',
+			'tab'     => 'player',
+			'section' => 'widget_player',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Widget] Analyzer Placement ---
+		'player_widget_analyzer_placement' => array(
+			'type'    => 'select',
+			'label'   => $admin ? __( 'Analyzer Placement', 'stream-player' ) : '',
+			'options' => array(
+				'top'        => $admin ? __( 'Top (Above Widget)', 'stream-player' ) : '',
+				'background' => $admin ? __( 'Background (Behind Widget Content)', 'stream-player' ) : '',
+			),
+			'default' => 'top',
+			'helper'  => $admin ? __( 'Whether the analyzer sits as a strip above the widget (pushing the rest of the page down, never overlapping) or fills the widget as a background behind its controls.', 'stream-player' ) : '',
+			'tab'     => 'player',
+			'section' => 'widget_player',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Widget] Analyzer Gradient ---
+		'player_widget_analyzer_gradient' => array(
+			'type'    => 'select',
+			'label'   => $admin ? __( 'Analyzer Color Theme', 'stream-player' ) : '',
+			'options' => array(
+				'classic'   => $admin ? __( 'Classic', 'stream-player' ) : '',
+				'orangered' => $admin ? __( 'Orange Red', 'stream-player' ) : '',
+				'prism'     => $admin ? __( 'Prism', 'stream-player' ) : '',
+				'rainbow'   => $admin ? __( 'Rainbow', 'stream-player' ) : '',
+				'steelblue' => $admin ? __( 'Steel Blue', 'stream-player' ) : '',
+			),
+			'default' => 'classic',
+			'tab'     => 'player',
+			'section' => 'widget_player',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Widget] Analyzer Style ---
+		'player_widget_analyzer_style' => array(
+			'type'    => 'select',
+			'label'   => $admin ? __( 'Analyzer Style', 'stream-player' ) : '',
+			'options' => array(
+				'bars'     => $admin ? __( 'Bars', 'stream-player' ) : '',
+				'finebars' => $admin ? __( 'Fine Bars', 'stream-player' ) : '',
+				'graph'    => $admin ? __( 'Line Graph', 'stream-player' ) : '',
+			),
+			'default' => 'bars',
+			'tab'     => 'player',
+			'section' => 'widget_player',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Widget] Analyzer Sensitivity ---
+		'player_widget_analyzer_sensitivity' => array(
+			'type'    => 'select',
+			'label'   => $admin ? __( 'Analyzer Sensitivity', 'stream-player' ) : '',
+			'options' => array(
+				'low'    => $admin ? __( 'Low', 'stream-player' ) : '',
+				'medium' => $admin ? __( 'Medium', 'stream-player' ) : '',
+				'high'   => $admin ? __( 'High', 'stream-player' ) : '',
+			),
+			'default' => 'medium',
+			'helper'  => $admin ? __( 'Higher sensitivity reacts more to quieter passages, but can look noisier on a loud/compressed stream.', 'stream-player' ) : '',
+			'tab'     => 'player',
+			'section' => 'widget_player',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Widget] Analyzer on Mobile ---
+		'player_widget_analyzer_mobile' => array(
+			'type'    => 'checkbox',
+			'label'   => $admin ? __( 'Enable Analyzer on Mobile', 'stream-player' ) : '',
+			'value'   => 'yes',
+			'default' => '',
+			'helper'  => $admin ? __( 'Off by default -- canvas rendering has a real battery/performance cost on phones. Enable once you\'ve confirmed it performs acceptably on your target devices.', 'stream-player' ) : '',
+			'tab'     => 'player',
+			'section' => 'widget_player',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Widget] Analyzer Opacity ---
+		'player_widget_analyzer_opacity' => array(
+			'type'    => 'range',
+			'label'   => $admin ? __( 'Analyzer Opacity', 'stream-player' ) : '',
+			'min'     => 10,
+			'max'     => 100,
+			'step'    => 5,
+			'default' => 100,
+			'suffix'  => '%',
+			'helper'  => $admin ? __( 'How visible the analyzer is. Lower values blend it more subtly behind the widget\'s content.', 'stream-player' ) : '',
+			'tab'     => 'player',
+			'section' => 'widget_player',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Widget] Analyzer Height ---
+		'player_widget_analyzer_height' => array(
+			'type'    => 'range',
+			'label'   => $admin ? __( 'Analyzer Height', 'stream-player' ) : '',
+			'min'     => 20,
+			'max'     => 100,
+			'step'    => 5,
+			'default' => 100,
+			'suffix'  => '%',
+			'helper'  => $admin ? __( 'Scales the analyzer relative to its full size (100% = full height) -- for Background placement it shrinks up from the bottom of the widget, for the Top strip it shrinks down toward the widget.', 'stream-player' ) : '',
+			'tab'     => 'player',
+			'section' => 'widget_player',
+			'pro'     => true,
+		),
 
 		// ------------------
 		// --- Player Bar ---
@@ -449,7 +696,8 @@ function stream_player_get_plugin_options( $admin = false ) {
 		'player_bar_background' => array(
 			'type'    => 'coloralpha',
 			'label'   => $admin ? __( 'Bar Player Background Color', 'stream-player' ) : '',
-			'default' => 'rgba(0,0,0,255)',
+			// 2.7.1: fix alpha value in default (range is 0 to 1)
+			'default' => 'rgba(0,0,0,1)',
 			'helper'  => $admin ? __( 'Background color for the fixed position Sitewide Bar Player.', 'stream-player' ) : '',
 			'tab'     => 'bar',
 			'section' => 'display',
@@ -498,6 +746,25 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'pro'     => true,
 		),
 
+		// --- [Pro/Player] Page Load Prompt ---
+		// 2.7.1: added load fail prompt (ported from Radio Station)
+		'player_bar_prompt' => array(
+			'type'    => 'select',
+			'label'   => $admin ? __( 'Load Fail Prompt', 'stream-player' ) : '',
+			'default' => '404',
+			'options' => array(
+				''     => $admin ? __( 'Off', 'stream-player' ) : '',
+				'yes'  => $admin ? __( 'Prompt on Timeout only', 'stream-player' ) : '',
+				'404'  => $admin ? __( 'Prompt on 404 Not Found only', 'stream-player' ) : '',
+				'404t' => $admin ? __( 'Prompt on 404 or Timeout', 'stream-player' ) : '',
+				'all'  => $admin ? __( 'Prompt on Timeout or any Error', 'stream-player' ) : '',
+			),
+			'helper'  => $admin ? __( 'Whether to show a user prompt on page timeout and/or when there is an error (if continuous playback is enabled.)', 'stream-player' ) : '',
+			'tab'     => 'bar',
+			'section' => 'persistent',
+			'pro'     => true,
+		),
+
 		// === Metadata ===
 
 		// --- [Pro/Player] Display Metadata ---
@@ -541,6 +808,126 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'pro'     => true,
 		),
 
+		// === Spectrum Analyzer ===
+
+		// --- [Pro/Bar] Spectrum Analyzer ---
+		// 2.7.1: added spectrum analyzer settings (ported from Radio Station)
+		'player_bar_analyzer' => array(
+			'type'    => 'checkbox',
+			'label'   => $admin ? __( 'Spectrum Analyzer', 'stream-player' ) : '',
+			'value'   => 'yes',
+			'default' => '',
+			'helper'  => $admin ? __( 'Show a real-time audio spectrum visualization in the Player Bar. Requires the streaming server to send CORS headers -- if the analyzer stays flat once enabled, check with your streaming host.', 'stream-player' ) : '',
+			'tab'     => 'bar',
+			'section' => 'analyzer',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Bar] Analyzer Placement ---
+		'player_bar_analyzer_placement' => array(
+			'type'    => 'select',
+			'label'   => $admin ? __( 'Analyzer Placement', 'stream-player' ) : '',
+			'options' => array(
+				'attached'   => $admin ? __( 'Attached to Bar Edge', 'stream-player' ) : '',
+				'background' => $admin ? __( 'Background (Behind Bar Content)', 'stream-player' ) : '',
+			),
+			'default' => 'attached',
+			'helper'  => $admin ? __( 'Whether the analyzer sits as a strip along the page edge of the Player Bar (below a top bar, above a bottom bar), or fills the bar as a background behind the text and controls.', 'stream-player' ) : '',
+			'tab'     => 'bar',
+			'section' => 'analyzer',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Bar] Analyzer Gradient ---
+		'player_bar_analyzer_gradient' => array(
+			'type'    => 'select',
+			'label'   => $admin ? __( 'Analyzer Color Theme', 'stream-player' ) : '',
+			'options' => array(
+				'classic'   => $admin ? __( 'Classic', 'stream-player' ) : '',
+				'orangered' => $admin ? __( 'Orange Red', 'stream-player' ) : '',
+				'prism'     => $admin ? __( 'Prism', 'stream-player' ) : '',
+				'rainbow'   => $admin ? __( 'Rainbow', 'stream-player' ) : '',
+				'steelblue' => $admin ? __( 'Steel Blue', 'stream-player' ) : '',
+			),
+			'default' => 'classic',
+			'tab'     => 'bar',
+			'section' => 'analyzer',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Bar] Analyzer Style ---
+		'player_bar_analyzer_style' => array(
+			'type'    => 'select',
+			'label'   => $admin ? __( 'Analyzer Style', 'stream-player' ) : '',
+			'options' => array(
+				'bars'     => $admin ? __( 'Bars', 'stream-player' ) : '',
+				'finebars' => $admin ? __( 'Fine Bars', 'stream-player' ) : '',
+				'graph'    => $admin ? __( 'Line Graph', 'stream-player' ) : '',
+			),
+			'default' => 'bars',
+			'tab'     => 'bar',
+			'section' => 'analyzer',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Bar] Analyzer Sensitivity ---
+		'player_bar_analyzer_sensitivity' => array(
+			'type'    => 'select',
+			'label'   => $admin ? __( 'Analyzer Sensitivity', 'stream-player' ) : '',
+			'options' => array(
+				'low'    => $admin ? __( 'Low', 'stream-player' ) : '',
+				'medium' => $admin ? __( 'Medium', 'stream-player' ) : '',
+				'high'   => $admin ? __( 'High', 'stream-player' ) : '',
+			),
+			'default' => 'medium',
+			'helper'  => $admin ? __( 'Higher sensitivity reacts more to quieter passages, but can look noisier on a loud/compressed stream.', 'stream-player' ) : '',
+			'tab'     => 'bar',
+			'section' => 'analyzer',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Bar] Analyzer on Mobile ---
+		'player_bar_analyzer_mobile' => array(
+			'type'    => 'checkbox',
+			'label'   => $admin ? __( 'Enable Analyzer on Mobile', 'stream-player' ) : '',
+			'value'   => 'yes',
+			'default' => '',
+			'helper'  => $admin ? __( 'Off by default -- canvas rendering has a real battery/performance cost on phones. Enable once you\'ve confirmed it performs acceptably on your target devices.', 'stream-player' ) : '',
+			'tab'     => 'bar',
+			'section' => 'analyzer',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Bar] Analyzer Opacity ---
+		'player_bar_analyzer_opacity' => array(
+			'type'    => 'range',
+			'label'   => $admin ? __( 'Analyzer Opacity', 'stream-player' ) : '',
+			'min'     => 10,
+			'max'     => 100,
+			'step'    => 5,
+			'default' => 100,
+			'suffix'  => '%',
+			'helper'  => $admin ? __( 'How visible the analyzer is. Lower values blend it more subtly behind the bar\'s text and controls.', 'stream-player' ) : '',
+			'tab'     => 'bar',
+			'section' => 'analyzer',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Bar] Analyzer Height ---
+		'player_bar_analyzer_height' => array(
+			'type'    => 'range',
+			'label'   => $admin ? __( 'Analyzer Height', 'stream-player' ) : '',
+			'min'     => 20,
+			'max'     => 100,
+			'step'    => 5,
+			'default' => 100,
+			'suffix'  => '%',
+			'helper'  => $admin ? __( 'Scales the analyzer relative to its full size (100% = full height) -- for Background placement it shrinks up from the bottom of the bar, for the Attached strip it shrinks down toward the bar.', 'stream-player' ) : '',
+			'tab'     => 'bar',
+			'section' => 'analyzer',
+			'pro'     => true,
+		),
+
 		// === Tabs and Sections ===
 
 		// --- Tab Labels ---
@@ -557,9 +944,12 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'basic'       => $admin ? __( 'Basic Defaults', 'stream-player' ) : '',
 			'colors'      => $admin ? __( 'Player Colors', 'stream-player' ) : '',
 			'advanced'    => $admin ? __( 'Advanced Defaults', 'stream-player' ) : '',
+			// 2.7.1: added widget player and bar spectrum analyzer sections
+			'widget_player' => $admin ? __( 'Widget Player Settings', 'stream-player' ) : '',
 			'display'     => $admin ? __( 'Bar Display', 'stream-player' ) : '',
 			'persistent'  => $admin ? __( 'Persistent Playback', 'stream-player' ) : '',
 			'metadata'    => $admin ? __( 'Metadata Display', 'stream-player' ) : '',
+			'analyzer'    => $admin ? __( 'Spectrum Analyzer', 'stream-player' ) : '',
 		),
 	);
 

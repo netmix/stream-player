@@ -169,21 +169,13 @@ class Stream_Player_Widget extends WP_Widget {
 		// === Player Styles ===
 		$fields['player_styles'] = '<h4>' . esc_html( __( 'Player Styles', 'stream-player' ) ) . '</h4>' . "\n";
 
-		// --- Player Layout ---
-		$field = '<p>
-			<label for="' . esc_attr( $this->get_field_id( 'layout' ) ) . '">
-			' . esc_html( __( 'Player Widget Layout', 'stream-player' ) ) . '</label><br>
-			<select id="' . esc_attr( $this->get_field_id( 'layout' ) ) . '" name="' . esc_attr( $this->get_field_name( 'layout' ) ) . '">';
-			$options = array(
-				'vertical' => __( 'Vertical (Stacked)', 'stream-player' ),
-				'horizontal' => __( 'Horizontal (Inline)', 'stream-player' ),
-			);
-			foreach ( $options as $option => $label ) {
-				$field .= '<option value="' . esc_attr( $option ) . '" ' . selected( $layout, $option, false ) . '>' . esc_html( $label ) . '</option>';
-			}
-			$field .= '</select>
+		// --- [Pro] Player Layout ---
+		// 2.7.1: free widget player is stacked (vertical); layout choice is a Pro option
+		$fields['layout'] = '<p>
+			<label for="dynamic">' . esc_html( __( 'Horizontal (Inline) layout available in Pro.', 'stream-player' ) ) . '</label><br>
+			<a href="' . esc_url( $pricing_url ) . '">' . esc_html( __( 'Upgrade to Pro', 'stream-player' ) ) . '</a> |
+			<a href="' . esc_url( $upgrade_url ) . '" target="_blank">' . esc_html( __( 'More Details', 'stream-player' ) ) . '</a>
 		</p>';
-		$fields['layout'] = $field;
 
 		// --- Player Theme ---
 		$field = '<p>
@@ -211,7 +203,10 @@ class Stream_Player_Widget extends WP_Widget {
 			' . esc_html( __( 'Buttons Style', 'stream-player' ) ) . '</label><br>
 			<select id="' . esc_attr( $this->get_field_id( 'buttons' ) ) . '" name="' . esc_attr( $this->get_field_name( 'buttons' ) ) . '">';
 			$options = array(
-				'default'  => __( 'Plugin Setting', 'stream-player' ),
+				'default'   => __( 'Plugin Setting', 'stream-player' ),
+				// 2.7.1: added solid button options
+				'solid'     => __( 'Solid', 'stream-player' ),
+				'semisolid' => __( 'Semi-solid', 'stream-player' ),
 				'circular' => __( 'Circular', 'stream-player' ),
 				'rounded'  => __( 'Rounded', 'stream-player' ),
 				'square'   => __( 'Square', 'stream-player' ),
@@ -245,6 +240,15 @@ class Stream_Player_Widget extends WP_Widget {
 			<a href="' . esc_url( $upgrade_url ) . '" target="_blank">' . esc_html( __( 'More Details', 'stream-player' ) ) . '</a>
 		</p>';
 
+		// --- [Pro] Spectrum Analyzer ---
+		// 2.7.1: added Pro spectrum analyzer message (replaced by Pro widget fields)
+		$fields['analyzer_options'] = '<h4>' . esc_html( __( '[Pro] Spectrum Analyzer', 'stream-player' ) ) . '</h4>' . "\n";
+		$fields['analyzer_options'] .= '<p>
+			<label for="dynamic">' . esc_html( __( 'Real-time spectrum analyzer available in Pro.', 'stream-player' ) ) . '</label><br>
+			<a href="' . esc_url( $pricing_url ) . '">' . esc_html( __( 'Upgrade to Pro', 'stream-player' ) ) . '</a> |
+			<a href="' . esc_url( $upgrade_url ) . '" target="_blank">' . esc_html( __( 'More Details', 'stream-player' ) ) . '</a>
+		</p>';
+
 		// --- filter and output ---
 		// 2.5.0: added filter for array fields for ease of adding fields
 		$fields = apply_filters( 'stream_player_player_widget_fields_list', $fields, $this, $instance );
@@ -266,7 +270,8 @@ class Stream_Player_Widget extends WP_Widget {
 		$instance['station'] = isset( $new_instance['station'] ) ? $new_instance['station'] : '';
 		$instance['image'] = isset( $new_instance['image'] ) ? $new_instance['image'] : $old_instance['image'];
 		$instance['script'] = isset( $new_instance['script'] ) ? $new_instance['script'] : $old_instance['script'];
-		$instance['layout'] = isset( $new_instance['layout'] ) ? $new_instance['layout'] : $old_instance['layout'];
+		// 2.7.1: fallback to vertical (layout field is only present in Pro)
+		$instance['layout'] = isset( $new_instance['layout'] ) ? $new_instance['layout'] : ( isset( $old_instance['layout'] ) ? $old_instance['layout'] : 'vertical' );
 		$instance['theme'] = isset( $new_instance['theme'] ) ? $new_instance['theme'] : $old_instance['theme'];
 		$instance['buttons'] = isset( $new_instance['buttons'] ) ? $new_instance['buttons'] : $old_instance['buttons'];
 		$instance['volume'] = isset( $new_instance['volume'] ) ? $new_instance['volume'] : $old_instance['volume'];
