@@ -525,8 +525,43 @@ function stream_player_get_plugin_options( $admin = false ) {
 				'prism'     => $admin ? __( 'Prism', 'stream-player' ) : '',
 				'rainbow'   => $admin ? __( 'Rainbow', 'stream-player' ) : '',
 				'steelblue' => $admin ? __( 'Steel Blue', 'stream-player' ) : '',
+				// 2.7.0: custom colors option
+				'custom'    => $admin ? __( 'Custom Colors', 'stream-player' ) : '',
 			),
 			'default' => 'classic',
+			'tab'     => 'player',
+			'section' => 'widget_player',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Widget] Analyzer Custom Top Color ---
+		'player_widget_analyzer_color_top' => array(
+			'type'    => 'color',
+			'label'   => $admin ? __( 'Analyzer Top Color', 'stream-player' ) : '',
+			'default' => '#ff0000',
+			'helper'  => $admin ? __( 'Used when the Analyzer Color Theme is set to Custom Colors.', 'stream-player' ) : '',
+			'tab'     => 'player',
+			'section' => 'widget_player',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Widget] Analyzer Custom Middle Color ---
+		'player_widget_analyzer_color_middle' => array(
+			'type'    => 'color',
+			'label'   => $admin ? __( 'Analyzer Middle Color', 'stream-player' ) : '',
+			'default' => '#ffff00',
+			'helper'  => $admin ? __( 'Used when the Analyzer Color Theme is set to Custom Colors.', 'stream-player' ) : '',
+			'tab'     => 'player',
+			'section' => 'widget_player',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Widget] Analyzer Custom Bottom Color ---
+		'player_widget_analyzer_color_bottom' => array(
+			'type'    => 'color',
+			'label'   => $admin ? __( 'Analyzer Bottom Color', 'stream-player' ) : '',
+			'default' => '#00ff00',
+			'helper'  => $admin ? __( 'Used when the Analyzer Color Theme is set to Custom Colors.', 'stream-player' ) : '',
 			'tab'     => 'player',
 			'section' => 'widget_player',
 			'pro'     => true,
@@ -848,8 +883,43 @@ function stream_player_get_plugin_options( $admin = false ) {
 				'prism'     => $admin ? __( 'Prism', 'stream-player' ) : '',
 				'rainbow'   => $admin ? __( 'Rainbow', 'stream-player' ) : '',
 				'steelblue' => $admin ? __( 'Steel Blue', 'stream-player' ) : '',
+				// 2.7.0: custom colors option
+				'custom'    => $admin ? __( 'Custom Colors', 'stream-player' ) : '',
 			),
 			'default' => 'classic',
+			'tab'     => 'bar',
+			'section' => 'analyzer',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Player] Analyzer Custom Top Color ---
+		'player_bar_analyzer_color_top' => array(
+			'type'    => 'color',
+			'label'   => $admin ? __( 'Analyzer Top Color', 'stream-player' ) : '',
+			'default' => '#ff0000',
+			'helper'  => $admin ? __( 'Used when the Analyzer Color Theme is set to Custom Colors.', 'stream-player' ) : '',
+			'tab'     => 'bar',
+			'section' => 'analyzer',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Player] Analyzer Custom Middle Color ---
+		'player_bar_analyzer_color_middle' => array(
+			'type'    => 'color',
+			'label'   => $admin ? __( 'Analyzer Middle Color', 'stream-player' ) : '',
+			'default' => '#ffff00',
+			'helper'  => $admin ? __( 'Used when the Analyzer Color Theme is set to Custom Colors.', 'stream-player' ) : '',
+			'tab'     => 'bar',
+			'section' => 'analyzer',
+			'pro'     => true,
+		),
+
+		// --- [Pro/Player] Analyzer Custom Bottom Color ---
+		'player_bar_analyzer_color_bottom' => array(
+			'type'    => 'color',
+			'label'   => $admin ? __( 'Analyzer Bottom Color', 'stream-player' ) : '',
+			'default' => '#00ff00',
+			'helper'  => $admin ? __( 'Used when the Analyzer Color Theme is set to Custom Colors.', 'stream-player' ) : '',
 			'tab'     => 'bar',
 			'section' => 'analyzer',
 			'pro'     => true,
