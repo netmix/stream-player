@@ -155,6 +155,12 @@ class Stream_Player_Upgrade {
 			gap: 12px;
 			margin-bottom: 10px;
 		}
+		/* 2.7.1: logo images are 300px; show them at half size */
+		.sp-upgrade-card .sp-card-logo {
+			width: 150px;
+			height: auto;
+			flex-shrink: 0;
+		}
 		.sp-upgrade-card .sp-card-badge {
 			display: inline-block;
 			font-size: 11px;
