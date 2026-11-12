@@ -1040,6 +1040,13 @@ function stream_player_shortcode( $atts, $echo = false ) {
 		}
 	}
 
+	// --- station title and meta text display is a Pro feature ---
+	// 2.7.1: free players show no station text (title, tagline, location, timezone)
+	if ( !defined( 'STREAM_PLAYER_PRO_FILE' ) && !defined( 'RADIO_STATION_PRO_FILE' ) && function_exists( 'stream_player_get_setting' ) ) {
+		$atts['title'] = 0;
+		$atts['meta'] = array();
+	}
+
 	// --- maybe debug shortcode attributes --
 	if ( STREAM_PLAYER_DEBUG ) {
 		echo '<span style="display:none;">Combined Radio Player Shortcode Attributes: ' . esc_html( print_r( $atts, true ) ) . '</span>' . "\n";
