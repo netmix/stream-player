@@ -8,11 +8,32 @@
 
 ---
 
+## Players: Free vs Pro
+
+The free version includes the Stream Player as a shortcode, widget and block, plus a [Basic Player Bar](./Player.md#basic-player-bar). For the full comparison and how the players behave together (switching, other tabs, the popup), see [Free and Pro at a Glance](./Player.md#free-and-pro-at-a-glance) and [How Players Work Together](./Player.md#how-players-work-together).
+
+| Feature | Free | Pro |
+|---|---|---|
+| Player as Shortcode, Widget and Block | ✓ | ✓ |
+| One-click switching between players on the same page | ✓ | ✓ |
+| Single Player at Once (pause players in other tabs) | ✓ | ✓ |
+| Stream title, image and meta in the player | | ✓ |
+| Colored button themes and custom colors | | ✓ |
+| Fixed Player Bar playing your Stream URL | ✓ (bottom, play and volume only) | ✓ |
+| Top or bottom bar position, height, fade in, text and background colors | | ✓ |
+| Responsive mobile modes (arrows or expander) | | ✓ |
+| Continuous playback between pages (Teleporter) | | ✓ |
+| Now Playing track display, animation and album artwork | | ✓ |
+| Popup Player window and Autoresume | | ✓ |
+| Spectrum Analyzer | | ✓ |
+
+---
+
 ## What's Included in Pro
 
 ### Sitewide Bar Player
 
-A fixed Player Bar displayed across every page of your site — pinned to the top or bottom of the browser window, unaffected by scrolling. Configured via **Plugin Settings → Player → Player Bar**.
+A fixed Player Bar displayed across every page of your site — pinned to the top or bottom of the browser window, unaffected by scrolling. It replaces the free version's Basic Player Bar. Configured via **Plugin Settings → Bar**.
 
 Key Bar Player settings (all Pro):
 
@@ -23,7 +44,7 @@ Key Bar Player settings (all Pro):
 | Fade In | Milliseconds to fade in the bar after page load. |
 | Text Color | Bar player text color. |
 | Background Color | Bar player background color. |
-| Responsive Display | Adapts to mobile screen sizes automatically. |
+| Bar Responsive Mode | On narrow screens, reach the bar sections with horizontal arrows or a vertical expander. |
 
 → See [Player Bar options](./Options.md#player-bar) for the full list.
 
@@ -49,7 +70,7 @@ Key settings:
 
 ### Now Playing / Track Metadata
 
-Displays the currently playing track title in the Player Bar, pulled from your stream's Icecast/Shoutcast metadata. Supports scrolling text animation.
+Displays the currently playing track title in the Player Bar, pulled from your stream's Icecast/Shoutcast metadata. Supports scrolling text animation and album artwork lookup (iTunes, with Spotify as a fallback).
 
 | Setting | Description |
 |---|---|
@@ -61,13 +82,13 @@ Displays the currently playing track title in the Player Bar, pulled from your s
 
 ### Playback Autoresume
 
-Attempts to automatically resume playback for returning visitors who were previously listening. Triggered only after the visitor first interacts with the page, in compliance with browser autoplay policies.
+When a visitor who was listening reloads the page or returns to your site, a small dialog asks whether they want to resume playback. (Browsers don't allow audio to start without a click.) See [Playback Autoresume](./Player.md#pro-playback-autoresume).
 
 ---
 
 ### Popup Player Window
 
-Adds a button to open the player in a small, separate browser window — letting listeners keep audio going while they navigate away from your site entirely.
+Adds a button to open the player in a small, separate browser window — letting listeners keep audio going while they navigate away from your site entirely. Starting the popup pauses the players on your pages, and starting a page player pauses the popup. See [Popup Player Window](./Player.md#pro-popup-player-window).
 
 ---
 
@@ -84,7 +105,7 @@ Pro unlocks a full range of color controls for both the inline player and the Pl
 
 **Button Themes** — In addition to Light and Dark, choose from: Red, Orange, Yellow, Light Green, Green, Cyan, Light Blue, Blue, Purple, or Magenta. Matching play/pause and volume control images are applied automatically.
 
-**Bar Player Colors** (Plugin Settings → Player → Player Bar):
+**Bar Player Colors** (Plugin Settings → Bar):
 
 - Bar Player Text Color
 - Bar Player Background Color

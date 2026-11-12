@@ -50,14 +50,20 @@ Select the format for your fallback stream.
 #### Channel Title
 Default: None. Key: station_title
 
-#### Display Station Title
-Default: On. key: player_title
+#### [Pro] Display Stream Title
+Default: On. Key: player_title
+Display your Stream Title in the Player by default. In the free version players show no stream title.
 
 #### Channel Image
 Default: None. Key: station_image
 
-#### Display Channel Image
-Default: On. key: player_image
+#### [Pro] Display Stream Image
+Default: On. Key: player_image
+Display your Stream Image in the Player by default. In the free version players show no stream image.
+
+#### [Pro] Player Meta Display
+Default: tagline. Key: player_meta
+Display your Stream Tagline, Location and/or Timezone in the Player by default. In the free version players show no stream meta.
 
 
 ## Player
@@ -108,23 +114,27 @@ Default Track Color for Player Volume Slider.
 Default: 77. Key: player_volume
 Initial volume for when the Player starts playback. 0-100
 
-#### Single Player
+#### Single Player at Once
 Default: on. Key: player_single
-Stop any existing Player instances on the page or in other windows or tabs when a Player is started.
+Stop any existing Player instances on the page or in other windows or tabs when a Player is started. Players on the same page always switch with one click (see [How Players Work Together](./Player.md#how-players-work-together).)
 
 #### [Pro] Player Autoresume
-Default: on. Key: player_autoresume
-Attempt to resume playback if visitor was playing. Only triggered when the user first interacts with the page.
+Default: off. Key: player_autoresume
+On return to the site or page reload, ask the visitor in a small dialog whether to resume stream playback if they were playing the stream before.
 
 #### [Pro] Player Popup
 Default: off. Key: player_popup
-Add button to open Popup Player in separate window.
+Add button to open Popup Player in separate window. (See [Popup Player Window](./Player.md#pro-popup-player-window).)
 
 
 ## Player Bar
 
-> **🔒 Player Bar is a Pro Feature**
-> All Player Bar settings below are available with [Stream Player Pro](https://radiostation.pro/stream-player/). On the free version, these options are visible in the settings screen but grayed out. Upgrade to Pro to unlock the Sitewide Bar Player, continuous playback, metadata display, and all color and transition options.
+#### Enable Player Bar
+Default: off. Key: player_bar_active
+Show a basic fixed Player Bar at the bottom of every page that plays your Stream URL, with play and volume controls only. (See [Basic Player Bar](./Player.md#basic-player-bar).) Hidden when Stream Player Pro is active, as the Pro Sitewide Player Bar replaces it.
+
+> **🔒 The settings below are Pro features.**
+> They are available with [Stream Player Pro](https://radiostation.pro/stream-player/). On the free version, these options are visible in the settings screen but grayed out. Upgrade to Pro to unlock the Sitewide Bar Player, continuous playback, metadata display, and all color and transition options.
 
 ### [Pro] Bar Display
 
