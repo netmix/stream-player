@@ -103,6 +103,8 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'helper'  => $admin ? __( 'Display Stream Title in Player by default.', 'stream-player' ) : '',
 			'tab'     => 'stream',
 			'section' => 'channel',
+			// 2.7.1: station text display is a Pro feature
+			'pro'     => true,
 		),
 
 		// --- [Player] Stream Tagline ---
@@ -131,6 +133,8 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'helper'  => $admin ? __( 'Stream Meta to display in Player by default.', 'radio-station' ) : '',
 			'tab'     => 'general',
 			'section' => 'channel',
+			// 2.7.1: station text display is a Pro feature
+			'pro'     => true,
 		),
 
 		// --- [Player] Stream Image ---
@@ -152,6 +156,8 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'helper'  => $admin ? __( 'Display your Stream Image in Player by default.', 'stream-player' ) : '',
 			'tab'     => 'stream',
 			'section' => 'channel',
+			// 2.7.1: station image display is a Pro feature
+			'pro'     => true,
 		),
 
 		// --------------
