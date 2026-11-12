@@ -550,6 +550,122 @@ function stream_player_get_stream_formats() {
 	return $formats;
 }
 
+// --------------------------
+// Free Sitewide Player Bar
+// --------------------------
+// 2.7.0: basic sitewide bar for free tier - renders the shortcode player in a fixed bottom bar.
+//
+// FREE vs PRO boundary — important for developers:
+//
+// This function implements a COSMETIC sticky bar only (#1 in Tony Hayes' taxonomy).
+// The player shortcode is output into a fixed-position div on every page load.
+// Navigation causes a full page reload and the player restarts — this is intentional
+// and expected behaviour for the free tier.
+//
+// What this is NOT:
+// - It does NOT load or initialise Teleporter.
+// - It does NOT implement continuous/uninterruptable/SPA-like playback (#2).
+// - It does NOT sync player state across tabs or windows.
+//
+// The persistent/continuous playback USP lives entirely in Stream Player PRO and is
+// gated by the `player_bar_continuous` option (pro => true in options.php).
+// Teleporter should only be initialised when that Pro option is active.
+// Keep those two code paths cleanly separate when implementing the full Pro bar.
+add_action( 'init', 'stream_player_maybe_add_bar' );
+function stream_player_maybe_add_bar() {
+	if ( is_admin() ) {
+		return;
+	}
+	$enabled = stream_player_get_setting( 'player_bar_active' );
+	if ( 'yes' === $enabled ) {
+		// 2.7.1: output before footer scripts print (priority 20) so the player's
+		// scripts and styles, enqueued by the shortcode, are loaded on the page
+		add_action( 'wp_footer', 'stream_player_output_bar', 4 );
+		add_action( 'wp_head', 'stream_player_bar_styles' );
+		add_filter( 'body_class', 'stream_player_bar_body_class' );
+	}
+}
+
+function stream_player_bar_styles() {
+	echo '<style id="stream-player-bar-css">
+#stream-player-bar {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	z-index: 9999;
+	background: #000;
+	padding: 6px 16px;
+	box-shadow: 0 -2px 8px rgba(0,0,0,0.4);
+}
+#stream-player-bar .radio-player-wrap {
+	max-width: 900px;
+	margin: 0 auto;
+}
+/* 2.7.1: keep the bar at 80px with readable text and vertically centered sections */
+#stream-player-bar {
+	height: 80px;
+	padding: 0 16px;
+	box-sizing: border-box;
+	overflow: hidden;
+	color: #FFFFFF;
+}
+#stream-player-bar .radio-container, #stream-player-bar a {
+	color: #FFFFFF;
+}
+#stream-player-bar .rp-type-single {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 80px;
+}
+#stream-player-bar .rp-station-info, #stream-player-bar .rp-interface, #stream-player-bar .rp-show-info {
+	margin-top: 0;
+	padding-top: 0;
+}
+#stream-player-bar .rp-interface {
+	height: auto;
+	flex: 0 0 auto;
+	width: max-content;
+	max-width: none;
+	min-width: 0;
+	white-space: nowrap;
+}
+#stream-player-bar .rp-volume-slider-bg {
+	background-color: rgba(255,255,255,0.25);
+}
+#stream-player-bar .rp-now-playing {
+	display: none;
+}
+/* 2.7.1: the free bar is play and volume only -- station display and show info are Pro bar features */
+#stream-player-bar .rp-station-info, #stream-player-bar .rp-show-info, #stream-player-bar .radio-container .rp-volume-max {
+	display: none;
+}
+/* 2.7.1: always offer mute and volume up/down in the free bar */
+#stream-player-bar .radio-container .rp-mute, #stream-player-bar .radio-container .rp-volume-up, #stream-player-bar .radio-container .rp-volume-down {
+	display: inline-block;
+}
+/* Push page content up so the bar does not overlap the footer */
+body.stream-player-bar-active {
+	padding-bottom: 80px;
+}
+</style>' . "
+";
+}
+
+// 2.7.1: add body class server-side (the inline script ran in head before body existed)
+function stream_player_bar_body_class( $classes ) {
+	$classes[] = 'stream-player-bar-active';
+	return $classes;
+}
+
+function stream_player_output_bar() {
+	echo '<div id="stream-player-bar" role="region" aria-label="' . esc_attr__( 'Audio Player', 'stream-player' ) . '">';
+	echo do_shortcode( '[stream-player layout="horizontal"]' );
+	echo '</div>' . "
+";
+}
+
 // -----------------
 // Get Streaming URL
 // -----------------

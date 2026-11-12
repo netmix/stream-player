@@ -364,6 +364,17 @@ function stream_player_get_plugin_options( $admin = false ) {
 
 		// === Display ===
 
+		// --- Player Bar (Free) Enable ---
+		'player_bar_active' => array(
+			'type'    => 'checkbox',
+			'label'   => $admin ? __( 'Enable Player Bar', 'stream-player' ) : '',
+			'default' => '',
+			'value'   => 'yes',
+			'helper'  => $admin ? __( 'Show a fixed Player Bar at the bottom of every page using your stream URL. Upgrade to Pro to unlock bar height, colors, continuous playback, metadata display, and more.', 'stream-player' ) : '',
+			'tab'     => 'bar',
+			'section' => 'display',
+		),
+
 		// --- Player Bar Note ---
 		'player_bar_note' => array(
 			'type'    => 'note',
