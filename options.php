@@ -156,6 +156,8 @@ function stream_player_get_plugin_options( $admin = false ) {
 			'helper'  => $admin ? __( 'Display your Stream Image in Player by default.', 'stream-player' ) : '',
 			'tab'     => 'stream',
 			'section' => 'channel',
+			// 2.7.1: station image display is a Pro feature
+			'pro'     => true,
 		),
 
 		// --------------
